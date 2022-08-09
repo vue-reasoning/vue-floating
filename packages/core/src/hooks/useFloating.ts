@@ -1,7 +1,5 @@
-import { computed, ref, unref, watch } from 'vue'
-import type { WatchStopHandle } from 'vue'
+import { computed, ref, unref } from 'vue'
 import { computePosition } from '@floating-ui/dom'
-import type { Middleware } from '@floating-ui/dom'
 
 import type {
   MaybeReferenceRef,
@@ -12,6 +10,7 @@ import type {
   UseFloatingData
 } from '../types'
 import { useNonNullableRefs } from './useNonNullableRefs'
+import { useFloatingProps } from './useFloatingProps'
 
 const defaultProps = {
   placement: 'bottom',
@@ -43,13 +42,10 @@ export function useFloating(
     middlewareData: {}
   })
 
-  let lastProps: UseFloatingProps = {}
-
   const update = () => {
     useNonNullableRefs<[MaybeReferenceRef, MaybeFloatingRef]>([unref(reference), unref(floating)], {
       handler: (reference, floating) => {
         const { value: props } = propsRef
-
         computePosition(reference, floating, props).then(data => {
           dataRef.value = data
 
@@ -59,33 +55,15 @@ export function useFloating(
     })
   }
 
-  const onPropsChange = (props: UseFloatingProps) => {
-    if (!equalFloatingProps(props, lastProps)) {
-      lastProps = {
-        ...props,
-        middleware: props.middleware
-          ? props.middleware.map(middleware => ({ ...middleware }))
-          : undefined
-      }
-
-      update()
-    }
-  }
-
-  let stopWatchProps: WatchStopHandle | null = null
+  const { stop: stopWatchProps, resume: doWatchProps } = useFloatingProps(propsRef, update)
 
   const stopWatchElements = useNonNullableRefs([reference, floating], {
     handler: () => {
-      if (!stopWatchProps) {
-        stopWatchProps = watch(propsRef, onPropsChange)
-      }
+      doWatchProps()
       update()
     },
     dissatisfyHandler: () => {
-      if (stopWatchProps) {
-        stopWatchProps()
-        stopWatchProps = null
-      }
+      stopWatchProps()
     },
     immediate: true
   })
@@ -97,42 +75,7 @@ export function useFloating(
       if (stopWatchElements) {
         stopWatchElements()
       }
-      if (stopWatchProps) {
-        stopWatchProps()
-        stopWatchProps = null
-      }
+      stopWatchProps()
     }
   }
-}
-
-function equalFloatingProps(a: UseFloatingProps, b: UseFloatingProps) {
-  return (
-    a.strategy === b.strategy &&
-    a.placement === b.placement &&
-    equalMiddlewares(a.middleware, b.middleware)
-  )
-}
-
-function equalMiddleware(a: Middleware, b: Middleware) {
-  return a.name === b.name && a.options === b.options && a.fn === b.fn
-}
-
-export function equalMiddlewares(a?: Middleware[], b?: Middleware[]) {
-  if (!a || !b || a.length !== b.length) {
-    return false
-  }
-
-  const remainings = [...b]
-
-  let i = -1
-  while (++i < a.length) {
-    const index = remainings.findIndex(r => equalMiddleware(a[i], r))
-    if (index === -1) {
-      return false
-    }
-
-    remainings.splice(index, 1)
-  }
-
-  return true
 }
