@@ -1,0 +1,46 @@
+{
+  "name": "@vue-reasoning/vue-floating-core",
+  "version": "0.0.1",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest"
+  },
+  "keywords": [
+    "tooltip",
+    "popover",
+    "dropdown",
+    "menu",
+    "popup",
+    "positioning",
+    "vue",
+    "hooks",
+    "vue-hooks"
+  ],
+  "author": "nooooooom <https://github.com/nooooooom>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vue-reasoning/vue-floating",
+    "directory": "packages/core"
+  },
+  "dependencies": {
+    "@floating-ui/core": "^1.0.0",
+    "@floating-ui/dom": "^1.0.0"
+  },
+  "devDependencies": {
+    "jsdom": "^20.0.0"
+  }
+}

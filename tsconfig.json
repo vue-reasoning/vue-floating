@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "lib": ["esnext", "dom"],
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "importsNotUsedAsValues": "error",
+    "jsx": "preserve",
+    "types": ["vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "@vue-floatting/core": ["packages/core/src"],
+      "@vue-floatting/shared": ["packages/shared/src"]
+    }
+  },
+  "include": ["packages/global.d.ts", "packages/*/src", "packages/*/__tests__"],
+  "exclude": ["node_modules"]
+}
