@@ -1,5 +1,5 @@
-export { useAutoUpdate } from './hooks/useAutoUpdate'
-export { useFloating } from './hooks/useFloating'
+export { useAutoUpdate } from './useAutoUpdate'
+export { useFloating } from './useFloating'
 
 export type {
   ReferenceType,

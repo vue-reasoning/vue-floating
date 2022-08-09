@@ -2,9 +2,10 @@ import { describe, test, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref } from 'vue'
 import { offset } from '@floating-ui/dom'
+import type { ClientRectObject } from '@floating-ui/dom'
 
-import { useFloating } from '../src/hooks/useFloating'
-import type { UseFloatingData, UseFloatingProps } from '../src/types'
+import { useFloating } from '../src'
+import type { UseFloatingData, UseFloatingProps, ReferenceType } from '../src'
 
 const mountBasicComponent = () => {
   const referenceRef = ref<HTMLElement | null>(null)
@@ -36,7 +37,7 @@ const mountBasicComponent = () => {
 }
 
 describe('basic', () => {
-  test('should update first.', async () => {
+  test('should update first.', () => {
     const onUpdate = vi.fn()
     const { wrapper, referenceRef, floatingRef } = mountBasicComponent()
 
@@ -50,10 +51,60 @@ describe('basic', () => {
   })
 })
 
-describe('options update', async () => {
-  const propsRef = ref<UseFloatingProps>({})
+describe('virtual element', () => {
+  interface BaseRect {
+    x: number
+    y: number
+    width: number
+    height: number
+  }
+
+  const createVirtualElement = ({ x, y, width, height }: BaseRect): ClientRectObject => {
+    return {
+      x,
+      y,
+      top: y,
+      bottom: y + height,
+      left: x,
+      right: x + width,
+      width,
+      height
+    }
+  }
+
+  test('should update when reference is virtual element', () => {
+    const refRect = createVirtualElement({
+      x: 10,
+      y: 10,
+      width: 100,
+      height: 100
+    })
+
+    const reference: ReferenceType = {
+      getBoundingClientRect: () => refRect
+    }
+    const floating = document.createElement('div')
+
+    useFloating(reference, floating, {
+      placement: 'bottom-start',
+      onUpdate: ({ x, y }) => {
+        expect({
+          x,
+          y
+        }).toContain({
+          x: refRect.top,
+          y: refRect.bottom
+        })
+      }
+    })
+  })
+})
+
+describe('options update', () => {
   const { referenceRef, floatingRef } = mountBasicComponent()
-  const { data: dataRef } = useFloating(referenceRef, floatingRef, propsRef)
+  const propsRef = ref<UseFloatingProps>({})
+
+  useFloating(referenceRef, floatingRef, propsRef)
 
   const diviner = (props: UseFloatingProps, data: Partial<UseFloatingData>) => {
     const { promise, resolve } = (() => {
@@ -70,8 +121,8 @@ describe('options update', async () => {
 
     propsRef.value = {
       ...props,
-      onUpdate: () => {
-        expect(dataRef.value).toContain(data)
+      onUpdate: updatedData => {
+        expect(updatedData).toContain(data)
         resolve()
       }
     }

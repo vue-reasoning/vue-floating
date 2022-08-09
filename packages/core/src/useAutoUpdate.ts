@@ -1,7 +1,7 @@
 import { autoUpdate, AutoUpdateOptions } from '@floating-ui/dom'
 
-import type { MaybeReferenceRef, MaybeFloatingRef } from '../types'
-import { useNonNullableRefs } from './useNonNullableRefs'
+import type { MaybeReferenceRef, MaybeFloatingRef } from './types'
+import { useNonNullableRefs } from './hooks/useNonNullableRefs'
 
 /**
  * Automatically updates the position of the floating element when necessary.

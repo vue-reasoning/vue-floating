@@ -12,23 +12,20 @@ export function useFloatingProps(
   let lastProps: UseFloatingProps | null = null
   let stop: (() => void) | null = null
 
-  const resume = () => {
-    if (stop) {
-      return
+  const handlePropsChange = (props: UseFloatingProps) => {
+    if (!lastProps || !equalFloatingProps(lastProps, props)) {
+      lastProps = {
+        ...props,
+        middleware: props.middleware ? [...props.middleware] : []
+      }
+      onUpdate()
     }
-    stop = watch(
-      props,
-      props => {
-        if (!lastProps || !equalFloatingProps(lastProps, props)) {
-          lastProps = {
-            ...props,
-            middleware: props.middleware ? [...props.middleware] : []
-          }
-          onUpdate()
-        }
-      },
-      watchOptions
-    )
+  }
+
+  const resume = () => {
+    if (!stop) {
+      stop = watch(props, handlePropsChange, watchOptions)
+    }
   }
 
   resume()

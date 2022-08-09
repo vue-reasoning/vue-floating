@@ -8,9 +8,9 @@ import type {
   UseFloatingProps,
   UseFloatingReturn,
   UseFloatingData
-} from '../types'
-import { useNonNullableRefs } from './useNonNullableRefs'
-import { useFloatingProps } from './useFloatingProps'
+} from './types'
+import { useNonNullableRefs } from './hooks/useNonNullableRefs'
+import { useFloatingProps } from './hooks/useFloatingProps'
 
 const defaultProps = {
   placement: 'bottom',
@@ -48,8 +48,7 @@ export function useFloating(
         const { value: props } = propsRef
         computePosition(reference, floating, props).then(data => {
           dataRef.value = data
-
-          props.onUpdate && props.onUpdate()
+          props.onUpdate && props.onUpdate(data)
         })
       }
     })

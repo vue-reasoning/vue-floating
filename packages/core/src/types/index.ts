@@ -28,7 +28,7 @@ export interface UseFloatingData {
 }
 
 export type UseFloatingProps = Omit<ComputePositionConfig, 'platform'> & {
-  onUpdate?: () => void
+  onUpdate?: (data: UseFloatingData) => void
 }
 
 export interface UseFloatingReturn {
