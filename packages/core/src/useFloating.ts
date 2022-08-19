@@ -9,25 +9,20 @@ import type {
   UseFloatingReturn,
   UseFloatingData
 } from './types'
-import { useNonNullableRefs } from './hooks/useNonNullableRefs'
-import { useFloatingProps } from './hooks/useFloatingProps'
-
-const defaultProps = {
-  placement: 'bottom',
-  strategy: 'absolute'
-} as const
+import { useQualifiedRefs } from './utils/useQualifiedRefs'
+import { useComparedFloatingProps } from './utils/useComparedFloatingProps'
 
 export function useFloating(
-  reference: MaybeReferenceRef,
-  floating: MaybeFloatingRef,
+  referenceRef: MaybeReferenceRef,
+  floatingRef: MaybeFloatingRef,
   props?: MaybeRef<UseFloatingProps>
 ): UseFloatingReturn {
   const propsRef = computed(() => {
     const userProps = unref(props) || {}
     return {
       ...userProps,
-      strategy: userProps.strategy || defaultProps.strategy,
-      placement: userProps.placement || defaultProps.placement,
+      strategy: userProps.strategy || 'absolute',
+      placement: userProps.placement || 'bottom',
       middleware: userProps.middleware
     }
   })
@@ -43,29 +38,31 @@ export function useFloating(
   })
 
   const update = () => {
-    useNonNullableRefs<[MaybeReferenceRef, MaybeFloatingRef]>([unref(reference), unref(floating)], {
-      handler: (reference, floating) => {
-        const { value: props } = propsRef
-        computePosition(reference, floating, props).then(data => {
-          dataRef.value = data
-          props.onUpdate && props.onUpdate(data)
-        })
-      }
-    })
+    const reference = unref(referenceRef)
+    const floating = unref(floatingRef)
+    if (reference && floating) {
+      const { value: props } = propsRef
+      computePosition(reference, floating, props).then(data => {
+        dataRef.value = data
+        props.onUpdate && props.onUpdate(data)
+      })
+    }
   }
 
-  const { stop: stopWatchProps, resume: doWatchProps } = useFloatingProps(propsRef, update)
+  const { pause: pauseWatchProps, resume: watchProps } = useComparedFloatingProps(propsRef, update)
 
-  const stopWatchElements = useNonNullableRefs([reference, floating], {
-    handler: () => {
-      doWatchProps()
-      update()
+  const stopWatchElements = useQualifiedRefs(
+    [referenceRef, floatingRef],
+    legal => {
+      if (legal) {
+        update()
+        watchProps()
+      } else {
+        pauseWatchProps()
+      }
     },
-    dissatisfyHandler: () => {
-      stopWatchProps()
-    },
-    immediate: true
-  })
+    { immediate: true }
+  )
 
   return {
     data: dataRef,
@@ -74,7 +71,7 @@ export function useFloating(
       if (stopWatchElements) {
         stopWatchElements()
       }
-      stopWatchProps()
+      pauseWatchProps()
     }
   }
 }

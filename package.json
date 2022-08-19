@@ -20,8 +20,7 @@
     "unbuild": "^0.7.6",
     "vite": "^3.0.2",
     "vitest": "^0.20.3",
-    "vue": "^3.2.37",
-    "vue2": "npm:vue@2.7.8"
+    "vue": "^3.2.37"
   },
   "dependencies": {
     "tsup": "^6.2.1",

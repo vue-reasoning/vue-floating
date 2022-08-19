@@ -4,37 +4,39 @@ import type { Middleware } from '@floating-ui/dom'
 
 import type { UseFloatingProps } from '../types'
 
-export function useFloatingProps(
+export function useComparedFloatingProps(
   props: Ref<UseFloatingProps>,
-  onUpdate: () => void,
+  onChange: () => void,
   watchOptions?: WatchOptions
 ) {
   let lastProps: UseFloatingProps | null = null
-  let stop: (() => void) | null = null
 
-  const handlePropsChange = (props: UseFloatingProps) => {
-    if (!lastProps || !equalFloatingProps(lastProps, props)) {
-      lastProps = {
-        ...props,
-        middleware: props.middleware ? [...props.middleware] : []
-      }
-      onUpdate()
+  const updateLastProps = (props: UseFloatingProps) => {
+    lastProps = {
+      ...props,
+      middleware: props.middleware ? [...props.middleware] : []
     }
   }
 
-  const resume = () => {
-    if (!stop) {
-      stop = watch(props, handlePropsChange, watchOptions)
+  const handlePropsChange = (props: UseFloatingProps) => {
+    if (!lastProps || !equalFloatingProps(lastProps, props)) {
+      updateLastProps(props)
+      onChange()
     }
+  }
+
+  let pause: (() => void) | null = null
+  const resume = () => {
+    pause = pause || watch(props, handlePropsChange, watchOptions)
   }
 
   resume()
 
   return {
-    stop: () => {
-      if (stop) {
-        stop()
-        stop = null
+    pause: () => {
+      if (pause) {
+        pause()
+        pause = null
       }
     },
     resume
@@ -53,7 +55,7 @@ function equalMiddleware(a: Middleware, b: Middleware) {
   return a.name === b.name && a.options === b.options && a.fn === b.fn
 }
 
-export function equalMiddlewares(a?: Middleware[], b?: Middleware[]) {
+function equalMiddlewares(a?: Middleware[], b?: Middleware[]) {
   if (!a || !b || a.length !== b.length) {
     return false
   }
