@@ -1,5 +1,5 @@
 import type { ReferenceType } from '@visoning/vue-floating-core'
-import type { DeepReadonly, Ref } from 'vue'
+import type { DeepReadonly, Ref } from 'vue-demi'
 
 export type FunctionWithArgs<T extends any[] = any[]> = (...args: T) => any
 

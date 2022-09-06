@@ -14,7 +14,8 @@
     "types": ["vite/client", "vitest/globals"],
     "baseUrl": ".",
     "paths": {
-      "@visoning/vue-floating-core": ["packages/core/src"]
+      "@visoning/vue-floating-core": ["packages/core/src/index.ts"],
+      "@visoning/vue-floating-interactions": ["packages/interactions/src/index.ts"]
     }
   },
   "include": ["packages/global.d.ts", "packages/*/src", "packages/*/__tests__"],

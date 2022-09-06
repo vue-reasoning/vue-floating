@@ -1,5 +1,5 @@
-import { isRef, unref, watch } from 'vue'
-import type { UnwrapRef, WatchOptions, WatchStopHandle } from 'vue'
+import { isRef, unref, watch } from 'vue-demi'
+import type { UnwrapRef, WatchOptions, WatchStopHandle } from 'vue-demi'
 
 import type { MaybeRef } from '../types'
 

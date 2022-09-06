@@ -1,4 +1,4 @@
-import type { Ref } from 'vue'
+import type { DeepReadonly, Ref } from 'vue-demi'
 import type {
   ComputePositionConfig,
   MiddlewareData,
@@ -6,6 +6,10 @@ import type {
   Strategy,
   VirtualElement
 } from '@floating-ui/dom'
+
+export type { Middleware } from '@floating-ui/dom'
+
+export type { MiddlewareData, Placement, Strategy, VirtualElement }
 
 export type ReferenceType = Element | VirtualElement
 
@@ -27,12 +31,12 @@ export interface UseFloatingData {
   middlewareData: MiddlewareData
 }
 
-export type UseFloatingProps = Omit<ComputePositionConfig, 'platform'> & {
+export type UseFloatingOptions = Omit<ComputePositionConfig, 'platform'> & {
   onUpdate?: (data: UseFloatingData) => void
 }
 
 export interface UseFloatingReturn {
-  data: Ref<UseFloatingData>
+  data: DeepReadonly<Ref<UseFloatingData>>
   update: () => void
   stop: () => void
 }

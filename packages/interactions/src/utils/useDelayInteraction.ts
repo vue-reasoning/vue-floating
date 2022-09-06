@@ -1,4 +1,4 @@
-import { computed, ComputedRef, isRef, Ref, unref } from 'vue'
+import { computed, ComputedRef, isRef, Ref, unref } from 'vue-demi'
 import type { FunctionWithArgs, MaybeRef } from '../types'
 import { useDelay, UseDelayReturn } from './useDelay'
 

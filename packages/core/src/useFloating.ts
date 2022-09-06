@@ -5,7 +5,7 @@ import type {
   MaybeReferenceRef,
   MaybeFloatingRef,
   MaybeRef,
-  UseFloatingProps,
+  UseFloatingOptions,
   UseFloatingReturn,
   UseFloatingData
 } from './types'
@@ -15,15 +15,15 @@ import { useCompareFloatingProps } from './utils/useCompareFloatingProps'
 export function useFloating(
   referenceRef: MaybeReferenceRef,
   floatingRef: MaybeFloatingRef,
-  props?: MaybeRef<UseFloatingProps>
+  options?: MaybeRef<UseFloatingOptions>
 ): UseFloatingReturn {
-  const propsRef = computed(() => {
-    const userProps = unref(props) || {}
+  const optionsRef = computed(() => {
+    const userOptions = unref(options) || {}
     return {
-      ...userProps,
-      strategy: userProps.strategy || 'absolute',
-      placement: userProps.placement || 'bottom',
-      middleware: userProps.middleware
+      ...userOptions,
+      strategy: userOptions.strategy || 'absolute',
+      placement: userOptions.placement || 'bottom',
+      middleware: userOptions.middleware
     }
   })
 
@@ -32,8 +32,8 @@ export function useFloating(
     // `computePosition()` has run yet
     x: null,
     y: null,
-    strategy: propsRef.value.strategy,
-    placement: propsRef.value.placement,
+    strategy: optionsRef.value.strategy,
+    placement: optionsRef.value.placement,
     middlewareData: {}
   })
 
@@ -41,15 +41,15 @@ export function useFloating(
     const reference = unref(referenceRef)
     const floating = unref(floatingRef)
     if (reference && floating) {
-      const { value: props } = propsRef
-      computePosition(reference, floating, props).then((data) => {
+      const { value: options } = optionsRef
+      computePosition(reference, floating, options).then((data) => {
         dataRef.value = data
-        props.onUpdate && props.onUpdate(data)
+        options.onUpdate && options.onUpdate(data)
       })
     }
   }
 
-  const { pause: pauseWatchProps, resume: watchProps } = useCompareFloatingProps(propsRef, update)
+  const { pause: pauseWatchProps, resume: watchProps } = useCompareFloatingProps(optionsRef, update)
 
   const stopWatchElements = useQualifiedRefs(
     [referenceRef, floatingRef],

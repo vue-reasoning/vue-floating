@@ -34,7 +34,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vue-reasoning/vue-floating",
-    "directory": "packages/interactions"
+    "directory": "packages/core"
   },
   "dependencies": {
     "@floating-ui/core": "^1.0.0",

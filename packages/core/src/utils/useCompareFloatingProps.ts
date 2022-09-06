@@ -1,24 +1,24 @@
-import { watch } from 'vue'
-import type { Ref, WatchOptions } from 'vue'
+import { watch } from 'vue-demi'
+import type { Ref, WatchOptions } from 'vue-demi'
 import type { Middleware } from '@floating-ui/dom'
 
-import type { UseFloatingProps } from '../types'
+import type { UseFloatingOptions } from '../types'
 
 export function useCompareFloatingProps(
-  props: Ref<UseFloatingProps>,
+  props: Ref<UseFloatingOptions>,
   onChange: () => void,
   watchOptions?: WatchOptions
 ) {
-  let lastProps: UseFloatingProps | null = null
+  let lastProps: UseFloatingOptions | null = null
 
-  const updateLastProps = (props: UseFloatingProps) => {
+  const updateLastProps = (props: UseFloatingOptions) => {
     lastProps = {
       ...props,
       middleware: props.middleware ? [...props.middleware] : []
     }
   }
 
-  const handlePropsChange = (props: UseFloatingProps) => {
+  const handlePropsChange = (props: UseFloatingOptions) => {
     if (!lastProps || !equalFloatingProps(lastProps, props)) {
       updateLastProps(props)
       onChange()
@@ -43,7 +43,7 @@ export function useCompareFloatingProps(
   }
 }
 
-function equalFloatingProps(a: UseFloatingProps, b: UseFloatingProps) {
+function equalFloatingProps(a: UseFloatingOptions, b: UseFloatingOptions) {
   return (
     a.strategy === b.strategy &&
     a.placement === b.placement &&

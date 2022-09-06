@@ -1,4 +1,4 @@
-import { ref, Ref, unref } from 'vue'
+import { ref, Ref, unref } from 'vue-demi'
 import type { FunctionWithArgs, MaybeRef } from '../types'
 
 export interface UseDelayReturn {
@@ -7,7 +7,10 @@ export interface UseDelayReturn {
   delaying: Ref<boolean>
 }
 
-export function useDelay(delay?: MaybeRef<number | undefined>, cb?: FunctionWithArgs): UseDelayReturn {
+export function useDelay(
+  delay?: MaybeRef<number | undefined>,
+  cb?: FunctionWithArgs
+): UseDelayReturn {
   const delayingRef = ref(false)
 
   if (!delay) {

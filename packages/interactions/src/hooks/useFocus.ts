@@ -1,4 +1,4 @@
-import { computed, unref, watch } from 'vue'
+import { computed, unref, watch } from 'vue-demi'
 import type { ElementProps, InteractionsContext, MaybeRef, InteractionInfo } from '../types'
 import { makeInteractionInfoFactory } from '../types'
 import { useDelayInteraction } from '../utils/useDelayInteraction'

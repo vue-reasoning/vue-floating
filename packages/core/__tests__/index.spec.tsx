@@ -5,7 +5,7 @@ import { offset } from '@floating-ui/dom'
 import type { ClientRectObject } from '@floating-ui/dom'
 
 import { useFloating } from '../src'
-import type { UseFloatingData, UseFloatingProps, ReferenceType } from '../src'
+import type { UseFloatingData, UseFloatingOptions, ReferenceType } from '../src'
 
 const mountBasicComponent = () => {
   const referenceRef = ref<HTMLElement | null>(null)
@@ -102,11 +102,11 @@ describe('virtual element', () => {
 
 describe('options update', () => {
   const { referenceRef, floatingRef } = mountBasicComponent()
-  const propsRef = ref<UseFloatingProps>({})
+  const propsRef = ref<UseFloatingOptions>({})
 
   useFloating(referenceRef, floatingRef, propsRef)
 
-  const diviner = (props: UseFloatingProps, data: Partial<UseFloatingData>) => {
+  const diviner = (props: UseFloatingOptions, data: Partial<UseFloatingData>) => {
     const { promise, resolve } = (() => {
       let resolve: () => void
       const promise = new Promise<void>(_resolve => {
@@ -132,7 +132,7 @@ describe('options update', () => {
 
   const cases: Array<{
     message: string
-    queue: Array<[UseFloatingProps, Partial<UseFloatingData>]>
+    queue: Array<[UseFloatingOptions, Partial<UseFloatingData>]>
   }> = [
     {
       message: 'should update position after options update',

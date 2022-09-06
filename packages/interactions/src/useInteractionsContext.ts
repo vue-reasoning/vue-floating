@@ -1,4 +1,4 @@
-import { computed, readonly, ref, unref } from 'vue'
+import { computed, readonly, ref, unref } from 'vue-demi'
 import type { MaybeFloatingRef, ReferenceType } from '@visoning/vue-floating-core'
 import type { InteractionsContext, MaybeRef, InteractionInfo } from './types'
 
