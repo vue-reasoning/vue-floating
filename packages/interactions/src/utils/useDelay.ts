@@ -1,4 +1,5 @@
 import { ref, Ref, unref } from 'vue-demi'
+
 import type { FunctionWithArgs, MaybeRef } from '../types'
 
 export interface UseDelayReturn {

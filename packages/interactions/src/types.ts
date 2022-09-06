@@ -10,6 +10,9 @@ export interface ElementRefs<RT extends ReferenceType = ReferenceType> {
   floating: Ref<HTMLElement | null | undefined>
 }
 
+export type DelayType = 'open' | 'close'
+export type Delay = number | Partial<Record<DelayType, number>> | undefined
+
 export interface InteractionInfo {
   type: string | null
   event: Event | null

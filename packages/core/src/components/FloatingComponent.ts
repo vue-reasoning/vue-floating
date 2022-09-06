@@ -12,9 +12,9 @@ import {
 } from 'vue-demi'
 import type { VNode } from 'vue-demi'
 import * as Vue from 'vue'
-import { useFloating, useAutoUpdate } from '@visoning/vue-floating-core'
-import type { UseFloatingOptions } from '@visoning/vue-floating-core'
 
+import { useFloating, useAutoUpdate } from '..'
+import type { UseFloatingOptions } from '..'
 import { FloatingComponentProps } from './FloatingComponent.types'
 
 export const FloatingComponent = defineComponent({
@@ -23,11 +23,11 @@ export const FloatingComponent = defineComponent({
   props: FloatingComponentProps,
 
   setup(props, { slots, expose }) {
-    const referenceRef = ref<HTMLDivElement>()
+    const referenceRef = ref<HTMLElement>()
     const floatingRef = toRef(props, 'floatingNode')
 
     const currentInstance = getCurrentInstance()
-    const updateReference = () => (referenceRef.value = currentInstance?.proxy?.$el)
+    const updateReference = () => (referenceRef.value = currentInstance?.proxy?.$el as HTMLElement)
 
     onMounted(updateReference)
     onUpdated(updateReference)
@@ -46,18 +46,18 @@ export const FloatingComponent = defineComponent({
     // Auto update
     let stopAutoUpdate: Function | null = null
 
+    const clearAutoUpdate = () => {
+      if (stopAutoUpdate) {
+        stopAutoUpdate()
+        stopAutoUpdate = null
+      }
+    }
+
     const createAutoUpdate = () => {
       if (!stopAutoUpdate) {
         const options = typeof props.autoUpdate === 'boolean' ? undefined : props.autoUpdate
 
         stopAutoUpdate = useAutoUpdate(referenceRef, floatingRef, update, options)
-      }
-    }
-
-    const clearAutoUpdate = () => {
-      if (stopAutoUpdate) {
-        stopAutoUpdate()
-        stopAutoUpdate = null
       }
     }
 
@@ -72,8 +72,12 @@ export const FloatingComponent = defineComponent({
       clearAutoUpdate()
     })
 
+    // Expose
     expose({
-      update
+      floating: {
+        update,
+        data
+      }
     })
 
     // Render
@@ -97,15 +101,9 @@ export const FloatingComponent = defineComponent({
   }
 })
 
-interface Vue2Vnode {
-  tag: any
-  isComment?: boolean
-  asyncFactory?: boolean
-}
-
 const isNotTextNode = isVue2
-  ? (child: Vue2Vnode) => child.tag || (child.isComment && child.asyncFactory)
-  : (child: VNode) => child.type !== Vue.Comment
+  ? (child: VNode) => child.tag || (child.isComment && (child as any).asyncFactory)
+  : (child: { type: any }) => child.type !== (Vue as any).Comment
 
 function getFloatingRealChild(children: VNode[]): VNode | undefined {
   for (let i = 0; i < children.length; i++) {

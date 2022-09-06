@@ -1,14 +1,15 @@
 import { computed, unref, watch } from 'vue-demi'
+
 import type {
   ElementProps,
   InteractionsContext,
   MaybeRef,
   InteractionInfo,
-  FunctionWithArgs
+  FunctionWithArgs,
+  Delay
 } from '../types'
 import { makeInteractionInfoFactory } from '../types'
 import { useDelayInteraction } from '../utils/useDelayInteraction'
-import type { Delay } from '../utils/useDelayInteraction'
 import { contains } from '../utils/contains'
 import { getDocument } from '../utils/getDocument'
 

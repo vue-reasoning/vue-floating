@@ -19,12 +19,9 @@
     "test": "vitest"
   },
   "keywords": [
-    "tooltip",
-    "popover",
-    "dropdown",
-    "menu",
-    "popup",
-    "positioning",
+    "trigger",
+    "actions",
+    "interactions",
     "vue",
     "hooks",
     "vue-hooks"
@@ -38,11 +35,5 @@
   },
   "dependencies": {
     "@visoning/vue-floating-core": "workspace:*"
-  },
-  "devDependencies": {
-    "jsdom": "^20.0.0"
-  },
-  "peerDependencies": {
-    "vue": "^2.7.0 || ^3.2.0"
   }
 }

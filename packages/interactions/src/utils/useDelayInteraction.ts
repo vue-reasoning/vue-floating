@@ -1,9 +1,7 @@
 import { computed, ComputedRef, isRef, Ref, unref } from 'vue-demi'
-import type { FunctionWithArgs, MaybeRef } from '../types'
-import { useDelay, UseDelayReturn } from './useDelay'
 
-export type DelayType = 'open' | 'close'
-export type Delay = number | Partial<Record<DelayType, number>> | undefined
+import type { FunctionWithArgs, MaybeRef, DelayType, Delay } from '../types'
+import { useDelay, UseDelayReturn } from './useDelay'
 
 function getDelay(type: DelayType, delay: Ref<Delay>): ComputedRef<number | undefined>
 function getDelay(type: DelayType, delay?: Delay): number | undefined

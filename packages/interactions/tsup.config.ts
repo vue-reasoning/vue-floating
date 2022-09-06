@@ -7,5 +7,5 @@ export const tsup: Options = {
   clean: true,
   format: ['cjs', 'esm'],
   dts: true,
-  external: ['vue']
+  external: ['vue', 'vue-demi', '@visoning/vue-floating-core']
 }

@@ -4,20 +4,25 @@
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "node",
-    "allowJs": true,
-    "resolveJsonModule": true,
+    "allowJs": false,
     "strict": true,
-    "noUnusedLocals": true,
-    "esModuleInterop": true,
     "importsNotUsedAsValues": "error",
     "jsx": "preserve",
     "types": ["vite/client", "vitest/globals"],
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
       "@visoning/vue-floating-core": ["packages/core/src/index.ts"],
+      "@visoning/vue-floating-core/components": ["packages/core/src/components/index.ts"],
       "@visoning/vue-floating-interactions": ["packages/interactions/src/index.ts"]
     }
   },
-  "include": ["packages/global.d.ts", "packages/*/src", "packages/*/__tests__"],
+  "include": [
+    "packages/global.d.ts",
+    "packages/*/src",
+    "packages/*/*.ts",
+    "packages/*/__tests__"
+  ],
   "exclude": ["node_modules"]
 }
