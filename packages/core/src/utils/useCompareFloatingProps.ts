@@ -4,7 +4,7 @@ import type { Middleware } from '@floating-ui/dom'
 
 import type { UseFloatingProps } from '../types'
 
-export function useComparedFloatingProps(
+export function useCompareFloatingProps(
   props: Ref<UseFloatingProps>,
   onChange: () => void,
   watchOptions?: WatchOptions
@@ -64,7 +64,7 @@ function equalMiddlewares(a?: Middleware[], b?: Middleware[]) {
 
   let i = -1
   while (++i < a.length) {
-    const index = remainings.findIndex(r => equalMiddleware(a[i], r))
+    const index = remainings.findIndex((r) => equalMiddleware(a[i], r))
     if (index === -1) {
       return false
     }

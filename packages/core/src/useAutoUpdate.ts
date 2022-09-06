@@ -17,7 +17,7 @@ export function useAutoUpdate(
 
   useQualifiedRefs<[MaybeReferenceRef, MaybeFloatingRef]>(
     [reference, floating],
-    qualifys => {
+    (qualifys) => {
       if (qualifys) {
         cleanup && cleanup()
         cleanup = autoUpdate(...qualifys, update, autoUpdateOptions)

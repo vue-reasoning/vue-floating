@@ -7,18 +7,18 @@ export type ConditionHandler<T extends any[]> = (qualifys?: NonNullables<UnwrapR
 
 export type Predicate<T = any> = (item: T) => boolean
 
-const defaultPredicate: Predicate = item => item !== undefined && item !== null
+const defaultPredicate: Predicate = (item) => item !== undefined && item !== null
 
 export function useQualifiedRefs<T extends any[]>(
   refs: MaybeRef<T>,
   handler: ConditionHandler<T>,
-  predicate?: Predicate<T[number]>,
   watchOptions?: WatchOptions
 ): WatchStopHandle
 
 export function useQualifiedRefs<T extends any[]>(
   refs: MaybeRef<T>,
   handler: ConditionHandler<T>,
+  predicate?: Predicate<T[number]>,
   watchOptions?: WatchOptions
 ): WatchStopHandle
 
@@ -43,7 +43,7 @@ export function useQualifiedRefs<T extends any[]>(
     handler(items as NonNullables<UnwrapRefs<T>>)
   }
 
-  if (!isRef(refs) && refs.every(ref => !isRef(ref))) {
+  if (!isRef(refs) && refs.every((ref) => !isRef(ref))) {
     condition(refs as UnwrapRefs<UnwrapRef<T>>)
     return () => {}
   }
@@ -51,14 +51,10 @@ export function useQualifiedRefs<T extends any[]>(
   return watch(() => unref(refs).map(unref) as UnwrapRefs<UnwrapRef<T>>, condition, watchOptions)
 }
 
-type UnwrapRefs<T> = T extends any[]
-  ? {
-      [Key in keyof T]: UnwrapRef<T[Key]>
-    }
-  : T
+type UnwrapRefs<T> = {
+  [Key in keyof T]: UnwrapRef<T[Key]>
+}
 
-type NonNullables<T> = T extends any[]
-  ? {
-      [Key in keyof T]: NonNullable<T[Key]>
-    }
-  : T
+type NonNullables<T> = {
+  [Key in keyof T]: NonNullable<T[Key]>
+}

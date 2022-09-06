@@ -10,7 +10,7 @@ import type {
   UseFloatingData
 } from './types'
 import { useQualifiedRefs } from './utils/useQualifiedRefs'
-import { useComparedFloatingProps } from './utils/useComparedFloatingProps'
+import { useCompareFloatingProps } from './utils/useCompareFloatingProps'
 
 export function useFloating(
   referenceRef: MaybeReferenceRef,
@@ -42,19 +42,19 @@ export function useFloating(
     const floating = unref(floatingRef)
     if (reference && floating) {
       const { value: props } = propsRef
-      computePosition(reference, floating, props).then(data => {
+      computePosition(reference, floating, props).then((data) => {
         dataRef.value = data
         props.onUpdate && props.onUpdate(data)
       })
     }
   }
 
-  const { pause: pauseWatchProps, resume: watchProps } = useComparedFloatingProps(propsRef, update)
+  const { pause: pauseWatchProps, resume: watchProps } = useCompareFloatingProps(propsRef, update)
 
   const stopWatchElements = useQualifiedRefs(
     [referenceRef, floatingRef],
-    legal => {
-      if (legal) {
+    (qualifys) => {
+      if (qualifys) {
         update()
         watchProps()
       } else {
@@ -68,9 +68,7 @@ export function useFloating(
     data: dataRef,
     update,
     stop: () => {
-      if (stopWatchElements) {
-        stopWatchElements()
-      }
+      stopWatchElements()
       pauseWatchProps()
     }
   }

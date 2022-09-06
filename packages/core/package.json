@@ -1,5 +1,5 @@
 {
-  "name": "@vue-reasoning/vue-floating-core",
+  "name": "@visoning/vue-floating-core",
   "version": "0.0.1",
   "files": [
     "dist"
@@ -34,7 +34,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vue-reasoning/vue-floating",
-    "directory": "packages/core"
+    "directory": "packages/interactions"
   },
   "dependencies": {
     "@floating-ui/core": "^1.0.0",
@@ -42,5 +42,8 @@
   },
   "devDependencies": {
     "jsdom": "^20.0.0"
+  },
+  "peerDependencies": {
+    "vue": "^2.7.0 || ^3.2.0"
   }
 }
