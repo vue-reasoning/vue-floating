@@ -1,5 +1,4 @@
 import {
-  isVue2,
   defineComponent,
   toRef,
   ref,
@@ -11,7 +10,6 @@ import {
   onBeforeUnmount
 } from 'vue-demi'
 import type { VNode } from 'vue-demi'
-import * as Vue from 'vue'
 
 import { useFloating, useAutoUpdate } from '..'
 import type { UseFloatingOptions } from '..'
@@ -82,7 +80,7 @@ export const FloatingComponent = defineComponent({
 
     // Render
     return () => {
-      const reference = slots.reference && getFloatingRealChild(slots.reference(data.value))
+      const reference = slots.reference && slots.reference(data.value)[0]
       if (!reference) {
         return
       }
@@ -100,16 +98,3 @@ export const FloatingComponent = defineComponent({
     }
   }
 })
-
-const isNotTextNode = isVue2
-  ? (child: VNode) => child.tag || (child.isComment && (child as any).asyncFactory)
-  : (child: { type: any }) => child.type !== (Vue as any).Comment
-
-function getFloatingRealChild(children: VNode[]): VNode | undefined {
-  for (let i = 0; i < children.length; i++) {
-    const child = children[i]
-    if (isNotTextNode(child as any)) {
-      return child
-    }
-  }
-}

@@ -9,8 +9,6 @@
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.5.0",
     "@types/node": "^18.0.0",
-    "@vitejs/plugin-vue2": "^1.1.2",
-    "@vitejs/plugin-vue2-jsx": "^1.0.3",
     "@vue/test-utils": "^2.0.2",
     "cross-env": "^7.0.3",
     "jsdom": "^20.0.0",

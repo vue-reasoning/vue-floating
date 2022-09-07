@@ -1,4 +1,4 @@
-import { computed, ref, unref, watch } from 'vue-demi'
+import { computed, Ref, ref, unref, watch } from 'vue-demi'
 
 import type { ElementProps, InteractionsContext, MaybeRef, InteractionInfo, Delay } from '../types'
 import { makeInteractionInfoFactory } from '../types'
@@ -16,6 +16,13 @@ export interface ClickInteractionInfo extends InteractionInfo {
 export type ClickPointerType = 'mouse' | 'touch' | 'pen'
 
 export interface UseClickOptions {
+  /**
+   * Conditionally enable/disable the hook.
+   *
+   * @default false
+   */
+  disabled?: boolean
+
   /**
    * Pointer types that trigger to.
    *
@@ -39,7 +46,7 @@ export interface UseClickOptions {
 export function useClick(
   context: InteractionsContext,
   options: MaybeRef<UseClickOptions> = {}
-): ElementProps {
+): Readonly<Ref<ElementProps>> {
   const optionsRef = computed(() => unref(options))
 
   let triggerEvent: ClickInteractionInfo['event']
@@ -52,12 +59,9 @@ export function useClick(
     }
   )
 
-  watch(context.open, (open) => {
-    if (open) {
-      closeDelay.clear()
-    } else {
-      openDelay.clear()
-    }
+  watch(context.open, () => {
+    openDelay.clear()
+    closeDelay.clear()
   })
 
   const toggle = (event: ClickInteractionInfo['event']) => {
@@ -125,7 +129,7 @@ export function useClick(
     }
   }
 
-  return {
+  const elementProps = {
     reference: {
       onPointerdown: handlePointerDown,
       onClick: handleClick,
@@ -133,4 +137,6 @@ export function useClick(
       onKeyup: handleKeyUp
     }
   }
+
+  return computed(() => (optionsRef.value.disabled ? {} : elementProps))
 }

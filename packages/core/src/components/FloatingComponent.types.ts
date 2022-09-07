@@ -7,7 +7,7 @@ export const FloatingComponentProps = {
     type: Boolean,
     default: true
   },
-  floatingNode: Object as PropType<HTMLElement | null>,
+  floatingNode: [] as PropType<HTMLElement | null>,
   placement: {
     type: String as PropType<Placement>,
     default: 'bottom' as Placement

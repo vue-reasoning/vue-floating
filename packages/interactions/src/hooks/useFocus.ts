@@ -1,4 +1,4 @@
-import { computed, unref, watch } from 'vue-demi'
+import { computed, Ref, unref, watch } from 'vue-demi'
 
 import type { ElementProps, InteractionsContext, MaybeRef, InteractionInfo, Delay } from '../types'
 import { makeInteractionInfoFactory } from '../types'
@@ -6,6 +6,13 @@ import { useDelayInteraction } from '../utils/useDelayInteraction'
 import { contains } from '../utils/contains'
 
 export interface UseFocusOptions {
+  /**
+   * Conditionally enable/disable the hook.
+   *
+   * @default false
+   */
+  disabled?: boolean
+
   /**
    * Delay in millisecond.
    * Waits for the specified time when the event listener runs before changing the open state.
@@ -25,28 +32,25 @@ export interface FocusInteractionInfo extends InteractionInfo {
 export function useFocus(
   context: InteractionsContext,
   options: MaybeRef<UseFocusOptions> = {}
-): ElementProps {
+): Readonly<Ref<ElementProps>> {
+  const optionsRef = computed(() => unref(options))
+
   let triggerEvent: FocusInteractionInfo['event']
 
   const { open: openDelay, close: closeDelay } = useDelayInteraction(
-    computed(() => unref(options).delay),
+    computed(() => optionsRef.value.delay),
     {
       open: () => context.setOpen(true, makeFocusInfo(triggerEvent)),
       close: () => context.setOpen(false, makeFocusInfo(triggerEvent))
     }
   )
 
-  watch(context.open, (open) => {
-    if (open) {
-      closeDelay.clear()
-    } else {
-      openDelay.clear()
-    }
-  })
-
   const triggerInContainers = (event: FocusEvent) => {
     const { floating, reference } = context.refs
-    return contains(event.relatedTarget as Element, [floating.value, reference.value])
+    return [floating.value, reference.value].some(
+      (container) =>
+        container && contains(container as HTMLElement, [event.relatedTarget as Element])
+    )
   }
 
   const handleFocus = (event: FocusEvent) => {
@@ -82,7 +86,12 @@ export function useFocus(
     closeDelay.delay()
   }
 
-  return {
+  watch(context.open, () => {
+    openDelay.clear()
+    closeDelay.clear()
+  })
+
+  const elementProps = {
     reference: {
       onFocus: handleFocus,
       onBlur: handleBlur
@@ -92,4 +101,6 @@ export function useFocus(
       onBlur: handleFloatingBlur
     }
   }
+
+  return computed(() => (optionsRef.value.disabled ? {} : elementProps))
 }

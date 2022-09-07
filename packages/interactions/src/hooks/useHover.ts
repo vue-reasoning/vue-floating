@@ -1,4 +1,5 @@
 import { computed, unref, watch } from 'vue-demi'
+import type { Ref } from 'vue-demi'
 
 import type {
   ElementProps,
@@ -26,6 +27,13 @@ export type MousePointerType = 'mouse' | 'touch' | 'pen'
 
 export interface UseHoverOptions {
   /**
+   * Conditionally enable/disable the hook.
+   *
+   * @default false
+   */
+  disabled?: boolean
+
+  /**
    * Pointer types that trigger to.
    *
    * @default ['mouse', 'touch', 'pen']
@@ -50,7 +58,7 @@ export interface UseHoverOptions {
 export function useHover(
   context: InteractionsContext,
   options: MaybeRef<UseHoverOptions> = {}
-): ElementProps {
+): Readonly<Ref<ElementProps>> {
   const optionsRef = computed(() => unref(options))
   const userControlRef = computed(() => optionsRef.value.handleClose)
   const userWantControlRef = computed(() => !!userControlRef.value)
@@ -65,14 +73,6 @@ export function useHover(
     }
   )
 
-  watch(context.open, (open) => {
-    if (open) {
-      closeDelay.clear()
-    } else {
-      openDelay.clear()
-    }
-  })
-
   const isAllowPointerType = (pointerType: string) => {
     const { pointerTypes } = optionsRef.value
     return !pointerTypes || pointerTypes.includes(pointerType as MousePointerType)
@@ -80,7 +80,10 @@ export function useHover(
 
   const triggerInContainers = (event: PointerEvent) => {
     const { floating, reference } = context.refs
-    return contains(event.relatedTarget as Element, [floating.value, reference.value])
+    return [floating.value, reference.value].some(
+      (container) =>
+        container && contains(container as HTMLElement, [event.relatedTarget as Element])
+    )
   }
 
   const shouldAllowPointerAction = (event: PointerEvent, isLeave = false) => {
@@ -111,7 +114,7 @@ export function useHover(
     if (context.open.value) {
       const doClose = () => {
         triggerEvent = event
-        openDelay.delay()
+        closeDelay.delay()
       }
 
       if (userWantControlRef.value) {
@@ -171,7 +174,22 @@ export function useHover(
     closeDelay.delay()
   }
 
-  return {
+  watch(context.open, () => {
+    openDelay.clear()
+    closeDelay.clear()
+    clearUserControlEffect()
+  })
+
+  watch(
+    () => optionsRef.value.disabled,
+    (disabled) => {
+      if (disabled) {
+        clearUserControlEffect()
+      }
+    }
+  )
+
+  const elementProps = {
     reference: {
       onPointerenter: handlePointerEnter,
       onPointerleave: handlePointerLeave
@@ -181,4 +199,6 @@ export function useHover(
       onPointerleave: handleFloatingPointerLeave
     }
   }
+
+  return computed(() => (optionsRef.value.disabled ? {} : elementProps))
 }
