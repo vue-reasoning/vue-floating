@@ -1,4 +1,4 @@
-import { computed, ref, unref } from 'vue'
+import { computed, ref, unref, watch } from 'vue-demi'
 import { computePosition } from '@floating-ui/dom'
 
 import type {
@@ -49,27 +49,40 @@ export function useFloating(
     }
   }
 
-  const { pause: pauseWatchProps, resume: watchProps } = useCompareFloatingProps(optionsRef, update)
+  const {
+    detect: detectUpdate,
+    mesure: watchElements,
+    pause: pauseWatchElements
+  } = useQualifiedRefs([referenceRef, floatingRef], (qualifys) => qualifys && update())
 
-  const stopWatchElements = useQualifiedRefs(
-    [referenceRef, floatingRef],
-    (qualifys) => {
-      if (qualifys) {
-        update()
-        watchProps()
-      } else {
+  const { mesure: watchProps, pause: pauseWatchProps } = useCompareFloatingProps(
+    optionsRef,
+    detectUpdate
+  )
+
+  watch(
+    () => optionsRef.value.disabled,
+    (disabled) => {
+      if (!!disabled) {
         pauseWatchProps()
+        pauseWatchElements()
+      } else {
+        detectUpdate()
+        watchProps()
+        watchElements()
       }
     },
-    { immediate: true }
+    {
+      immediate: true
+    }
   )
 
   return {
     data: dataRef,
     update,
     stop: () => {
-      stopWatchElements()
       pauseWatchProps()
+      pauseWatchElements()
     }
   }
 }

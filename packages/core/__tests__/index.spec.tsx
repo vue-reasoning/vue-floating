@@ -1,6 +1,6 @@
 import { describe, test, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { ref } from 'vue'
+import { ref } from 'vue-demi'
 import { offset } from '@floating-ui/dom'
 import type { ClientRectObject } from '@floating-ui/dom'
 

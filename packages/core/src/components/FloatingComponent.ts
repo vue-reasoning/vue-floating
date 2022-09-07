@@ -20,7 +20,7 @@ export const FloatingComponent = defineComponent({
 
   props: FloatingComponentProps,
 
-  setup(props, { slots, expose }) {
+  setup(props, { emit, slots, expose }) {
     const referenceRef = ref<HTMLElement>()
     const floatingRef = toRef(props, 'floatingNode')
 
@@ -33,41 +33,34 @@ export const FloatingComponent = defineComponent({
     // Floating
     const UseFloatingOptionsRef = computed<UseFloatingOptions>(() => {
       return {
+        disabled: !!props.disabled,
         placement: props.placement,
         strategy: props.strategy,
-        middleware: props.middleware
+        middleware: props.middleware,
+        onUpdate: () => emit('update')
       }
     })
 
     const { data, update, stop } = useFloating(referenceRef, floatingRef, UseFloatingOptionsRef)
 
     // Auto update
-    let stopAutoUpdate: Function | null = null
-
-    const clearAutoUpdate = () => {
-      if (stopAutoUpdate) {
-        stopAutoUpdate()
-        stopAutoUpdate = null
-      }
-    }
-
-    const createAutoUpdate = () => {
-      if (!stopAutoUpdate) {
-        const options = typeof props.autoUpdate === 'boolean' ? undefined : props.autoUpdate
-
-        stopAutoUpdate = useAutoUpdate(referenceRef, floatingRef, update, options)
-      }
-    }
-
-    watch(
-      () => !!props.autoUpdate && (props.enabled || props.autoUpdateOnDisabled),
-      (enabled) => (enabled ? createAutoUpdate() : clearAutoUpdate()),
-      { immediate: true }
+    const stopAutoUpdate = useAutoUpdate(
+      referenceRef,
+      floatingRef,
+      update,
+      computed(() => {
+        const options = props.autoUpdate
+        return !!options === false || props.disabled
+          ? { disabled: true }
+          : typeof options === 'object'
+          ? options
+          : {}
+      })
     )
 
     onBeforeUnmount(() => {
       stop()
-      clearAutoUpdate()
+      stopAutoUpdate()
     })
 
     // Expose

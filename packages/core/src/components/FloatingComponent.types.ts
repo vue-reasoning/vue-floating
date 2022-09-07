@@ -1,13 +1,10 @@
-import type { ExtractPropTypes, PropType } from 'vue-demi'
+import type { ExtractPropTypes, PropType, UnwrapRef } from 'vue-demi'
 
 import type { Middleware, Placement, Strategy, UseAutoUpdateOptions, UseFloatingReturn } from '..'
 
 export const FloatingComponentProps = {
-  enabled: {
-    type: Boolean,
-    default: true
-  },
   floatingNode: [] as PropType<HTMLElement | null>,
+  disabled: Boolean,
   placement: {
     type: String as PropType<Placement>,
     default: 'bottom' as Placement
@@ -17,11 +14,7 @@ export const FloatingComponentProps = {
     default: 'absolute'
   },
   middleware: Array as PropType<Middleware[]>,
-  autoUpdate: [Boolean, Object] as PropType<boolean | UseAutoUpdateOptions>,
-  autoUpdateOnDisabled: {
-    type: Boolean,
-    default: true
-  }
+  autoUpdate: [Boolean, Object] as PropType<boolean | UseAutoUpdateOptions>
 } as const
 
 export type FloatingComponentProps = ExtractPropTypes<typeof FloatingComponentProps>
@@ -33,4 +26,4 @@ export interface FloatingInstanceExpose {
   }
 }
 
-export type FloatingSlotProps = UseFloatingReturn['data']
+export type FloatingSlotProps = UnwrapRef<UseFloatingReturn['data']>

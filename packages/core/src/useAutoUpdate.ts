@@ -1,9 +1,16 @@
+import { isRef, unref, watch } from 'vue-demi'
 import { autoUpdate, AutoUpdateOptions } from '@floating-ui/dom'
 
-import type { MaybeReferenceRef, MaybeFloatingRef } from './types'
+import type { MaybeReferenceRef, MaybeFloatingRef, MaybeRef } from './types'
 import { useQualifiedRefs } from './utils/useQualifiedRefs'
+import { useManualEffect } from './utils/useManualEffect'
 
-export type UseAutoUpdateOptions = AutoUpdateOptions
+export type UseAutoUpdateOptions = Partial<AutoUpdateOptions> & {
+  /**
+   * @default false
+   */
+  disabled?: boolean
+}
 
 /**
  * Automatically updates the position of the floating element when necessary.
@@ -13,26 +20,36 @@ export function useAutoUpdate(
   reference: MaybeReferenceRef,
   floating: MaybeFloatingRef,
   update: () => void,
-  autoUpdateOptions?: UseAutoUpdateOptions
+  autoUpdateOptions?: MaybeRef<UseAutoUpdateOptions>
 ) {
-  let cleanup: Function | null = null
+  const { reset: resetAutoUpdate, clear: clearAutoUpdate } = useManualEffect()
 
-  const stopWatchElements = useQualifiedRefs<[MaybeReferenceRef, MaybeFloatingRef]>(
-    [reference, floating],
+  const { detect: createAutoUpdate, pause: pauseQualifiedDetect } = useQualifiedRefs<
+    [MaybeReferenceRef, MaybeFloatingRef]
+  >(
+    [unref(reference), unref(floating)],
     (qualifys) => {
       if (qualifys) {
-        cleanup && cleanup()
-        cleanup = autoUpdate(...qualifys, update, autoUpdateOptions)
+        resetAutoUpdate(autoUpdate(...qualifys, update, unref(autoUpdateOptions)))
       }
     },
-    { immediate: true }
+    {
+      immediate: true
+    }
   )
 
+  if (isRef(autoUpdateOptions)) {
+    watch(autoUpdateOptions, (options) => {
+      if (options.disabled === false) {
+        pauseQualifiedDetect()
+      } else {
+        createAutoUpdate()
+      }
+    })
+  }
+
   return () => {
-    if (cleanup) {
-      cleanup()
-      cleanup = null
-    }
-    stopWatchElements()
+    pauseQualifiedDetect()
+    clearAutoUpdate()
   }
 }

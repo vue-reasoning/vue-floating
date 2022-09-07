@@ -3,6 +3,7 @@ import type { Ref, WatchOptions } from 'vue-demi'
 import type { Middleware } from '@floating-ui/dom'
 
 import type { UseFloatingOptions } from '../types'
+import { useManualEffect } from './useManualEffect'
 
 export function useCompareFloatingProps(
   props: Ref<UseFloatingOptions>,
@@ -25,21 +26,13 @@ export function useCompareFloatingProps(
     }
   }
 
-  let pause: (() => void) | null = null
-  const resume = () => {
-    pause = pause || watch(props, handlePropsChange, watchOptions)
-  }
-
-  resume()
+  const { clear: pause, reset: mesure } = useManualEffect(() =>
+    watch(props, handlePropsChange, watchOptions)
+  )
 
   return {
-    pause: () => {
-      if (pause) {
-        pause()
-        pause = null
-      }
-    },
-    resume
+    pause,
+    mesure
   }
 }
 

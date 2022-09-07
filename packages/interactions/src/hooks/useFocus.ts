@@ -4,6 +4,7 @@ import type { ElementProps, InteractionsContext, MaybeRef, InteractionInfo, Dela
 import { makeInteractionInfoFactory } from '../types'
 import { useDelayInteraction } from '../utils/useDelayInteraction'
 import { contains } from '../utils/contains'
+import { getDocument } from '../utils/getDocument'
 
 export interface UseFocusOptions {
   /**
@@ -47,10 +48,7 @@ export function useFocus(
 
   const triggerInContainers = (event: FocusEvent) => {
     const { floating, reference } = context.refs
-    return [floating.value, reference.value].some(
-      (container) =>
-        container && contains(container as HTMLElement, [event.relatedTarget as Element])
-    )
+    return contains(event.relatedTarget as Element, [floating.value, reference.value])
   }
 
   const handleFocus = (event: FocusEvent) => {
@@ -66,11 +64,12 @@ export function useFocus(
     if (triggerInContainers(event)) {
       return
     }
+
     openDelay.clear()
 
     if (context.open.value) {
       triggerEvent = event
-      openDelay.delay()
+      closeDelay.delay()
     }
   }
 
@@ -78,13 +77,31 @@ export function useFocus(
     closeDelay.clear()
   }
 
-  const handleFloatingBlur = (event: FocusEvent) => {
-    if (triggerInContainers(event)) {
-      return
+  let focusEffect: Function | null = null
+
+  const clearFocusEffect = () => {
+    if (focusEffect) {
+      focusEffect()
+      focusEffect = null
     }
-    triggerEvent = event
-    closeDelay.delay()
   }
+
+  watch(
+    [context.open, () => optionsRef.value.disabled],
+    ([open, disabled]) => {
+      clearFocusEffect()
+
+      if (open && !disabled) {
+        const doc = getDocument(context.refs.floating.value)
+        doc.addEventListener('blur', handleBlur)
+
+        focusEffect = () => doc.removeEventListener('blur', handleBlur)
+      }
+    },
+    {
+      immediate: true
+    }
+  )
 
   watch(context.open, () => {
     openDelay.clear()
@@ -93,12 +110,10 @@ export function useFocus(
 
   const elementProps = {
     reference: {
-      onFocus: handleFocus,
-      onBlur: handleBlur
+      onFocus: handleFocus
     },
     floating: {
-      onFocus: handleFloatingFocus,
-      onBlur: handleFloatingBlur
+      onFocus: handleFloatingFocus
     }
   }
 

@@ -32,6 +32,7 @@ export interface UseFloatingData {
 }
 
 export type UseFloatingOptions = Omit<ComputePositionConfig, 'platform'> & {
+  disabled?: boolean
   onUpdate?: (data: UseFloatingData) => void
 }
 

@@ -21,7 +21,8 @@
   },
   "scripts": {
     "build": "rimraf dist & rollup -c --configPlugin typescript",
-    "test": "vitest"
+    "test:2": "vue-demi-switch 2.7 vue2 & vitest",
+    "test:3": "vue-demi-switch 3 vue & vitest"
   },
   "keywords": [
     "tooltip",

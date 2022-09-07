@@ -84,13 +84,13 @@ export function useClick(
 
   const blockClickRef = ref(false)
 
-  const isAllowPointerType = (pointerType: string) => {
+  const isAllowPointerEvent = ({ pointerType }: PointerEvent) => {
     const { pointerTypes } = optionsRef.value
     return !pointerTypes || pointerTypes.includes(pointerType as ClickPointerType)
   }
 
   const handlePointerDown = (event: PointerEvent) => {
-    blockClickRef.value = !isAllowPointerType(event.pointerType)
+    blockClickRef.value = !isAllowPointerEvent(event)
   }
 
   const handleClick = (event: MouseEvent) => {

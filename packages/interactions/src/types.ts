@@ -1,8 +1,6 @@
 import type { ReferenceType } from '@visoning/vue-floating-core'
 import type { DeepReadonly, Ref } from 'vue-demi'
 
-export type FunctionWithArgs<T extends any[] = any[]> = (...args: T) => any
-
 export type MaybeRef<T> = T | Ref<T>
 
 export interface ElementRefs<RT extends ReferenceType = ReferenceType> {

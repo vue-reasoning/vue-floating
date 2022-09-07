@@ -3,5 +3,5 @@ export function isContainer(reference: unknown): reference is Element {
 }
 
 export function contains(target: Element, containers: unknown[]) {
-  return !containers.some((container) => isContainer(container) && container.contains(target))
+  return containers.some((container) => isContainer(container) && container.contains(target))
 }

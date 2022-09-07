@@ -1,28 +1,16 @@
-import { computed, ComputedRef, isRef, Ref, unref } from 'vue-demi'
+import { computed, ComputedRef, isRef, unref } from 'vue-demi'
+import type { Ref } from 'vue-demi'
 
-import type { FunctionWithArgs, MaybeRef, DelayType, Delay } from '../types'
-import { useDelay, UseDelayReturn } from './useDelay'
-
-function getDelay(type: DelayType, delay: Ref<Delay>): ComputedRef<number | undefined>
-function getDelay(type: DelayType, delay?: Delay): number | undefined
-function getDelay(
-  type: DelayType,
-  delay?: MaybeRef<Delay>
-): ComputedRef<number | undefined> | number | undefined
-function getDelay(
-  type: DelayType,
-  delay?: MaybeRef<Delay>
-): ComputedRef<number | undefined> | number | undefined {
-  const get = (delay: Delay) => (typeof delay === 'number' ? delay : delay && delay[type])
-  return isRef(delay) ? computed(() => get(unref(delay))) : get(delay)
-}
+import type { MaybeRef, DelayType, Delay } from '../types'
+import { useDelay } from './useDelay'
+import type { UseDelayReturn } from './useDelay'
 
 export interface Callbacks {
-  open?: FunctionWithArgs
-  close?: FunctionWithArgs
+  open?: Function
+  close?: Function
 }
 
-export type CallbackType = Callbacks | FunctionWithArgs<[boolean]>
+export type CallbackType = Callbacks | ((value: boolean) => void)
 
 export interface UseDelayInteractionReturn {
   open: UseDelayReturn
@@ -40,4 +28,18 @@ export function useDelayInteraction(
     open: useDelay(getDelay('open', delay), open),
     close: useDelay(getDelay('close', delay), close)
   }
+}
+
+function getDelay(type: DelayType, delay: Ref<Delay>): ComputedRef<number | undefined>
+function getDelay(type: DelayType, delay?: Delay): number | undefined
+function getDelay(
+  type: DelayType,
+  delay?: MaybeRef<Delay>
+): ComputedRef<number | undefined> | number | undefined
+function getDelay(
+  type: DelayType,
+  delay?: MaybeRef<Delay>
+): ComputedRef<number | undefined> | number | undefined {
+  const get = (delay: Delay) => (typeof delay === 'number' ? delay : delay && delay[type])
+  return isRef(delay) ? computed(() => get(unref(delay))) : get(delay)
 }

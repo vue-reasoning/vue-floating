@@ -8,7 +8,7 @@
     "strict": true,
     "importsNotUsedAsValues": "error",
     "jsx": "preserve",
-    "types": ["vite/client", "vitest/globals"],
+    "types": ["vite/client", "vitest/globals", "vue/types/jsx"],
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",

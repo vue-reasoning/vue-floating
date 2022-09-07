@@ -1,14 +1,7 @@
 import { computed, unref, watch } from 'vue-demi'
 import type { Ref } from 'vue-demi'
 
-import type {
-  ElementProps,
-  InteractionsContext,
-  MaybeRef,
-  InteractionInfo,
-  FunctionWithArgs,
-  Delay
-} from '../types'
+import type { ElementProps, InteractionsContext, MaybeRef, InteractionInfo, Delay } from '../types'
 import { makeInteractionInfoFactory } from '../types'
 import { useDelayInteraction } from '../utils/useDelayInteraction'
 import { contains } from '../utils/contains'
@@ -73,26 +66,20 @@ export function useHover(
     }
   )
 
-  const isAllowPointerType = (pointerType: string) => {
+  const isAllowPointerEvent = ({ pointerType }: PointerEvent) => {
     const { pointerTypes } = optionsRef.value
     return !pointerTypes || pointerTypes.includes(pointerType as MousePointerType)
   }
 
   const triggerInContainers = (event: PointerEvent) => {
     const { floating, reference } = context.refs
-    return [floating.value, reference.value].some(
-      (container) =>
-        container && contains(container as HTMLElement, [event.relatedTarget as Element])
-    )
-  }
-
-  const shouldAllowPointerAction = (event: PointerEvent, isLeave = false) => {
-    return isAllowPointerType(event.pointerType) && (!isLeave || !triggerInContainers(event))
+    return contains(event.relatedTarget as Element, [floating.value, reference.value])
   }
 
   const handlePointerEnter = (event: PointerEvent) => {
     clearUserControlEffect()
-    if (!shouldAllowPointerAction(event)) {
+
+    if (!isAllowPointerEvent(event)) {
       return
     }
 
@@ -105,18 +92,20 @@ export function useHover(
   }
 
   const handlePointerLeave = (event: PointerEvent) => {
-    if (!shouldAllowPointerAction(event, true)) {
+    if (!isAllowPointerEvent(event) || triggerInContainers(event)) {
       return
     }
 
     openDelay.clear()
 
-    if (context.open.value) {
-      const doClose = () => {
+    const doClose = () => {
+      if (context.open.value) {
         triggerEvent = event
         closeDelay.delay()
       }
+    }
 
+    if (context.open.value) {
       if (userWantControlRef.value) {
         handleUserControl(doClose)
       } else {
@@ -125,9 +114,9 @@ export function useHover(
     }
   }
 
-  let userControlEffect: FunctionWithArgs | null = null
+  let userControlEffect: Function | null = null
 
-  const handleUserControl = (next: FunctionWithArgs) => {
+  const handleUserControl = (next: Function) => {
     clearUserControlEffect()
 
     const handlePointerMove = (event: PointerEvent) => {
@@ -141,11 +130,11 @@ export function useHover(
       }
     }
 
-    const floatingDoc = getDocument(context.refs.floating.value)
-    floatingDoc.addEventListener('pointermove', handlePointerMove)
+    const doc = getDocument(context.refs.floating.value)
+    doc.addEventListener('pointermove', handlePointerMove)
 
     userControlEffect = () => {
-      floatingDoc.removeEventListener('pointermove', handlePointerMove)
+      doc.removeEventListener('pointermove', handlePointerMove)
     }
   }
 
@@ -158,7 +147,8 @@ export function useHover(
 
   const handleFloatingPointerEnter = (event: PointerEvent) => {
     clearUserControlEffect()
-    if (!shouldAllowPointerAction(event)) {
+
+    if (!isAllowPointerEvent(event)) {
       return
     }
 
@@ -166,7 +156,7 @@ export function useHover(
   }
 
   const handleFloatingPointerLeave = (event: PointerEvent) => {
-    if (!shouldAllowPointerAction(event, true)) {
+    if (!isAllowPointerEvent(event) || triggerInContainers(event)) {
       return
     }
 

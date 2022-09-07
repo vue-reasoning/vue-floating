@@ -1,7 +1,9 @@
 import { isRef, unref, watch } from 'vue-demi'
-import type { UnwrapRef, WatchOptions, WatchStopHandle } from 'vue-demi'
+import type { UnwrapRef, WatchOptions } from 'vue-demi'
 
 import type { MaybeRef } from '../types'
+import { noop } from './noop'
+import { useManualEffect } from './useManualEffect'
 
 export type ConditionHandler<T extends any[]> = (qualifys?: NonNullables<UnwrapRefs<T>>) => void
 
@@ -9,46 +11,68 @@ export type Predicate<T = any> = (item: T) => boolean
 
 const defaultPredicate: Predicate = (item) => item !== undefined && item !== null
 
+export interface UseQualifiedRefsReturn {
+  detect: () => void
+  mesure: () => void
+  pause: () => void
+}
+
 export function useQualifiedRefs<T extends any[]>(
   refs: MaybeRef<T>,
   handler: ConditionHandler<T>,
   watchOptions?: WatchOptions
-): WatchStopHandle
+): UseQualifiedRefsReturn
 
 export function useQualifiedRefs<T extends any[]>(
   refs: MaybeRef<T>,
   handler: ConditionHandler<T>,
   predicate?: Predicate<T[number]>,
   watchOptions?: WatchOptions
-): WatchStopHandle
+): UseQualifiedRefsReturn
 
 export function useQualifiedRefs<T extends any[]>(
   refs: MaybeRef<T>,
   handler: ConditionHandler<T>,
   predicate?: Predicate<T[number]> | WatchOptions,
   watchOptions?: WatchOptions
-): WatchStopHandle {
+): UseQualifiedRefsReturn {
   if (typeof predicate !== 'function') {
-    watchOptions = predicate
+    watchOptions = watchOptions || predicate
     predicate = defaultPredicate
   }
 
-  const condition = (items: UnwrapRefs<UnwrapRef<T>>) => {
+  const detect = () => {
+    const items = unref(refs).map(unref) as NonNullables<UnwrapRefs<T>>
     for (let i = 0; i < items.length; i++) {
       if (!(predicate as Predicate)(items[i])) {
         return handler()
       }
     }
-
-    handler(items as NonNullables<UnwrapRefs<T>>)
+    handler(items)
   }
 
+  // The refs never changes
   if (!isRef(refs) && refs.every((ref) => !isRef(ref))) {
-    condition(refs as UnwrapRefs<UnwrapRef<T>>)
-    return () => {}
+    if (watchOptions?.immediate) {
+      detect()
+    }
+
+    return {
+      detect,
+      mesure: noop,
+      pause: noop
+    }
   }
 
-  return watch(() => unref(refs).map(unref) as UnwrapRefs<UnwrapRef<T>>, condition, watchOptions)
+  const { clear: pause, reset: mesure } = useManualEffect(() =>
+    watch(() => unref(refs).map(unref) as UnwrapRefs<UnwrapRef<T>>, detect, watchOptions)
+  )
+
+  return {
+    detect,
+    pause,
+    mesure
+  }
 }
 
 type UnwrapRefs<T> = {
