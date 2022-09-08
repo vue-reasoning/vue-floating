@@ -64,8 +64,9 @@ export function useQualifiedRefs<T extends any[]>(
     }
   }
 
-  const { clear: pause, reset: mesure } = useManualEffect(() =>
-    watch(() => unref(refs).map(unref) as UnwrapRefs<UnwrapRef<T>>, detect, watchOptions)
+  const { clear: pause, reset: mesure } = useManualEffect(
+    () => watch(() => unref(refs).map(unref) as UnwrapRefs<UnwrapRef<T>>, detect, watchOptions),
+    true
   )
 
   return {

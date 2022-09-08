@@ -1,30 +1,44 @@
-import { h } from 'vue-demi'
-import Vue from 'vue'
+import { h, ref, Vue2 } from 'vue-demi'
 
-import { Popover } from '../src/popover/Popover'
+import { Popup } from '../src/popup'
 
 import './index.css'
 
-new Vue({
+const appendToBodyRef = ref(true)
+
+new Vue2({
   el: '#app',
 
   render() {
     return h('div', [
-      h(Popover, {
+      h('div', [
+        h(
+          'button',
+          {
+            on: {
+              click: () => (appendToBodyRef.value = !appendToBodyRef.value)
+            }
+          },
+          [`appendToBody: ${appendToBodyRef.value}`]
+        )
+      ]),
+
+      // h(Popup, {
+      //   props: {
+      //     interactions: ['hover'],
+      //     placement: 'bottom',
+      //     appendToBody: appendToBodyRef.value
+      //   },
+      //   scopedSlots: {
+      //     default: () => h('div', 'My Tooltip'),
+      //     reference: () => h('button', 'Hover me')
+      //   }
+      // }),
+      h(Popup, {
         props: {
-          interactions: ['hover'],
-          hoverDelay: 200
-        },
-        scopedSlots: {
-          default: () => h('div', 'My Tooltip'),
-          reference: () => h('button', 'Hover me')
-        }
-      }),
-      h(Popover, {
-        props: {
-          interactions: ['hover'],
-          hoverDelay: 200,
-          floatingWrapper: (floating: any) =>
+          interactions: ['click'],
+          appendToBody: appendToBodyRef.value,
+          popupWrapper: (floating: any) =>
             h(
               'transition',
               {

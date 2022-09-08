@@ -5,29 +5,30 @@ import type { Middleware } from '@floating-ui/dom'
 import type { UseFloatingOptions } from '../types'
 import { useManualEffect } from './useManualEffect'
 
-export function useCompareFloatingProps(
-  props: Ref<UseFloatingOptions>,
+export function useFloatingOptionsChange(
+  options: Ref<UseFloatingOptions>,
   onChange: () => void,
   watchOptions?: WatchOptions
 ) {
-  let lastProps: UseFloatingOptions | null = null
+  let lastOptions: UseFloatingOptions | null = null
 
-  const updateLastProps = (props: UseFloatingOptions) => {
-    lastProps = {
-      ...props,
-      middleware: props.middleware ? [...props.middleware] : []
+  const updateLastProps = (options: UseFloatingOptions) => {
+    lastOptions = {
+      ...options,
+      middleware: options.middleware ? [...options.middleware] : []
     }
   }
 
-  const handlePropsChange = (props: UseFloatingOptions) => {
-    if (!lastProps || !equalFloatingProps(lastProps, props)) {
-      updateLastProps(props)
+  const handlePropsChange = (options: UseFloatingOptions) => {
+    if (!lastOptions || !equalFloatingProps(lastOptions, options)) {
+      updateLastProps(options)
       onChange()
     }
   }
 
-  const { clear: pause, reset: mesure } = useManualEffect(() =>
-    watch(props, handlePropsChange, watchOptions)
+  const { clear: pause, reset: mesure } = useManualEffect(
+    () => watch(options, handlePropsChange, watchOptions),
+    true
   )
 
   return {

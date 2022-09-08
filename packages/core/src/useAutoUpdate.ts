@@ -24,32 +24,38 @@ export function useAutoUpdate(
 ) {
   const { reset: resetAutoUpdate, clear: clearAutoUpdate } = useManualEffect()
 
-  const { detect: createAutoUpdate, pause: pauseQualifiedDetect } = useQualifiedRefs<
+  const { mesure: watchElements, pause: pauseWatchElements } = useQualifiedRefs<
     [MaybeReferenceRef, MaybeFloatingRef]
   >(
     [unref(reference), unref(floating)],
     (qualifys) => {
-      if (qualifys) {
-        resetAutoUpdate(autoUpdate(...qualifys, update, unref(autoUpdateOptions)))
-      }
+      resetAutoUpdate(qualifys && autoUpdate(...qualifys, update, unref(autoUpdateOptions)))
     },
     {
       immediate: true
     }
   )
 
-  if (isRef(autoUpdateOptions)) {
-    watch(autoUpdateOptions, (options) => {
-      if (options.disabled === false) {
-        pauseQualifiedDetect()
-      } else {
-        createAutoUpdate()
+  const { reset: watchProps, clear: stopWatchProps } = useManualEffect(() =>
+    watch(
+      () => unref(autoUpdateOptions!),
+      (options) => {
+        if (!!options.disabled) {
+          watchElements()
+        } else {
+          pauseWatchElements()
+        }
       }
-    })
+    )
+  )
+
+  if (isRef(autoUpdateOptions)) {
+    watchProps()
   }
 
   return () => {
-    pauseQualifiedDetect()
+    stopWatchProps()
+    pauseWatchElements()
     clearAutoUpdate()
   }
 }

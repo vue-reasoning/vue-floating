@@ -6,6 +6,10 @@ importers:
     specifiers:
       '@rollup/plugin-typescript': ^8.5.0
       '@types/node': ^18.0.0
+      '@vitejs/plugin-vue': ^3.1.0
+      '@vitejs/plugin-vue-jsx': ^2.0.1
+      '@vitejs/plugin-vue2': ^1.1.2
+      '@vitejs/plugin-vue2-jsx': ^1.0.3
       '@vue/test-utils': ^2.0.2
       cross-env: ^7.0.3
       jsdom: ^20.0.0
@@ -26,6 +30,10 @@ importers:
     devDependencies:
       '@rollup/plugin-typescript': 8.5.0_mad6iryzja5sfcvlsiy3osqulq
       '@types/node': 18.0.0
+      '@vitejs/plugin-vue': 3.1.0_vite@3.0.2+vue@3.2.38
+      '@vitejs/plugin-vue-jsx': 2.0.1_vite@3.0.2+vue@3.2.38
+      '@vitejs/plugin-vue2': 1.1.2_vite@3.0.2+vue@3.2.38
+      '@vitejs/plugin-vue2-jsx': 1.0.3_vite@3.0.2+vue@3.2.38
       '@vue/test-utils': 2.0.2_vue@3.2.38
       cross-env: 7.0.3
       jsdom: 20.0.0
@@ -48,12 +56,7 @@ importers:
       '@types/lodash.pick': ^4.4.7
       '@visoning/vue-floating-core': workspace:*
       '@visoning/vue-floating-interactions': workspace:*
-      '@vitejs/plugin-vue': ^3.1.0
-      '@vitejs/plugin-vue-jsx': ^2.0.1
-      '@vitejs/plugin-vue2': ^1.1.2
-      '@vitejs/plugin-vue2-jsx': ^1.0.3
       classnames: ^2.3.1
-      jsdom: ^20.0.0
       lodash.pick: ^4.4.0
       sass: ^1.54.8
     dependencies:
@@ -62,14 +65,9 @@ importers:
       '@visoning/vue-floating-core': link:../core
       '@visoning/vue-floating-interactions': link:../interactions
       classnames: 2.3.1
+      lodash.pick: 4.4.0
     devDependencies:
       '@types/lodash.pick': 4.4.7
-      '@vitejs/plugin-vue': 3.1.0
-      '@vitejs/plugin-vue-jsx': 2.0.1
-      '@vitejs/plugin-vue2': 1.1.2
-      '@vitejs/plugin-vue2-jsx': 1.0.3
-      jsdom: 20.0.0
-      lodash.pick: 4.4.0
       sass: 1.54.8
 
   packages/core:
@@ -535,7 +533,7 @@ packages:
     resolution: {integrity: sha512-cHlGmko4gWLVI27cGJntjs/Sj8th9aYwplmZFwmmgYQQvL5NUsgVJG7OddLvNfLqYS31KFN0s3qlaD9qCaxACA==}
     dev: true
 
-  /@vitejs/plugin-vue-jsx/2.0.1:
+  /@vitejs/plugin-vue-jsx/2.0.1_vite@3.0.2+vue@3.2.38:
     resolution: {integrity: sha512-lmiR1k9+lrF7LMczO0pxtQ8mOn6XeppJDHxnpxkJQpT5SiKz4SKhKdeNstXaTNuR8qZhUo5X0pJlcocn72Y4Jg==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
@@ -546,19 +544,24 @@ packages:
       '@babel/plugin-syntax-import-meta': 7.10.4_@babel+core@7.19.0
       '@babel/plugin-transform-typescript': 7.19.0_@babel+core@7.19.0
       '@vue/babel-plugin-jsx': 1.1.1_@babel+core@7.19.0
+      vite: 3.0.2
+      vue: 3.2.38
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /@vitejs/plugin-vue/3.1.0:
+  /@vitejs/plugin-vue/3.1.0_vite@3.0.2+vue@3.2.38:
     resolution: {integrity: sha512-fmxtHPjSOEIRg6vHYDaem+97iwCUg/uSIaTzp98lhELt2ISOQuDo2hbkBdXod0g15IhfPMQmAxh4heUks2zvDA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       vite: ^3.0.0
       vue: ^3.2.25
+    dependencies:
+      vite: 3.0.2
+      vue: 3.2.38
     dev: true
 
-  /@vitejs/plugin-vue2-jsx/1.0.3:
+  /@vitejs/plugin-vue2-jsx/1.0.3_vite@3.0.2+vue@3.2.38:
     resolution: {integrity: sha512-JdcmeuTCRfYkQ6wPIbg0IG43l/2SuAFAK0asWOmrNQ098CfFb86gfOfHLTr5s01qduMCdfl7JOoSgxOckQxvBg==}
     engines: {node: '>=14.18.0'}
     peerDependencies:
@@ -569,17 +572,22 @@ packages:
       '@babel/plugin-syntax-import-meta': 7.10.4_@babel+core@7.19.0
       '@babel/plugin-transform-typescript': 7.19.0_@babel+core@7.19.0
       '@rollup/pluginutils': 4.2.1
-      '@vue/babel-preset-jsx': 1.4.0_@babel+core@7.19.0
+      '@vue/babel-preset-jsx': 1.4.0_ly7wgjnrrhyxrvm42ic2ktcodm
+      vite: 3.0.2
+      vue: 3.2.38
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /@vitejs/plugin-vue2/1.1.2:
+  /@vitejs/plugin-vue2/1.1.2_vite@3.0.2+vue@3.2.38:
     resolution: {integrity: sha512-y6OEA+2UdJ0xrEQHodq20v9r3SpS62IOHrgN92JPLvVpNkhcissu7yvD5PXMzMESyazj0XNWGsc8UQk8+mVrjQ==}
     engines: {node: '>=14.6.0'}
     peerDependencies:
       vite: '>=2.5.10'
       vue: ^2.7.0-0
+    dependencies:
+      vite: 3.0.2
+      vue: 3.2.38
     dev: true
 
   /@vue/babel-helper-vue-jsx-merge-props/1.4.0:
@@ -621,7 +629,7 @@ packages:
       svg-tags: 1.0.0
     dev: true
 
-  /@vue/babel-preset-jsx/1.4.0_@babel+core@7.19.0:
+  /@vue/babel-preset-jsx/1.4.0_ly7wgjnrrhyxrvm42ic2ktcodm:
     resolution: {integrity: sha512-QmfRpssBOPZWL5xw7fOuHNifCQcNQC1PrOo/4fu6xlhlKJJKSA3HqX92Nvgyx8fqHZTUGMPHmFA+IDqwXlqkSA==}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -639,6 +647,7 @@ packages:
       '@vue/babel-sugar-inject-h': 1.4.0_@babel+core@7.19.0
       '@vue/babel-sugar-v-model': 1.4.0_@babel+core@7.19.0
       '@vue/babel-sugar-v-on': 1.4.0_@babel+core@7.19.0
+      vue: 3.2.38
     dev: true
 
   /@vue/babel-sugar-composition-api-inject-h/1.4.0_@babel+core@7.19.0:
@@ -1916,7 +1925,7 @@ packages:
 
   /lodash.pick/4.4.0:
     resolution: {integrity: sha512-hXt6Ul/5yWjfklSGvLQl8vM//l3FtyHZeuelpzK6mm99pNvN9yTDruNZPEJZD1oWrqo+izBmB7oUfWgcCX7s4Q==}
-    dev: true
+    dev: false
 
   /lodash.sortby/4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}

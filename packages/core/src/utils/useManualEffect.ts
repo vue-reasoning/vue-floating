@@ -1,25 +1,38 @@
+import { noop } from './noop'
+
+export type CreateEffect = () => (() => void) | void
+
+export const createEmptyEffect: CreateEffect = () => noop
+
 export interface UseManualEffectReturn {
-  reset: (effect?: Function) => void
   clear: () => void
+  reset: (effect?: () => void) => void
   hasEffect: () => boolean
 }
 
-export function useManualEffect(createEffect?: () => Function): UseManualEffectReturn {
-  let effect = createEffect && createEffect()
+export function useManualEffect(
+  createEffect?: CreateEffect,
+  immediate?: boolean
+): UseManualEffectReturn {
+  let clearEffect: ReturnType<CreateEffect>
+
+  if (immediate && createEffect) {
+    clearEffect = createEffect()
+  }
 
   const clear = () => {
-    if (effect) {
-      effect()
-      effect = undefined
+    if (clearEffect) {
+      clearEffect()
+      clearEffect = undefined
     }
   }
 
   return {
+    clear,
     reset: (newEffect) => {
       clear()
-      effect = newEffect || (createEffect && createEffect())
+      clearEffect = newEffect || (createEffect && createEffect())
     },
-    clear,
-    hasEffect: () => !!effect
+    hasEffect: () => !!clearEffect
   }
 }

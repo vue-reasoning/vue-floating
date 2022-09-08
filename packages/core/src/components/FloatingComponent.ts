@@ -3,7 +3,6 @@ import {
   toRef,
   ref,
   computed,
-  watch,
   getCurrentInstance,
   onMounted,
   onUpdated,
@@ -33,7 +32,7 @@ export const FloatingComponent = defineComponent({
     // Floating
     const UseFloatingOptionsRef = computed<UseFloatingOptions>(() => {
       return {
-        disabled: !!props.disabled,
+        disabled: props.disabled,
         placement: props.placement,
         strategy: props.strategy,
         middleware: props.middleware,
@@ -50,7 +49,7 @@ export const FloatingComponent = defineComponent({
       update,
       computed(() => {
         const options = props.autoUpdate
-        return !!options === false || props.disabled
+        return !options || props.disabled
           ? { disabled: true }
           : typeof options === 'object'
           ? options

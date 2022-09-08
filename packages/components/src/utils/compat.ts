@@ -1,4 +1,5 @@
-import { isVue3 } from 'vue-demi'
+import { isVue3, Vue2 } from 'vue-demi'
+import { createApp } from 'vue'
 import { identity } from './identity'
 import { isOn } from './isOn'
 import { mergeListeners } from './mergeProps'
@@ -56,3 +57,62 @@ export const transformListeners = isVue3
         return listeners
       }, {} as Record<string, any>)
     }
+
+export interface VueMountProxy {
+  readonly $el: Element | null
+  readonly isMounted: boolean
+  mount: (container?: Element | string) => void
+  unmount: () => void
+}
+
+export const createVueMountProxy = (options?: any): VueMountProxy => {
+  const proxy = {} as VueMountProxy
+
+  if (isVue3) {
+    const app = createApp(options)
+    const v3Instance = app._instance!
+
+    proxy.mount = (container) => app.mount(container as any)
+    proxy.unmount = () => app.unmount()
+
+    Object.defineProperties(proxy, {
+      $el: {
+        configurable: true,
+        get() {
+          return v3Instance.proxy?.$el
+        }
+      },
+      isMounted: {
+        configurable: true,
+        get() {
+          return v3Instance.isMounted
+        }
+      }
+    })
+  }
+
+  const v2Instance = new Vue2!(options)
+  console.log(v2Instance)
+  proxy.mount = (container) => v2Instance.$mount(container)
+  proxy.unmount = () => {
+    v2Instance.$destroy()
+    v2Instance.$el.remove()
+  }
+
+  Object.defineProperties(proxy, {
+    $el: {
+      configurable: true,
+      get() {
+        return v2Instance.$el
+      }
+    },
+    isMounted: {
+      configurable: true,
+      get() {
+        return (v2Instance as any)._isMounted
+      }
+    }
+  })
+
+  return proxy
+}

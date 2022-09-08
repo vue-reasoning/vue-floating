@@ -10,7 +10,7 @@ import type {
   UseFloatingData
 } from './types'
 import { useQualifiedRefs } from './utils/useQualifiedRefs'
-import { useCompareFloatingProps } from './utils/useCompareFloatingProps'
+import { useFloatingOptionsChange } from './utils/useFloatingOptionsChange'
 
 export function useFloating(
   referenceRef: MaybeReferenceRef,
@@ -55,7 +55,7 @@ export function useFloating(
     pause: pauseWatchElements
   } = useQualifiedRefs([referenceRef, floatingRef], (qualifys) => qualifys && update())
 
-  const { mesure: watchProps, pause: pauseWatchProps } = useCompareFloatingProps(
+  const { mesure: watchProps, pause: pauseWatchProps } = useFloatingOptionsChange(
     optionsRef,
     detectUpdate
   )

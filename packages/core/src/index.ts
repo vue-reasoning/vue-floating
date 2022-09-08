@@ -2,6 +2,10 @@ export { useAutoUpdate } from './useAutoUpdate'
 export type { UseAutoUpdateOptions } from './useAutoUpdate'
 export { useFloating } from './useFloating'
 
+export * from './utils/useFloatingOptionsChange'
+export * from './utils/useManualEffect'
+export * from './utils/useQualifiedRefs'
+
 export type {
   Middleware,
   MiddlewareData,
