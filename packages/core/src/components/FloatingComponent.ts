@@ -23,6 +23,7 @@ export const FloatingComponent = defineComponent({
     //
     // Elements ====================================
     //
+
     const referenceRef = ref<HTMLElement>()
     const floatingRef = toRef(props, 'floatingNode')
 
@@ -35,6 +36,7 @@ export const FloatingComponent = defineComponent({
     //
     // Floating ====================================
     //
+
     const UseFloatingOptionsRef = computed<UseFloatingOptions>(() => {
       return {
         disabled: props.disabled,
@@ -54,6 +56,7 @@ export const FloatingComponent = defineComponent({
     //
     // AutoUpdate ====================================
     //
+
     const useAutoUpdateOptionsRef = computed(() => {
       const options = props.autoUpdate
       const disabled = !options || props.disabled
@@ -71,6 +74,7 @@ export const FloatingComponent = defineComponent({
     //
     // Expose ====================================
     //
+
     const exposes: FloatingComponentExpose = {
       floating: {
         update,
@@ -82,6 +86,7 @@ export const FloatingComponent = defineComponent({
     //
     // Rende ====================================
     //
+
     return () => {
       const reference = slots.reference && slots.reference(data.value)[0]
       if (!reference) {

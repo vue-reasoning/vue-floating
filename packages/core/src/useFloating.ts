@@ -12,6 +12,10 @@ import type {
 import { useQualifiedRefs } from './utils/useQualifiedRefs'
 import { useFloatingOptionsChange } from './utils/useFloatingOptionsChange'
 
+/**
+ * Uue hooks based on `computePosition`.
+ * @see https://floating-ui.com/docs/computePosition
+ */
 export function useFloating(
   referenceRef: MaybeReferenceRef,
   floatingRef: MaybeFloatingRef,
@@ -44,7 +48,6 @@ export function useFloating(
       const { value: options } = optionsRef
       computePosition(reference, floating, options).then((data) => {
         dataRef.value = data
-        options.onUpdate && options.onUpdate(data)
       })
     }
   }

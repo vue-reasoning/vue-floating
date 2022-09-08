@@ -20,7 +20,7 @@ export function useAutoUpdate(
   reference: MaybeReferenceRef,
   floating: MaybeFloatingRef,
   update: () => void,
-  autoUpdateOptions?: MaybeRef<UseAutoUpdateOptions>
+  options?: MaybeRef<UseAutoUpdateOptions>
 ) {
   const { reset: resetAutoUpdate, clear: clearAutoUpdate } = useManualEffect()
 
@@ -29,7 +29,7 @@ export function useAutoUpdate(
   >(
     [unref(reference), unref(floating)],
     (qualifys) => {
-      resetAutoUpdate(qualifys && autoUpdate(...qualifys, update, unref(autoUpdateOptions)))
+      resetAutoUpdate(qualifys && autoUpdate(...qualifys, update, unref(options)))
     },
     {
       immediate: true
@@ -38,7 +38,7 @@ export function useAutoUpdate(
 
   const { reset: watchProps, clear: stopWatchProps } = useManualEffect(() =>
     watch(
-      () => unref(autoUpdateOptions!),
+      () => unref(options!),
       (options) => {
         if (!!options.disabled) {
           watchElements()
@@ -49,7 +49,7 @@ export function useAutoUpdate(
     )
   )
 
-  if (isRef(autoUpdateOptions)) {
+  if (isRef(options)) {
     watchProps()
   }
 

@@ -52,22 +52,16 @@ importers:
   packages/components:
     specifiers:
       '@floating-ui/core': ^1.0.0
-      '@floating-ui/dom': ^1.0.0
-      '@types/lodash.pick': ^4.4.7
       '@visoning/vue-floating-core': workspace:*
       '@visoning/vue-floating-interactions': workspace:*
       classnames: ^2.3.1
-      lodash.pick: ^4.4.0
       sass: ^1.54.8
     dependencies:
       '@floating-ui/core': 1.0.0
-      '@floating-ui/dom': 1.0.0
       '@visoning/vue-floating-core': link:../core
       '@visoning/vue-floating-interactions': link:../interactions
       classnames: 2.3.1
-      lodash.pick: 4.4.0
     devDependencies:
-      '@types/lodash.pick': 4.4.7
       sass: 1.54.8
 
   packages/core:
@@ -517,16 +511,6 @@ packages:
 
   /@types/estree/0.0.39:
     resolution: {integrity: sha512-EYNwp3bU+98cpU4lAWYYL7Zz+2gryWH1qbdDTidVd6hkiR6weksdbMadyXKXNPEkQFhXM+hVO9ZygomHXp+AIw==}
-    dev: true
-
-  /@types/lodash.pick/4.4.7:
-    resolution: {integrity: sha512-HgdyKz7/1+oeoVzbpu1XiX/Bti9AUksHtOILH38T07aKvqoirzcdOsrO2+Yg3L51Hv/8m1MetvHZEUGeABiTiQ==}
-    dependencies:
-      '@types/lodash': 4.14.184
-    dev: true
-
-  /@types/lodash/4.14.184:
-    resolution: {integrity: sha512-RoZphVtHbxPZizt4IcILciSWiC6dcn+eZ8oX9IWEYfDMcocdd42f7NPI6fQj+6zI8y4E0L7gu2pcZKLGTRaV9Q==}
     dev: true
 
   /@types/node/18.0.0:
@@ -1922,10 +1906,6 @@ packages:
   /lodash.kebabcase/4.1.1:
     resolution: {integrity: sha512-N8XRTIMMqqDgSy4VLKPnJ/+hpGZN+PHQiJnSenYqPaVV/NCqEogTnAdZLQiGKhxX+JCs8waWq2t1XHWKOmlY8g==}
     dev: true
-
-  /lodash.pick/4.4.0:
-    resolution: {integrity: sha512-hXt6Ul/5yWjfklSGvLQl8vM//l3FtyHZeuelpzK6mm99pNvN9yTDruNZPEJZD1oWrqo+izBmB7oUfWgcCX7s4Q==}
-    dev: false
 
   /lodash.sortby/4.7.0:
     resolution: {integrity: sha512-HDWXG8isMntAyRF5vZ7xKuEvOhT4AhlRt/3czTSjvGUxjYCBVRQY48ViDHyfYz9VIoBkW4TMGQNapx+l3RUwdA==}

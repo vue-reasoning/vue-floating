@@ -20,24 +20,24 @@ export interface UseQualifiedRefsReturn {
 export function useQualifiedRefs<T extends any[]>(
   refs: MaybeRef<T>,
   handler: ConditionHandler<T>,
-  watchOptions?: WatchOptions
+  options?: WatchOptions
 ): UseQualifiedRefsReturn
 
 export function useQualifiedRefs<T extends any[]>(
   refs: MaybeRef<T>,
   handler: ConditionHandler<T>,
   predicate?: Predicate<T[number]>,
-  watchOptions?: WatchOptions
+  options?: WatchOptions
 ): UseQualifiedRefsReturn
 
 export function useQualifiedRefs<T extends any[]>(
   refs: MaybeRef<T>,
   handler: ConditionHandler<T>,
   predicate?: Predicate<T[number]> | WatchOptions,
-  watchOptions?: WatchOptions
+  options?: WatchOptions
 ): UseQualifiedRefsReturn {
   if (typeof predicate !== 'function') {
-    watchOptions = watchOptions || predicate
+    options = options || predicate
     predicate = defaultPredicate
   }
 
@@ -53,7 +53,7 @@ export function useQualifiedRefs<T extends any[]>(
 
   // The refs never changes
   if (!isRef(refs) && refs.every((ref) => !isRef(ref))) {
-    if (watchOptions?.immediate) {
+    if (options?.immediate) {
       detect()
     }
 
@@ -65,7 +65,7 @@ export function useQualifiedRefs<T extends any[]>(
   }
 
   const { clear: pause, reset: mesure } = useManualEffect(
-    () => watch(() => unref(refs).map(unref) as UnwrapRefs<UnwrapRef<T>>, detect, watchOptions),
+    () => watch(() => unref(refs).map(unref) as UnwrapRefs<UnwrapRef<T>>, detect, options),
     true
   )
 
