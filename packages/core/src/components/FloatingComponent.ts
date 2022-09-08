@@ -6,7 +6,8 @@ import {
   getCurrentInstance,
   onMounted,
   onUpdated,
-  onBeforeUnmount
+  onBeforeUnmount,
+  watch
 } from 'vue-demi'
 import type { VNode } from 'vue-demi'
 
@@ -42,8 +43,7 @@ export const FloatingComponent = defineComponent({
         disabled: props.disabled,
         placement: props.placement,
         strategy: props.strategy,
-        middleware: props.middleware,
-        onUpdate: () => emit('update')
+        middleware: props.middleware
       }
     })
 
@@ -52,6 +52,16 @@ export const FloatingComponent = defineComponent({
       update,
       stop: stopFloating
     } = useFloating(referenceRef, floatingRef, UseFloatingOptionsRef)
+
+    watch(
+      data,
+      () => {
+        emit('update', data.value)
+      },
+      {
+        immediate: true
+      }
+    )
 
     //
     // AutoUpdate ====================================

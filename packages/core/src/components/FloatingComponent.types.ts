@@ -56,7 +56,9 @@ export const FloatingComponentProps = {
   autoUpdate: {
     type: [Boolean, Object] as PropType<boolean | AutoUpdateOptions>,
     default: true
-  }
+  },
+
+  onUpdate: Function as PropType<(data: UnwrapRef<UseFloatingReturn['data']>) => void>
 } as const
 
 export type FloatingComponentProps = ExtractPropTypes<typeof FloatingComponentProps>

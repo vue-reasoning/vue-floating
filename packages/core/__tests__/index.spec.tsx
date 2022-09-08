@@ -1,6 +1,6 @@
 import { describe, test, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { ref } from 'vue-demi'
+import { ref, watch } from 'vue-demi'
 import { offset } from '@floating-ui/core'
 import type { ClientRectObject } from '@floating-ui/dom'
 
@@ -41,13 +41,19 @@ describe('basic', () => {
     const onUpdate = vi.fn()
     const { wrapper, referenceRef, floatingRef } = mountBasicComponent()
 
-    useFloating(referenceRef, floatingRef, {
-      onUpdate: () => {
+    const { data } = useFloating(referenceRef, floatingRef)
+
+    watch(
+      data,
+      () => {
         onUpdate()
         expect(onUpdate).toHaveBeenCalled()
         wrapper.unmount()
+      },
+      {
+        immediate: true
       }
-    })
+    )
   })
 })
 
@@ -85,17 +91,18 @@ describe('virtual element', () => {
     }
     const floating = document.createElement('div')
 
-    useFloating(reference, floating, {
-      placement: 'bottom-start',
-      onUpdate: ({ x, y }) => {
-        expect({
-          x,
-          y
-        }).toContain({
-          x: refRect.top,
-          y: refRect.bottom
-        })
-      }
+    const { data } = useFloating(reference, floating, {
+      placement: 'bottom-start'
+    })
+
+    watch(data, ({ x, y }) => {
+      expect({
+        x,
+        y
+      }).toContain({
+        x: refRect.top,
+        y: refRect.bottom
+      })
     })
   })
 })
@@ -104,12 +111,21 @@ describe('options update', () => {
   const { referenceRef, floatingRef } = mountBasicComponent()
   const propsRef = ref<UseFloatingOptions>({})
 
-  useFloating(referenceRef, floatingRef, propsRef)
+  const { data } = useFloating(referenceRef, floatingRef, propsRef)
+
+  let onUpdate: ((data: UseFloatingData) => void) | void
+
+  watch(
+    () => data.value as UseFloatingData,
+    (data) => {
+      onUpdate?.(data)
+    }
+  )
 
   const diviner = (props: UseFloatingOptions, data: Partial<UseFloatingData>) => {
     const { promise, resolve } = (() => {
       let resolve: () => void
-      const promise = new Promise<void>(_resolve => {
+      const promise = new Promise<void>((_resolve) => {
         resolve = _resolve
       })
       return {
@@ -119,12 +135,13 @@ describe('options update', () => {
       }
     })()
 
+    onUpdate = (updatedData) => {
+      expect(updatedData).toContain(data)
+      resolve()
+    }
+
     propsRef.value = {
-      ...props,
-      onUpdate: updatedData => {
-        expect(updatedData).toContain(data)
-        resolve()
-      }
+      ...props
     }
 
     return promise
