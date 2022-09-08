@@ -13,7 +13,7 @@ import type { VNode } from 'vue-demi'
 
 import { useFloating, useAutoUpdate } from '..'
 import type { UseFloatingOptions } from '..'
-import { FloatingComponentExpose, FloatingComponentProps } from './FloatingComponent.types'
+import { FloatingComponentExposed, FloatingComponentProps } from './FloatingComponent.types'
 
 export const FloatingComponent = defineComponent({
   name: 'FloatingComponent',
@@ -47,16 +47,12 @@ export const FloatingComponent = defineComponent({
       }
     })
 
-    const {
-      data,
-      update,
-      stop: stopFloating
-    } = useFloating(referenceRef, floatingRef, UseFloatingOptionsRef)
+    const floatingReturn = useFloating(referenceRef, floatingRef, UseFloatingOptionsRef)
 
     watch(
-      data,
-      () => {
-        emit('update', data.value)
+      floatingReturn.data,
+      (data) => {
+        emit('update', data)
       },
       {
         immediate: true
@@ -73,37 +69,40 @@ export const FloatingComponent = defineComponent({
       return disabled ? { disabled: true } : typeof options === 'object' ? options : {}
     })
 
-    const stopAutoUpdate = useAutoUpdate(referenceRef, floatingRef, update, useAutoUpdateOptionsRef)
+    const stopAutoUpdate = useAutoUpdate(
+      referenceRef,
+      floatingRef,
+      floatingReturn.update,
+      useAutoUpdateOptionsRef
+    )
 
     // clear effects
     onBeforeUnmount(() => {
       stopAutoUpdate()
-      stopFloating()
+      floatingReturn.stop()
     })
 
     //
     // Expose ====================================
     //
 
-    const exposes: FloatingComponentExpose = {
-      floating: {
-        update,
-        data
-      }
-    }
-    expose(exposes)
+    expose({
+      floatingData: floatingReturn.data,
+      update: floatingReturn.update
+    })
 
     //
     // Rende ====================================
     //
 
     return () => {
-      const reference = slots.reference && slots.reference(data.value)[0]
+      const floatingData = floatingReturn.data
+      const reference = slots.reference && slots.reference(floatingData.value)[0]
       if (!reference) {
         return
       }
 
-      const floating = slots.default && slots.default(data.value)
+      const floating = slots.default && slots.default(floatingData.value)
       if (floating && floating.length) {
         const children = (
           Array.isArray(reference.children) ? reference.children : [reference.children]

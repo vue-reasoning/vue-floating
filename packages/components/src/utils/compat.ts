@@ -1,49 +1,62 @@
-import { isVue3, Vue2 } from 'vue-demi'
+import { isVue3, Vue2, h } from 'vue-demi'
 import { createApp } from 'vue'
+
 import { identity } from './identity'
 import { isOn } from './isOn'
 import { mergeListeners } from './mergeProps'
 
-interface TransformData {
-  props: Record<string, any>
+export interface CompatVNodeData {
+  data: Record<string, any>
   scopedSlots?: Record<string, any>
 }
 
-type TransformVNodeData = (data: TransformData) => Required<TransformData>
+export function createElement(
+  tag: any,
+  data: CompatVNodeData,
+  children?: any
+): ReturnType<typeof h> {
+  const { data: compatData, scopedSlots } = data
+  const normalizedChildren = Array.isArray(children) ? children : [children]
 
-export const transformLegacyVNodeData = isVue3
-  ? (identity as TransformVNodeData)
-  : (data: TransformData) => {
-      const ret: Required<TransformData> = {
-        props: {},
-        scopedSlots: {}
-      }
+  if (isVue3) {
+    return h(
+      tag,
+      compatData,
+      scopedSlots
+        ? ({
+            ...scopedSlots,
+            default: () => normalizedChildren.concat(scopedSlots.default?.())
+          } as any)
+        : normalizedChildren
+    )
+  }
 
-      const { props, scopedSlots } = data
+  const legacyReserveKeys = ['key', 'ref', 'tag', 'class', 'style', 'attrs', 'directives']
+  const transformData: Record<string, any> = {}
 
-      for (let key in props) {
-        if (isOn(key)) {
-          // Floating only listen to the DOM
-          ret.props.on = mergeListeners(
-            ret.props.on,
-            transformListeners({
-              [key]: props[key]
-            })
-          )
-        } else {
-          ret.props[key] = props[key]
-        }
-      }
-
-      if (scopedSlots) {
-        for (const key in scopedSlots) {
-          const slot = scopedSlots[key]
-          ret.scopedSlots[key] = typeof slot === 'function' ? slot : () => slot
-        }
-      }
-
-      return ret
+  for (const key in compatData) {
+    if (isOn(key)) {
+      transformData.on = mergeListeners(
+        transformData.on,
+        transformListeners({
+          [key]: compatData[key]
+        })
+      )
+    } else if (legacyReserveKeys.includes(key)) {
+      transformData[key] = compatData[key]
+    } else {
+      ;(transformData.props || (transformData.props = {}))[key] = compatData[key]
     }
+  }
+
+  if (scopedSlots) {
+    for (const key in scopedSlots) {
+      ;(transformData.scopedSlots || (transformData.scopedSlots = {}))[key] = scopedSlots[key]
+    }
+  }
+
+  return h(tag, transformData, normalizedChildren)
+}
 
 export const transformListeners = isVue3
   ? identity
@@ -92,7 +105,7 @@ export const createVueMountProxy = (options?: any): VueMountProxy => {
   }
 
   const v2Instance = new Vue2!(options)
-  console.log(v2Instance)
+
   proxy.mount = (container) => v2Instance.$mount(container)
   proxy.unmount = () => {
     v2Instance.$destroy()

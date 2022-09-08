@@ -1,11 +1,34 @@
 import { isVue2 } from 'vue-demi'
-import * as Vue from 'vue'
+import { mergeProps as _mergeProps } from 'vue'
 
 import { isOn } from './isOn'
 
-export const mergeProps = isVue2 ? _mergeProps : ((Vue as any).mergeProps as typeof _mergeProps)
-
 // Copied from Vue
+
+type MergeProps = (...props: (Record<string, any> | undefined)[]) => Record<string, any>
+
+export const mergeProps: MergeProps = isVue2
+  ? (...args) => {
+      const ret: Record<string, any> = {}
+      for (let i = 0; i < args.length; i++) {
+        const toMerge = args[i]
+        for (const key in toMerge) {
+          if (key === 'class') {
+            if (ret.class !== toMerge.class) {
+              ret.class = normalizeClass([ret.class, toMerge.class])
+            }
+          } else if (key === 'style') {
+            ret.style = normalizeStyle([ret.style, toMerge.style])
+          } else if (isOn(key)) {
+            Object.assign(ret, mergeListeners(ret, toMerge))
+          } else if (key !== '') {
+            ret[key] = toMerge[key]
+          }
+        }
+      }
+      return ret
+    }
+  : (_mergeProps as MergeProps)
 
 export function mergeListeners(...args: (Record<string, any> | undefined)[]) {
   const ret: Record<string, Function[]> = {}
@@ -20,27 +43,6 @@ export function mergeListeners(...args: (Record<string, any> | undefined)[]) {
         !(isArray(existing) && existing.includes(incoming))
       ) {
         ret[key] = existing ? [].concat(existing as any, incoming as any).flat() : incoming
-      }
-    }
-  }
-  return ret
-}
-
-function _mergeProps(...args: (Record<string, any> | undefined)[]) {
-  const ret: Record<string, any> = {}
-  for (let i = 0; i < args.length; i++) {
-    const toMerge = args[i]
-    for (const key in toMerge) {
-      if (key === 'class') {
-        if (ret.class !== toMerge.class) {
-          ret.class = normalizeClass([ret.class, toMerge.class])
-        }
-      } else if (key === 'style') {
-        ret.style = normalizeStyle([ret.style, toMerge.style])
-      } else if (isOn(key)) {
-        Object.assign(ret, mergeListeners(ret, toMerge))
-      } else if (key !== '') {
-        ret[key] = toMerge[key]
       }
     }
   }
@@ -94,12 +96,7 @@ function normalizeClass(value: unknown): string {
   if (isString(value)) {
     res = value
   } else if (isArray(value)) {
-    for (let i = 0; i < value.length; i++) {
-      const normalized = normalizeClass(value[i])
-      if (normalized) {
-        res += normalized + ' '
-      }
-    }
+    res += value.map(normalizeClass).join(' ')
   } else if (isObject(value)) {
     for (const name in value) {
       if (value[name]) {

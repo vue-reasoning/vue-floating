@@ -13,10 +13,10 @@ import {
   onBeforeUnmount
 } from 'vue-demi'
 import { Comment } from 'vue'
-import { offset, shift, flip, autoPlacement } from '@floating-ui/core'
+import { offset, shift, flip, autoPlacement, arrow } from '@floating-ui/core'
 import { Middleware, useManualEffect } from '@visoning/vue-floating-core'
-import { FloatingComponent } from '@visoning/vue-floating-core/components'
-import type { FloatingSlotProps } from '@visoning/vue-floating-core/components'
+import { FloatingComponent, FloatingComponentExposed } from '@visoning/vue-floating-core/components'
+import type { FloatingComponentSlotProps } from '@visoning/vue-floating-core/components'
 import {
   useClick,
   useFocus,
@@ -24,22 +24,18 @@ import {
   useInteractionsContext
 } from '@visoning/vue-floating-interactions'
 
-import { Interaction, PopupProps } from './Popup.types'
+import { Interaction, PopupExposed, PopupProps } from './Popup.types'
 import { mergeListeners, mergeProps } from '../utils/mergeProps'
-import { transformListeners, transformLegacyVNodeData, createVueMountProxy } from '../utils/compat'
+import { transformListeners, createVueMountProxy, createElement } from '../utils/compat'
 import { isOn } from '../utils/isOn'
 import { useElementProps } from '../utils/useElementsProps'
-
-let uid = 0
 
 export const Popup = defineComponent({
   name: 'Popup',
 
   props: PopupProps,
 
-  setup(props, { emit, slots }) {
-    const id = `__visoning_popup_${uid++}`
-
+  setup(props, { emit, slots, expose }) {
     //
     // Controlled state ====================================
     //
@@ -63,6 +59,10 @@ export const Popup = defineComponent({
 
     const referenceRef = ref<HTMLElement>()
     const popupRef = ref<HTMLElement>()
+
+    const arrowRef = ref<HTMLElement>()
+
+    const floatingComponentRef = ref<FloatingComponentExposed>()
 
     const currentInstance = getCurrentInstance()
     const updateReference = () => {
@@ -95,28 +95,25 @@ export const Popup = defineComponent({
     const hasInteraction = (interaction: Interaction) => props.interactions.includes(interaction)
 
     const elementPropsRef = useElementProps(
-      // hover
       useHover(
         interactionsContext,
         computed(() => ({
           disabled: !hasInteraction('hover'),
-          delay: props.hoverDelay
+          delay: props.hoverDelay ?? props.delay
         }))
       ),
-      // focus
       useFocus(
         interactionsContext,
         computed(() => ({
           disabled: !hasInteraction('focus'),
-          delay: props.focusDelay
+          delay: props.focusDelay ?? props.delay
         }))
       ),
-      // click
       useClick(
         interactionsContext,
         computed(() => ({
           disabled: !hasInteraction('click'),
-          delay: props.clickDelay
+          delay: props.clickDelay ?? props.delay
         }))
       ),
       // user
@@ -127,11 +124,26 @@ export const Popup = defineComponent({
     )
 
     //
+    // Expose ====================================
+    //
+
+    const floatingDataRef = computed(() => floatingComponentRef.value?.floatingData)
+
+    const updateFloating = () => floatingComponentRef.value?.update()
+
+    const popupExposed: PopupExposed = {
+      floatingData: floatingDataRef,
+      update: updateFloating
+    }
+
+    expose(popupExposed)
+
+    //
     // Render helpers ====================================
     //
 
     // disabled
-    const disabledFloatingRef = computed(
+    const disabledRef = computed(
       () => props.disabled || (!mergedOpenRef.value && !props.autoUpdateOnClosed)
     )
 
@@ -158,97 +170,110 @@ export const Popup = defineComponent({
       if (props.autoPlacement) {
         middleware.push(autoPlacement(normalizeMiddlewareOptions(props.autoPlacement)))
       }
+      if (props.showArrow && arrowRef.value) {
+        middleware.push(
+          arrow({
+            element: arrowRef.value
+          })
+        )
+      }
 
       return middleware.concat(props.middleware || [])
     })
 
     // popup portal
-    const popupRenderNodeRef = ref<VNode | null>(null)
+    const popupTeleportNodeRef = ref<VNode | null>(null)
 
-    // Vue loses placeholder node during transition processing,
-    // so each time we need to recreate
-    const { clear: unmountTeleport, reset: mountTeleport } = useManualEffect(() => {
+    const createTeleport = () => {
       if (props.appendToBody) {
         const popupPortal = createVueMountProxy({
-          name: 'PopupComponent',
           render() {
-            return popupRenderNodeRef.value
+            return popupTeleportNodeRef.value
           }
         })
-
         popupPortal.mount()
+
         document.body.appendChild(popupPortal.$el!)
 
         return popupPortal.unmount
       }
-    })
+    }
+
+    // Vue loses placeholder node during transition processing,
+    // so each time we need to recreate
+    const { clear: unmountTeleport, reset: mountTeleport } = useManualEffect(createTeleport)
+
+    watch(
+      () => props.appendToBody,
+      () => mountTeleport()
+    )
 
     onBeforeMount(mountTeleport)
     onBeforeUnmount(unmountTeleport)
 
-    watch(() => props.appendToBody, mountTeleport)
+    // render arrow
+    const renderArrow = () => {
+      const arrow = props.arrow
+      const createArrow = arrow ? (typeof arrow === 'function' ? arrow : () => arrow) : slots.arrow
+
+      return createArrow && createArrow(floatingDataRef.value!)
+    }
 
     // render popup
-    const getPopupStyle = (data: FloatingSlotProps) => {
+    const getPopupStyle = (data: FloatingComponentSlotProps) => {
       if (props.gpuAcceleration) {
         return {
           position: data.strategy,
           top: 0,
           left: 0,
-          transform: `transform: translate3d(${data.x}px, ${data.y}px, 0px);`
+          transform: `translate3d(${data.x}px, ${data.y}px, 0px)`
         }
       }
 
       return {
         position: data.strategy,
-        top: `${data.y}px`,
-        left: `${data.x}px`
+        left: `${data.x}px`,
+        top: `${data.y}px`
       }
     }
 
-    const renderPopup = (slotProps: FloatingSlotProps) => {
+    const renderPopup = (slotProps: FloatingComponentSlotProps) => {
       const { popupWrapper } = props
       const { value: mergedOpen } = mergedOpenRef
 
       let popup: VNode | null = null
       if (mergedOpen || !props.destoryedOnClosed) {
-        const data = transformLegacyVNodeData({
-          props: {
-            ...elementPropsRef.value.floating,
-            key: id,
-            ref: popupRef,
-            style: getPopupStyle(slotProps),
-            directives: [
-              {
-                name: 'show',
-                value: mergedOpen
-              }
-            ]
-          }
-        })
-
-        popup = h('div', data.props, [
-          h(
-            'div',
-            {
-              class: 'visoning-popover-content'
-            },
-            slots.default?.(slotProps)
-          )
-        ])
+        popup = createElement(
+          'div',
+          {
+            data: mergeProps(elementPropsRef.value.floating, {
+              ref: popupRef as any,
+              class: 'visoning-popup',
+              style: getPopupStyle(slotProps),
+              directives: [
+                {
+                  name: 'show',
+                  value: mergedOpen
+                }
+              ]
+            })
+          },
+          [slots.default?.(slotProps), props.showArrow && renderArrow()]
+        )
       }
 
       popup = popupWrapper ? popupWrapper(popup) : popup
 
       if (!props.appendToBody) {
-        popupRenderNodeRef.value = null
+        popupTeleportNodeRef.value = null
         return popup
       } else {
-        popupRenderNodeRef.value = popup
+        popupTeleportNodeRef.value = popup
       }
     }
 
-    const renderReference = (slotProps: FloatingSlotProps) => {
+    // render reference
+    const renderReference = (slotProps: FloatingComponentSlotProps) => {
       const reference = slots.reference && getPopoverRealChild(slots.reference(slotProps))
       if (!reference) {
         return
@@ -287,7 +312,7 @@ export const Popup = defineComponent({
           }
         }
 
-        data.props = attrs
+        data.attrs = attrs
         data.on = mergeListeners(data.on, transformListeners(on))
         ;(reference as any).data = data
       }
@@ -299,28 +324,22 @@ export const Popup = defineComponent({
     // Render ====================================
     //
 
-    return () => {
-      const data = transformLegacyVNodeData({
-        props: {
+    return () =>
+      createElement(FloatingComponent, {
+        data: {
+          ref: floatingComponentRef,
           floatingNode: popupRef.value,
-          disabled: disabledFloatingRef.value,
+          disabled: disabledRef.value,
           placement: props.placement,
           strategy: props.strategy,
           middleware: middlewareRef.value,
           autoUpdate: props.autoUpdate
         },
         scopedSlots: {
-          reference: (slotProps: FloatingSlotProps) => renderReference(slotProps),
-          default: (slotProps: FloatingSlotProps) => renderPopup(slotProps)
+          default: renderPopup,
+          reference: renderReference
         }
       })
-
-      if (isVue3) {
-        return h(FloatingComponent, data.props, data.scopedSlots as any)
-      }
-
-      return h(FloatingComponent, data)
-    }
   }
 })
 

@@ -1,4 +1,4 @@
-import type { DeepReadonly, Ref } from 'vue-demi'
+import type { Ref } from 'vue-demi'
 import type {
   ComputePositionConfig,
   Middleware,
@@ -38,7 +38,7 @@ export interface UseFloatingReturn {
   /**
    * @see https://floating-ui.com/docs/computePosition#return-value
    */
-  data: DeepReadonly<Ref<UseFloatingData>>
+  data: Readonly<Ref<UseFloatingData>>
   update: () => void
   stop: () => void
 }

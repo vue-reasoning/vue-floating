@@ -1,5 +1,5 @@
 import type { ReferenceType } from '@visoning/vue-floating-core'
-import type { DeepReadonly, Ref } from 'vue-demi'
+import type { Ref } from 'vue-demi'
 
 export type MaybeRef<T> = T | Ref<T>
 
@@ -30,7 +30,7 @@ export interface InteractionsContext<
 > {
   open: Readonly<Ref<boolean>>
   setOpen: (open: boolean, info?: Info) => void
-  info: DeepReadonly<Ref<Info>>
+  info: Readonly<Ref<Info>>
   refs: ElementRefs<RT>
 }
 
