@@ -1,6 +1,6 @@
 import { watch } from 'vue-demi'
 import type { Ref, WatchOptions } from 'vue-demi'
-import type { Middleware } from '@floating-ui/dom'
+import type { Middleware } from '@floating-ui/core'
 
 import type { UseFloatingOptions } from '../types'
 import { useManualEffect } from './useManualEffect'

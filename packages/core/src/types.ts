@@ -1,15 +1,14 @@
 import type { DeepReadonly, Ref } from 'vue-demi'
 import type {
   ComputePositionConfig,
+  Middleware,
   MiddlewareData,
   Placement,
-  Strategy,
-  VirtualElement
-} from '@floating-ui/dom'
+  Strategy
+} from '@floating-ui/core'
+import type { VirtualElement } from '@floating-ui/dom'
 
-export type { Middleware } from '@floating-ui/dom'
-
-export type { MiddlewareData, Placement, Strategy, VirtualElement }
+export type { Middleware, MiddlewareData, Placement, Strategy, VirtualElement }
 
 export type ReferenceType = Element | VirtualElement
 

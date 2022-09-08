@@ -25,7 +25,7 @@ function createConfig({ name }: { name: string }): RollupOptions | RollupOptions
         }
       ],
       plugins: [esbuildPlugin],
-      external: externals
+      external: [...externals, ...(name.includes('/') ? ['..'] : [])]
     },
     {
       input: `src/${name}.ts`,
@@ -37,7 +37,7 @@ function createConfig({ name }: { name: string }): RollupOptions | RollupOptions
         }
       ],
       plugins: [dtsPlugin],
-      external: externals
+      external: [...externals, ...(name.includes('/') ? ['..'] : [])]
     }
   ]
 }

@@ -12,7 +12,7 @@ import type { VNode } from 'vue-demi'
 
 import { useFloating, useAutoUpdate } from '..'
 import type { UseFloatingOptions } from '..'
-import { FloatingComponentProps } from './FloatingComponent.types'
+import { FloatingComponentExpose, FloatingComponentProps } from './FloatingComponent.types'
 
 export const FloatingComponent = defineComponent({
   name: 'FloatingComponent',
@@ -20,6 +20,9 @@ export const FloatingComponent = defineComponent({
   props: FloatingComponentProps,
 
   setup(props, { emit, slots, expose }) {
+    //
+    // Elements ====================================
+    //
     const referenceRef = ref<HTMLElement>()
     const floatingRef = toRef(props, 'floatingNode')
 
@@ -29,7 +32,9 @@ export const FloatingComponent = defineComponent({
     onMounted(updateReference)
     onUpdated(updateReference)
 
-    // Floating
+    //
+    // Floating ====================================
+    //
     const UseFloatingOptionsRef = computed<UseFloatingOptions>(() => {
       return {
         disabled: props.disabled,
@@ -40,37 +45,43 @@ export const FloatingComponent = defineComponent({
       }
     })
 
-    const { data, update, stop } = useFloating(referenceRef, floatingRef, UseFloatingOptionsRef)
-
-    // Auto update
-    const stopAutoUpdate = useAutoUpdate(
-      referenceRef,
-      floatingRef,
+    const {
+      data,
       update,
-      computed(() => {
-        const options = props.autoUpdate
-        return !options || props.disabled
-          ? { disabled: true }
-          : typeof options === 'object'
-          ? options
-          : {}
-      })
-    )
+      stop: stopFloating
+    } = useFloating(referenceRef, floatingRef, UseFloatingOptionsRef)
 
-    onBeforeUnmount(() => {
-      stop()
-      stopAutoUpdate()
+    //
+    // AutoUpdate ====================================
+    //
+    const useAutoUpdateOptionsRef = computed(() => {
+      const options = props.autoUpdate
+      const disabled = !options || props.disabled
+      return disabled ? { disabled: true } : typeof options === 'object' ? options : {}
     })
 
-    // Expose
-    expose({
+    const stopAutoUpdate = useAutoUpdate(referenceRef, floatingRef, update, useAutoUpdateOptionsRef)
+
+    // clear effects
+    onBeforeUnmount(() => {
+      stopAutoUpdate()
+      stopFloating()
+    })
+
+    //
+    // Expose ====================================
+    //
+    const exposes: FloatingComponentExpose = {
       floating: {
         update,
         data
       }
-    })
+    }
+    expose(exposes)
 
-    // Render
+    //
+    // Rende ====================================
+    //
     return () => {
       const reference = slots.reference && slots.reference(data.value)[0]
       if (!reference) {
