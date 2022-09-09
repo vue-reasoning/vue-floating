@@ -1,10 +1,9 @@
-import { createApp, h, ref, Vue2 } from 'vue-demi'
+import { h, ref } from 'vue-demi'
 
-import { Popup } from '../src/popup'
 import { Popover } from '../src/popover'
+import { createCompatElement, createSimpleCompatVueInstance } from '../src/utils/compat'
 
 import './index.css'
-import { createCompatElement, createSimpleCompatVueInstance } from '../src/utils/compat'
 
 const appendToBodyRef = ref(true)
 

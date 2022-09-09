@@ -10,6 +10,7 @@ function identity<T>(value: T): T {
 export interface CompatVNodeData {
   data: Record<string, any>
   scopedSlots?: Record<string, any>
+  propsKey?: 'props' | 'attrs'
 }
 
 export function createCompatElement(
@@ -18,6 +19,24 @@ export function createCompatElement(
   children?: any
 ): ReturnType<typeof h> {
   children = Array.isArray(children) ? children : [children]
+
+  let propsKey = data.propsKey
+
+  if (!propsKey && !isVue3) {
+    // TODO: Vue2's vnode data allocation is not smart,
+    // we can only decide whether to keys other than
+    // reserved keys to "props" or "attrs" through simple tag type judgment
+    if (typeof tag === 'string') {
+      const imitation = h(tag) as any
+      if (typeof imitation.tag === 'string' && imitation.tag.indexOf('vue-component') !== 0) {
+        propsKey = 'attrs'
+      }
+    }
+
+    if (!propsKey) {
+      propsKey = 'props'
+    }
+  }
 
   const { data: compatData, scopedSlots } = data
 
@@ -62,8 +81,7 @@ export function createCompatElement(
     } else if (legacyReserveKeys.includes(key)) {
       transformData[key] = compatData[key]
     } else {
-      // dclared props will be "consumed" from attrs in Vue2
-      ;(transformData.attrs || (transformData.attrs = {}))[key] = compatData[key]
+      ;(transformData[propsKey!] || (transformData[propsKey!] = {}))[key] = compatData[key]
     }
   }
 

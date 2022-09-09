@@ -27,6 +27,12 @@ $placement-mark: 'data-placement';
   }
 }
 
+@mixin with-arrow {
+  &.with-arrow {
+    @content;
+  }
+}
+
 @mixin arrow-placement($placement: '') {
   @include popover-placement($placement) {
     @include popover(arrow) {

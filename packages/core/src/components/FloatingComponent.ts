@@ -138,7 +138,7 @@ export const FloatingComponent = defineComponent({
           // }
         }
 
-        reference.children = [reference.children].concat(floating) as any
+        reference.children = [reference.children].concat(floating).flat() as any
       }
 
       return reference

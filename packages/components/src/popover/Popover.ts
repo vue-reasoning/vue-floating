@@ -80,17 +80,21 @@ export const Popover = defineComponent({
     // Transition wrapper ====================================
     //
 
-    const transitionPopupWrapper = (popup: any) => {
+    const transitionWrapper = (popup: any) => {
       const { transitionProps, popupWrapper } = props
 
       if (transitionProps) {
         const rawPopup = popup
-        popup = createCompatElement(isVue3 ? Transition : 'transiton', {
-          data: typeof transitionProps === 'string' ? { name: transitionProps } : transitionProps,
-          scopedSlots: {
-            default: () => rawPopup
-          }
-        })
+        popup = createCompatElement(
+          isVue3 ? Transition : 'transition',
+          {
+            data: typeof transitionProps === 'string' ? { name: transitionProps } : transitionProps,
+            scopedSlots: {
+              default: () => rawPopup
+            }
+          },
+          !isVue3 && [rawPopup]
+        )
       }
 
       return typeof popupWrapper === 'function' ? popupWrapper(popup) : popup
@@ -144,7 +148,7 @@ export const Popover = defineComponent({
           ...omit(props, Object.keys([PopoverOwnProps])),
           ref: popupExposedRef,
           middleware: middlewareRef.value,
-          popupWrapper: transitionPopupWrapper,
+          popupWrapper: transitionWrapper,
           'onUpdate:open': (open: boolean) => emit('update:open', open)
         },
         scopedSlots: {
