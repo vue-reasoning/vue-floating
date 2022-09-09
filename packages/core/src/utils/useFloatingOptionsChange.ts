@@ -26,13 +26,13 @@ export function useFloatingOptionsChange(
     }
   }
 
-  const { clear: pause, mesure } = useManualEffect(
+  const { clear: stop, mesure } = useManualEffect(
     () => watch(options, handlePropsChange, watchOptions),
     true
   )
 
   return {
-    pause,
+    stop,
     mesure
   }
 }

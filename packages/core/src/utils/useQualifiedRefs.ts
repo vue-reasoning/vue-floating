@@ -14,7 +14,7 @@ const defaultPredicate: Predicate = (item) => item !== undefined && item !== nul
 export interface UseQualifiedRefsReturn {
   detect: () => void
   mesure: () => void
-  pause: () => void
+  stop: () => void
 }
 
 export function useQualifiedRefs<T extends any[]>(
@@ -59,7 +59,7 @@ export function useQualifiedRefs<T extends any[]>(
     return {
       detect,
       mesure: noop,
-      pause: noop
+      stop: noop
     }
   }
 
@@ -70,7 +70,7 @@ export function useQualifiedRefs<T extends any[]>(
 
   return {
     detect,
-    pause: clear,
+    stop: clear,
     mesure
   }
 }

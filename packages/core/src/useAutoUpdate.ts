@@ -24,28 +24,23 @@ export function useAutoUpdate(
 ) {
   const { reset: resetAutoUpdate, clear: clearAutoUpdate } = useManualEffect()
 
-  const { mesure: watchElements, pause: pauseWatchElements } = useQualifiedRefs<
+  const { mesure: watchElements, stop: stopWatchElements } = useQualifiedRefs<
     [MaybeReferenceRef, MaybeFloatingRef]
-  >(
-    [unref(reference), unref(floating)],
-    (qualifys) => {
-      resetAutoUpdate(qualifys && autoUpdate(...qualifys, update, unref(options)))
-    },
-    {
-      immediate: true
-    }
-  )
+  >([reference, floating], (qualifys) => {
+    resetAutoUpdate(qualifys && autoUpdate(...qualifys, update, unref(options)))
+  })
 
   const handleOptionsChange = (options: UseAutoUpdateOptions) => {
-    if (!!options.disabled) {
+    if (!options.disabled) {
       watchElements()
     } else {
-      pauseWatchElements()
+      stopWatchElements()
     }
   }
 
-  const { reset: watchProps, clear: stopWatchProps } = useManualEffect(() =>
-    watch(() => unref(options!), handleOptionsChange)
+  const { mesure: watchProps, clear: stopWatchProps } = useManualEffect(
+    () => watch(() => unref(options!), handleOptionsChange),
+    true
   )
 
   if (isRef(options)) {
@@ -54,7 +49,7 @@ export function useAutoUpdate(
 
   return () => {
     stopWatchProps()
-    pauseWatchElements()
+    stopWatchElements()
     clearAutoUpdate()
   }
 }

@@ -55,7 +55,7 @@ export function useFloating(
   const {
     detect: detectElements,
     mesure: watchElements,
-    pause: pauseWatchElements
+    stop: stopWatchElements
   } = useQualifiedRefs([referenceRef, floatingRef], (qualifys) => qualifys && safeUpdate())
 
   let disabled: boolean = false
@@ -66,7 +66,7 @@ export function useFloating(
     // If disabled changes, it means that some watching has been suspended
     if (disabled !== lastDisabled) {
       if (disabled) {
-        pauseWatchElements()
+        stopWatchElements()
       } else {
         detectElements()
         watchElements()
@@ -76,7 +76,7 @@ export function useFloating(
     }
   }
 
-  const { pause: pauseWatchProps } = useFloatingOptionsChange(optionsRef, handleOptionsChange, {
+  const { stop: stopWatchProps } = useFloatingOptionsChange(optionsRef, handleOptionsChange, {
     immediate: true
   })
 
@@ -84,8 +84,8 @@ export function useFloating(
     data: dataRef,
     update: safeUpdate,
     stop: () => {
-      pauseWatchProps()
-      pauseWatchElements()
+      stopWatchProps()
+      stopWatchElements()
     }
   }
 }
