@@ -43,12 +43,11 @@ export function useQualifiedRefs<T extends any[]>(
 
   const detect = () => {
     const items = unref(refs).map(unref) as NonNullables<UnwrapRefs<T>>
-    for (let i = 0; i < items.length; i++) {
-      if (!(predicate as Predicate)(items[i])) {
-        return handler()
-      }
+    if (items.some((item) => !(predicate as Predicate)(item))) {
+      handler()
+    } else {
+      handler(items)
     }
-    handler(items)
   }
 
   // The refs never changes
@@ -64,14 +63,14 @@ export function useQualifiedRefs<T extends any[]>(
     }
   }
 
-  const { clear: pause, reset: mesure } = useManualEffect(
-    () => watch(() => unref(refs).map(unref) as UnwrapRefs<UnwrapRef<T>>, detect, options),
+  const { clear, mesure } = useManualEffect(
+    () => watch(() => unref(refs).map(unref), detect, options),
     true
   )
 
   return {
     detect,
-    pause,
+    pause: clear,
     mesure
   }
 }

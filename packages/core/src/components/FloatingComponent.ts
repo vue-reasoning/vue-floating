@@ -13,7 +13,7 @@ import type { VNode } from 'vue-demi'
 
 import { useFloating, useAutoUpdate } from '..'
 import type { UseFloatingOptions } from '..'
-import { FloatingComponentExposed, FloatingComponentProps } from './FloatingComponent.types'
+import { FloatingComponentProps } from './FloatingComponent.types'
 
 export const FloatingComponent = defineComponent({
   name: 'FloatingComponent',
@@ -38,7 +38,7 @@ export const FloatingComponent = defineComponent({
     // Floating ====================================
     //
 
-    const UseFloatingOptionsRef = computed<UseFloatingOptions>(() => {
+    const useFloatingOptionsRef = computed<UseFloatingOptions>(() => {
       return {
         disabled: props.disabled,
         placement: props.placement,
@@ -47,7 +47,7 @@ export const FloatingComponent = defineComponent({
       }
     })
 
-    const floatingReturn = useFloating(referenceRef, floatingRef, UseFloatingOptionsRef)
+    const floatingReturn = useFloating(referenceRef, floatingRef, useFloatingOptionsRef)
 
     watch(
       floatingReturn.data,

@@ -41,7 +41,7 @@ export function useFloating(
     middlewareData: {}
   })
 
-  const update = () => {
+  const safeUpdate = () => {
     const reference = unref(referenceRef)
     const floating = unref(floatingRef)
     if (reference && floating) {
@@ -53,36 +53,36 @@ export function useFloating(
   }
 
   const {
-    detect: detectUpdate,
+    detect: detectElements,
     mesure: watchElements,
     pause: pauseWatchElements
-  } = useQualifiedRefs([referenceRef, floatingRef], (qualifys) => qualifys && update())
+  } = useQualifiedRefs([referenceRef, floatingRef], (qualifys) => qualifys && safeUpdate())
 
-  const { mesure: watchProps, pause: pauseWatchProps } = useFloatingOptionsChange(
-    optionsRef,
-    detectUpdate
-  )
+  let disabled: boolean = false
+  const handleOptionsChange = (options: UseFloatingOptions) => {
+    const lastDisabled = disabled
+    disabled = !!options.disabled
 
-  watch(
-    () => optionsRef.value.disabled,
-    (disabled) => {
-      if (!!disabled) {
-        pauseWatchProps()
+    // If disabled changes, it means that some watching has been suspended
+    if (disabled !== lastDisabled) {
+      if (disabled) {
         pauseWatchElements()
       } else {
-        detectUpdate()
-        watchProps()
+        detectElements()
         watchElements()
       }
-    },
-    {
-      immediate: true
+    } else if (!disabled) {
+      safeUpdate()
     }
-  )
+  }
+
+  const { pause: pauseWatchProps } = useFloatingOptionsChange(optionsRef, handleOptionsChange, {
+    immediate: true
+  })
 
   return {
     data: dataRef,
-    update,
+    update: safeUpdate,
     stop: () => {
       pauseWatchProps()
       pauseWatchElements()

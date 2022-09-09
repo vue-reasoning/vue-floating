@@ -36,17 +36,16 @@ export function useAutoUpdate(
     }
   )
 
+  const handleOptionsChange = (options: UseAutoUpdateOptions) => {
+    if (!!options.disabled) {
+      watchElements()
+    } else {
+      pauseWatchElements()
+    }
+  }
+
   const { reset: watchProps, clear: stopWatchProps } = useManualEffect(() =>
-    watch(
-      () => unref(options!),
-      (options) => {
-        if (!!options.disabled) {
-          watchElements()
-        } else {
-          pauseWatchElements()
-        }
-      }
-    )
+    watch(() => unref(options!), handleOptionsChange)
   )
 
   if (isRef(options)) {

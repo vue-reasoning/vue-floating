@@ -1,15 +1,18 @@
-import type { ExtractPropTypes, PropType, PropOptions, UnwrapRef } from 'vue-demi'
+import type { ExtractPropTypes, Prop, PropType, UnwrapRef } from 'vue-demi'
 
 import type {
   FloatingType,
   Middleware,
   Placement,
   Strategy,
+  MiddlewareData,
   UseAutoUpdateOptions,
-  UseFloatingReturn
+  UseFloatingData
 } from '..'
 
-export type { FloatingType, Middleware, Placement, Strategy }
+export type { FloatingType, Middleware, Placement, Strategy, MiddlewareData }
+
+export type FloatingData = UseFloatingData
 
 export type AutoUpdateOptions = UseAutoUpdateOptions
 
@@ -17,7 +20,7 @@ export const FloatingComponentProps = {
   /**
    * Floating don't care where floating node from, so it doesn't capture internally.
    */
-  floatingNode: {} as PropOptions<FloatingType | null>,
+  floatingNode: {} as Prop<FloatingType | null>,
 
   /**
    * Whether to disable the floating.
@@ -58,16 +61,17 @@ export const FloatingComponentProps = {
     default: true
   },
 
-  onUpdate: Function as PropType<(data: UnwrapRef<UseFloatingReturn['data']>) => void>
+  /**
+   * Callback on floating data status changes.
+   */
+  onUpdate: Function as PropType<(data: UnwrapRef<FloatingData>) => void>
 } as const
 
 export type FloatingComponentProps = ExtractPropTypes<typeof FloatingComponentProps>
 
-export type FloatingComponentSlotProps = UnwrapRef<UseFloatingReturn['data']>
+export type FloatingComponentSlotProps = UnwrapRef<FloatingData>
 
-export interface FloatingComponentExpose {
-  floating: {
-    data: UseFloatingReturn['data']
-    update: () => void
-  }
+export interface FloatingComponentExposed {
+  floatingData: FloatingData
+  update: () => void
 }

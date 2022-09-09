@@ -7,7 +7,7 @@ import { useManualEffect } from './useManualEffect'
 
 export function useFloatingOptionsChange(
   options: Ref<UseFloatingOptions>,
-  onChange: () => void,
+  onChange: (options: UseFloatingOptions) => void,
   watchOptions?: WatchOptions
 ) {
   let lastOptions: UseFloatingOptions | null = null
@@ -22,11 +22,11 @@ export function useFloatingOptionsChange(
   const handlePropsChange = (options: UseFloatingOptions) => {
     if (!lastOptions || !equalFloatingProps(lastOptions, options)) {
       updateLastProps(options)
-      onChange()
+      onChange(options)
     }
   }
 
-  const { clear: pause, reset: mesure } = useManualEffect(
+  const { clear: pause, mesure } = useManualEffect(
     () => watch(options, handlePropsChange, watchOptions),
     true
   )
@@ -41,6 +41,7 @@ function equalFloatingProps(a: UseFloatingOptions, b: UseFloatingOptions) {
   return (
     a.strategy === b.strategy &&
     a.placement === b.placement &&
+    !!a.disabled === !!b.disabled &&
     equalMiddlewares(a.middleware, b.middleware)
   )
 }

@@ -135,14 +135,23 @@ describe('options update', () => {
       }
     })()
 
+    let updated = false
+
     onUpdate = (updatedData) => {
       expect(updatedData).toContain(data)
       resolve()
+
+      clearTimeout(disabledTimeout)
     }
 
-    propsRef.value = {
-      ...props
-    }
+    // check disabled
+    const disabledTimeout = setTimeout(() => {
+      if (!props.disabled === updated) {
+        resolve()
+      }
+    }, 1000)
+
+    propsRef.value = props
 
     return promise
   }
@@ -217,6 +226,37 @@ describe('options update', () => {
           {
             x: 20,
             y: -35
+          }
+        ]
+      ]
+    },
+    {
+      message: 'should disabled update position after disabled',
+      queue: [
+        [
+          {
+            placement: 'top',
+            disabled: true,
+            middleware: [offset(10)]
+          },
+          {
+            x: NaN,
+            y: NaN
+          }
+        ],
+        [
+          {
+            placement: 'top',
+            middleware: [
+              offset(10),
+              offset(() => 5),
+              offset(() => ({ crossAxis: 10 })),
+              offset({ crossAxis: 10, mainAxis: 10 })
+            ]
+          },
+          {
+            x: 20,
+            y: -25
           }
         ]
       ]
