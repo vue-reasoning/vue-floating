@@ -5,7 +5,7 @@ import { isOn } from './compat'
 
 // Copied from Vue
 
-type MergeProps = (...props: (Record<string, any> | undefined)[]) => Record<string, any>
+type MergeProps = (...props: (Record<string, any> | undefined | null)[]) => Record<string, any>
 
 export const mergeProps: MergeProps = isVue2
   ? (...args) => {

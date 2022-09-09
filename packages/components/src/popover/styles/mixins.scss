@@ -1,0 +1,36 @@
+@import '../../theme-utils';
+
+$popoverCls: 'visoning-popover';
+
+$namespace: $popoverCls;
+
+@mixin popover($block: '') {
+  @include namespace($block) {
+    @content;
+  }
+}
+
+$placement-mark: 'data-placement';
+
+@mixin placement($placement: '', $root: '') {
+  $value: if($placement == '', '', '*=' + $placement + '');
+  $selector: #{'[' + $placement-mark + $value + ']'};
+
+  #{$root + $selector} {
+    @content;
+  }
+}
+
+@mixin popover-placement($placement: '') {
+  @include placement($placement, '.' + $popoverCls) {
+    @content;
+  }
+}
+
+@mixin arrow-placement($placement: '') {
+  @include popover-placement($placement) {
+    @include popover(arrow) {
+      @content;
+    }
+  }
+}

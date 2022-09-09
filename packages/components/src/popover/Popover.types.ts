@@ -1,33 +1,65 @@
 import type { ExtractPropTypes, PropType, VNode } from 'vue-demi'
-import pick from 'lodash.pick'
-import { FloatingComponentProps } from '@visoning/vue-floating-core/components'
-import type { Delay } from '@visoning/vue-floating-interactions'
+import { PopupProps, PopupSlotProps } from '../popup'
 
 export type Interaction = 'click' | 'hover' | 'focus'
 
-export const PopoverProps = {
-  ...pick(FloatingComponentProps, ['placement', 'strategy', 'middleware', 'autoUpdate']),
-  open: {
-    type: Boolean,
-    default: undefined
-  },
-  defaultOpen: Boolean,
-  disabled: Boolean,
-  interactions: {
-    type: Array as PropType<Interaction[]>,
-    default: () => ['hover']
-  },
-  clickDelay: [Number, Object] as PropType<Delay>,
-  hoverDelay: [Number, Object] as PropType<Delay>,
-  focusDelay: [Number, Object] as PropType<Delay>,
-  autoUpdateOnClosed: {
+export type PopoverSlotProps = PopupSlotProps
+
+export type CreateArrow = (props: PopoverSlotProps) => VNode | null
+
+export const PopoverOwnProps = {
+  /**
+   * support: string | VNode | slot
+   */
+  content: [String, Object] as PropType<string | VNode>,
+
+  /**
+   * support: string | VNode | slot
+   */
+  title: [String, Object] as PropType<string | VNode>,
+
+  /**
+   * @see https://cn.vuejs.org/guide/built-ins/transition.html
+   */
+  transitionProps: [String, Object] as PropType<string | Record<string, any>>,
+
+  /**
+   * Whether to show arrow if set.
+   * @default true
+   */
+  showArrow: {
     type: Boolean,
     default: true
   },
-  destoryedOnClosed: Boolean,
-  floatingProps: Object as PropType<Record<string, any>>,
-  floatingWrapper: Function as PropType<(floating: VNode | null) => VNode>,
-  'onUpdate:open': Function as PropType<(shown: boolean) => void>
+
+  /**
+   * For style uniformity, we will never enable the configuration of arrow middleware, 
+   * you can customize arrow to make arrow more as expected.
+   * 
+   * support: VNode | slot
+   */
+  arrow: [Object, Function] as PropType<VNode | null | CreateArrow>,
+
+  /**
+   * Whether the arrow is shown in the center of the reference.
+   * @default true
+   */
+  // arrowShowInCenter: {
+  //   type: Boolean,
+  //   default: true
+  // },
+
+  /**
+   * HTML attributes of node.
+   */
+  arrowProps: Object as PropType<Record<string, any>>
+} as const
+
+export type PopoverOwnProps = ExtractPropTypes<typeof PopoverOwnProps>
+
+export const PopoverProps = {
+  ...PopupProps,
+  ...PopoverOwnProps
 } as const
 
 export type PopoverProps = ExtractPropTypes<typeof PopoverProps>

@@ -1,0 +1,95 @@
+@import 'mixins';
+
+// CSS Variables
+// --arrow-bg
+// --arrow-box-shadow
+
+//
+// Popover
+//
+
+@include popover() {
+  position: relative;
+}
+
+//
+// Content
+//
+
+@include popover(content) {
+  padding: 12px 24px;
+  color: #162d3d;
+  font-size: 14px;
+  line-height: 18px;
+  background: #fff;
+  box-shadow: 0 6px 6px 0 rgba(22, 45, 61, 0.06), 0 0 18px 0 rgba(22, 45, 61, 0.12);
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+//
+// Title
+//
+
+@include popover(title) {
+  color: #162d3d;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+//
+// Arrow
+//
+
+@include popover(arrow) {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-style: solid;
+  box-shadow: var(--arrow-box-shadow, 3px 3px 6px rgb(0 0 0 / 10%));
+  box-sizing: border-box;
+  transform: rotateZ(45deg);
+}
+
+@include arrow-placement() {
+  margin: 0;
+  border-width: 4px;
+  border-color: transparent var(--arrow-bg, #fff) var(--arrow-bg, #fff) transparent;
+}
+
+@include popover-placement(top) {
+  padding-bottom: 6px;
+}
+
+@include arrow-placement(top) {
+  transform: rotateZ(45deg);
+  bottom: 2px;
+}
+
+@include popover-placement(right) {
+  padding-left: 6px;
+}
+
+@include arrow-placement(right) {
+  transform: rotateZ(135deg);
+  left: 2px;
+}
+
+@include popover-placement(bottom) {
+  padding-top: 6px
+}
+
+@include arrow-placement(bottom) {
+  transform: rotateZ(-135deg);
+  top: 2px;
+}
+
+@include popover-placement(left) {
+  padding-right: 6px
+}
+
+@include arrow-placement(left) {
+  transform: rotateZ(-45deg);
+  right: 2px;
+}

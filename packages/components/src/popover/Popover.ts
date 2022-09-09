@@ -1,34 +1,18 @@
-import {
-  defineComponent,
-  ref,
-  computed,
-  h,
-  VNode,
-  unref,
-  onMounted,
-  onUpdated,
-  getCurrentInstance,
-  isVue3,
-  watch
-} from 'vue-demi'
-import * as Vue from 'vue'
-import type { Middleware } from '@visoning/vue-floating-core'
-import { FloatingComponent } from '@visoning/vue-floating-core/components'
-import type { FloatingSlotProps } from '@visoning/vue-floating-core/components'
-import {
-  ElementProps,
-  useClick,
-  useFocus,
-  useHover,
-  useInteractionsContext
-} from '@visoning/vue-floating-interactions'
+import classNames from 'classnames'
+import { computed, defineComponent, h, isVue3, ref } from 'vue-demi'
+import { Transition } from 'vue'
+import { arrow as coreArrow } from '@floating-ui/core'
 
-import { Interaction, PopoverProps } from './Popover.types'
-import { mergeListeners, mergeProps } from '../utils/mergeProps'
-import { transformListeners, transformLegacyVNodeData } from '../utils/compat'
-import { isOn } from '../utils/isOn'
+import { Popup, PopupExposed } from '../popup'
+import type { PopupSlotProps } from '../popup'
+import { createCompatElement } from '../utils/compat'
+import { isEmpty } from '../utils/isEmpty'
+import { omit } from '../utils/omit'
+import { PopoverOwnProps, PopoverProps, PopoverSlotProps } from './Popover.types'
 
-let uid = 0
+import './styles/index.scss'
+
+const prefixCls = 'visoning-popover'
 
 export const Popover = defineComponent({
   name: 'Popover',
@@ -36,191 +20,137 @@ export const Popover = defineComponent({
   props: PopoverProps,
 
   setup(props, { emit, slots }) {
-    const id = `__visoning_popover_${uid++}`
+    const popupExposedRef = ref<PopupExposed>()
 
-    // Controlled state
-    const uncontrolledOpenRef = ref(!!props.defaultOpen)
-    const mergedOpenRef = computed({
-      get() {
-        return props.open === undefined ? uncontrolledOpenRef.value : props.open
-      },
-      set(newOpen) {
-        uncontrolledOpenRef.value = newOpen
-        if (newOpen !== props.open) {
-          emit('update:open', newOpen)
-        }
-      }
-    })
+    //
+    // Arrow ====================================
+    //
 
-    // Interactions props
-    const referenceRef = ref<HTMLElement>()
-    const floatingRef = ref<HTMLElement>()
+    const arrowRef = ref<HTMLElement>()
 
-    const interactionsContext = useInteractionsContext(referenceRef, floatingRef)
+    const getArrowStyle = ({ placement, middlewareData }: PopoverSlotProps) => {
+      const top = middlewareData.arrow?.y ?? 0
+      const left = middlewareData.arrow?.x ?? 0
 
-    watch(interactionsContext.open, (open) => {
-      console.log(open)
-      mergedOpenRef.value = open
-    })
-
-    const interactionsRef = computed(() => props.interactions || [])
-
-    const hasInteraction = (interaction: Interaction) => interactionsRef.value.includes(interaction)
-
-    const hoverPropsRef = useHover(
-      interactionsContext,
-      computed(() => ({
-        disabled: !hasInteraction('hover'),
-        delay: props.hoverDelay
-      }))
-    )
-
-    const focusPropsRef = useFocus(
-      interactionsContext,
-      computed(() => ({
-        disabled: !hasInteraction('focus'),
-        delay: props.focusDelay
-      }))
-    )
-
-    const clickPropsRef = useClick(
-      interactionsContext,
-      computed(() => ({
-        disabled: !hasInteraction('click'),
-        delay: props.clickDelay
-      }))
-    )
-
-    const elementPropsRef = computed<ElementProps>(() => {
-      const elementProps = [hoverPropsRef, focusPropsRef, clickPropsRef].map(unref)
-      return {
-        reference: mergeProps(...elementProps.map((props) => props.reference)),
-        floating: mergeProps(...elementProps.map((props) => props.floating))
-      }
-    })
-
-    // Render
-    const middlewaresRef = ref<Middleware[]>([])
-
-    const enabledFloatingRef = computed(
-      () => !props.disabled && (mergedOpenRef.value || props.autoUpdateOnClosed)
-    )
-
-    const currentInstance = getCurrentInstance()
-    const updateReference = () => {
-      referenceRef.value = currentInstance?.proxy?.$el as HTMLElement
-    }
-
-    onMounted(updateReference)
-    onUpdated(updateReference)
-
-    const renderFloating = (slotProps: FloatingSlotProps) => {
-      const { floatingWrapper } = props
-      const { value: mergedOpen } = mergedOpenRef
-
-      let floating: VNode | null = null
-      if (mergedOpen || !props.destoryedOnClosed) {
-        const data = transformLegacyVNodeData({
-          props: {
-            ...mergeProps(props.floatingProps, elementPropsRef.value.floating),
-            key: id,
-            ref: floatingRef,
-            directives: [
-              {
-                name: 'show',
-                value: mergedOpen
-              }
-            ]
-          }
-        })
-        floating = h('div', data.props, slots.default?.(slotProps))
+      const style: Record<string, any> = {
+        '--arrow-top': `${top}px`,
+        '--arrow-left': `${left}px`
       }
 
-      return floatingWrapper ? floatingWrapper(floating) : floating
-    }
-
-    const renderReference = (slotProps: FloatingSlotProps) => {
-      const reference = slots.reference && getPopoverRealChild(slots.reference(slotProps))
-      if (!reference) {
-        return
-      }
-
-      if (isVue3) {
-        ;(reference as any).props = mergeProps(
-          (reference as any).props,
-          elementPropsRef.value.reference
-        )
+      // Because another value in the opposite direction to placement is always 0,
+      // here we avoid the style override problem
+      if (placement.includes('top') || placement.includes('bottom')) {
+        style.left = `${left}px`
       } else {
-        if (!reference.data) {
-          reference.data = reference.data || {}
-        }
-        const {
-          class: kls,
-          style,
-          ...mergedProps
-        } = mergeProps(
-          {
-            ...reference.data.attrs,
-            class: reference.data.class,
-            style: reference.data.style
-          },
-          elementPropsRef.value.reference
-        )
-
-        reference.data.class = kls
-        reference.data.style = style
-
-        const on: Record<string, any> = {}
-        const attrs: Record<string, any> = {}
-        for (const key in mergedProps) {
-          if (isOn(key)) {
-            on[key] = mergedProps[key]
-          } else {
-            attrs[key] = mergedProps[key]
-          }
-        }
-
-        reference.data.props = attrs
-        reference.data.on = mergeListeners(reference.data.on, transformListeners(on))
+        style.top = `${top}px`
       }
 
-      return reference
+      return style
     }
 
-    return () => {
-      const data = transformLegacyVNodeData({
-        props: {
-          enabled: enabledFloatingRef.value,
-          floatingNode: floatingRef.value,
-          placement: props.placement,
-          strategy: props.strategy,
-          middlewares: middlewaresRef.value,
-          autoUpdate: props.autoUpdate
-        },
-        scopedSlots: {
-          reference: (slotProps: FloatingSlotProps) => renderReference(slotProps),
-          default: (slotProps: FloatingSlotProps) => renderFloating(slotProps)
+    const createArrow = (slotProps: PopoverSlotProps) => {
+      const customArrow = props.arrow || slots.arrow
+      if (customArrow) {
+        return typeof customArrow === 'function' ? customArrow(slotProps) : customArrow
+      }
+
+      return createCompatElement('div', {
+        data: {
+          ref: arrowRef,
+          class: `${prefixCls}-arrow`,
+          style: getArrowStyle(slotProps)
         }
       })
+    }
 
-      if (isVue3) {
-        return h(FloatingComponent, data.props, data.scopedSlots as any)
+    const middlewareRef = computed(() => {
+      const middleware = props.middleware || []
+
+      if (props.showArrow && arrowRef.value) {
+        middleware.push(
+          coreArrow({
+            element: arrowRef.value
+          })
+        )
+      }
+      return middleware
+    })
+
+    //
+    // Transition wrapper ====================================
+    //
+
+    const transitionPopupWrapper = (popup: any) => {
+      const { transitionProps, popupWrapper } = props
+
+      if (transitionProps) {
+        const rawPopup = popup
+        popup = createCompatElement(isVue3 ? Transition : 'transiton', {
+          data: typeof transitionProps === 'string' ? { name: transitionProps } : transitionProps,
+          scopedSlots: {
+            default: () => rawPopup
+          }
+        })
       }
 
-      return h(FloatingComponent, data)
+      return typeof popupWrapper === 'function' ? popupWrapper(popup) : popup
     }
+
+    // render content
+    const renderContent = (slotProps: PopupSlotProps) => {
+      const { showArrow } = props
+      const title = props.title ?? slots.title?.()
+      const content = props.content ?? slots.content?.()
+      const hasTitle = !isEmpty(title)
+      const hasContent = !isEmpty(content)
+
+      return createCompatElement(
+        'div',
+        {
+          data: {
+            class: classNames(prefixCls, {
+              'with-arrow': showArrow
+            }),
+            'data-placement': slotProps.placement
+          }
+        },
+        [
+          h(
+            'div',
+            {
+              class: `${prefixCls}-content`
+            },
+            [
+              hasTitle
+                ? h(
+                    'div',
+                    {
+                      class: `${prefixCls}-title`
+                    },
+                    [title]
+                  )
+                : null,
+              hasContent ? content : slots.default?.()
+            ]
+          ),
+          showArrow && createArrow(slotProps)
+        ]
+      )
+    }
+
+    return () =>
+      createCompatElement(Popup, {
+        data: {
+          ...omit(props, Object.keys([PopoverOwnProps])),
+          ref: popupExposedRef,
+          middleware: middlewareRef.value,
+          popupWrapper: transitionPopupWrapper,
+          'onUpdate:open': (open: boolean) => emit('update:open', open)
+        },
+        scopedSlots: {
+          reference: slots.reference,
+          default: renderContent
+        }
+      })
   }
 })
-
-const isNotTextNode = isVue3
-  ? (child: { type: any }) => child.type !== (Vue as any).Comment
-  : (child: VNode) => child.tag || (child.isComment && (child as any).asyncFactory)
-
-function getPopoverRealChild(children: VNode[]): VNode | undefined {
-  for (let i = 0; i < children.length; i++) {
-    const child = children[i]
-    if (isNotTextNode(child as any)) {
-      return child
-    }
-  }
-}

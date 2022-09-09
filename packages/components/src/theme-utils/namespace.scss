@@ -1,0 +1,13 @@
+@import 'config';
+
+@mixin namespace($module: '') {
+  $M: $namespace;
+
+  @if $module != '' {
+    $M: $M + '-' + $module;
+  }
+
+  .#{$M} {
+    @content;
+  }
+}

@@ -229,17 +229,24 @@ export const Popup = defineComponent({
         popup = createCompatElement(
           'div',
           {
-            data: mergeProps(elementPropsRef.value.floating, {
-              ref: popupRef as any,
-              class: 'visoning-popup',
-              style: getPopupStyle(slotProps),
-              directives: [
-                {
-                  name: 'show',
-                  value: mergedOpen
-                }
-              ]
-            })
+            data: mergeProps(
+              elementPropsRef.value.floating,
+              {
+                ref: popupRef as any,
+                class: 'visoning-popup',
+                style: getPopupStyle(slotProps)
+              },
+              !isVue3
+                ? {
+                    directives: [
+                      {
+                        name: 'show',
+                        value: mergedOpen
+                      }
+                    ]
+                  }
+                : null
+            )
           },
           slots.default?.(slotProps)
         )

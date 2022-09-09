@@ -1,53 +1,35 @@
-import { h, ref, Vue2 } from 'vue-demi'
+import { createApp, h, ref, Vue2 } from 'vue-demi'
 
 import { Popup } from '../src/popup'
+import { Popover } from '../src/popover'
 
 import './index.css'
+import { createCompatElement, createSimpleCompatVueInstance } from '../src/utils/compat'
 
 const appendToBodyRef = ref(true)
 
-new Vue2({
-  el: '#app',
-
+const proxy = createSimpleCompatVueInstance({
   render() {
     return h('div', [
       h('div', [
-        h(
+        createCompatElement(
           'button',
           {
-            on: {
-              click: () => (appendToBodyRef.value = !appendToBodyRef.value)
+            data: {
+              onClick: () => (appendToBodyRef.value = !appendToBodyRef.value)
             }
           },
           [`appendToBody: ${appendToBodyRef.value}`]
         )
       ]),
-
-      // h(Popup, {
-      //   props: {
-      //     interactions: ['hover'],
-      //     placement: 'bottom',
-      //     appendToBody: appendToBodyRef.value
-      //   },
-      //   scopedSlots: {
-      //     default: () => h('div', 'My Tooltip'),
-      //     reference: () => h('button', 'Hover me')
-      //   }
-      // }),
-      h(Popup, {
-        props: {
+      createCompatElement(Popover, {
+        data: {
+          title: 'Popover content:',
+          content: 'Can be any react node!',
+          transitionProps: 'fade',
           interactions: ['click'],
           appendToBody: appendToBodyRef.value,
-          popupWrapper: (floating: any) =>
-            h(
-              'transition',
-              {
-                props: {
-                  name: 'fade'
-                }
-              },
-              [floating]
-            )
+          'onUpdate:open': (open) => console.log(open)
         },
         scopedSlots: {
           default: () => h('div', 'My Tooltip'),
@@ -57,3 +39,5 @@ new Vue2({
     ])
   }
 })
+
+proxy.mount('#app')
