@@ -7,7 +7,8 @@ import type {
   Strategy,
   MiddlewareData,
   UseAutoUpdateOptions,
-  UseFloatingData
+  UseFloatingData,
+  VirtualElement
 } from '..'
 
 export type { FloatingType, Middleware, Placement, Strategy, MiddlewareData }
@@ -21,6 +22,13 @@ export const FloatingComponentProps = {
    * Floating don't care where floating node from, so it doesn't capture internally.
    */
   floatingNode: {} as Prop<FloatingType | null>,
+
+  /**
+   * You can position a floating element relative to a virtual element instead of a real one. 
+   * This enables things like positioning context menus or following the cursor.
+   * @see https://floating-ui.com/docs/virtual-elements
+   */
+  referenceNode: {} as PropType<VirtualElement | null>,
 
   /**
    * Whether to disable the floating.

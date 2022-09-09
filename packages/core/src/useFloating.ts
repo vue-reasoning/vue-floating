@@ -65,11 +65,11 @@ export function useFloating(
 
     // If disabled changes, it means that some watching has been suspended
     if (disabled !== lastDisabled) {
-      if (disabled) {
-        stopWatchElements()
-      } else {
+      if (!disabled) {
         detectElements()
         watchElements()
+      } else {
+        stopWatchElements()
       }
     } else if (!disabled) {
       safeUpdate()
