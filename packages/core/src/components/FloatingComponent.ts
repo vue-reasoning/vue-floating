@@ -58,7 +58,11 @@ export const FloatingComponent = defineComponent({
       }
     })
 
-    const floatingReturn = useFloating(referenceRef, floatingRef, useFloatingOptionsRef)
+    const floatingReturn = useFloating(
+      computed(() => props.referenceNode || referenceRef.value),
+      floatingRef,
+      useFloatingOptionsRef
+    )
 
     watch(floatingReturn.data, (data) => emit('update', data), {
       immediate: true
@@ -82,7 +86,7 @@ export const FloatingComponent = defineComponent({
     })
 
     const stopAutoUpdate = useAutoUpdate(
-      referenceRef,
+      computed(() => props.referenceNode || referenceRef.value),
       floatingRef,
       floatingReturn.update,
       autoUpdateOptionsRef

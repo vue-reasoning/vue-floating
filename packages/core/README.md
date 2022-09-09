@@ -25,7 +25,8 @@ export default {
     const floatingRef = ref<HTMLElement>()
 
     const floating = useFloating(referenceRef, floatingRef, {
-      placement: 'right'
+      placement: 'right',
+      strategy: 'fixed'
     })
 
     // If you want to automatically update the position of the floating element when necessary.
@@ -43,9 +44,9 @@ export default {
       return (
         <button>
           <div style={{
-            position: 'fixed',
-            top: `${floating.data.value.top}`px,
-            left: `${floating.data.value.left}`px
+            position: floating.data.value.strategy,
+            top: `${floating.data.value.y}`px,
+            left: `${floating.data.value.x}`px
           }}>
             Top
           </div>

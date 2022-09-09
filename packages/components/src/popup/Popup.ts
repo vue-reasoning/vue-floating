@@ -2,8 +2,6 @@ import {
   defineComponent,
   ref,
   computed,
-  h,
-  VNode,
   onMounted,
   onUpdated,
   getCurrentInstance,
@@ -12,11 +10,16 @@ import {
   onBeforeMount,
   onBeforeUnmount
 } from 'vue-demi'
-import { Comment } from 'vue'
-import { offset, shift, flip, autoPlacement, arrow } from '@floating-ui/core'
-import { Middleware, useManualEffect } from '@visoning/vue-floating-core'
-import { FloatingComponent, FloatingComponentExposed } from '@visoning/vue-floating-core/components'
-import type { FloatingComponentSlotProps } from '@visoning/vue-floating-core/components'
+import type { VNode } from 'vue-demi'
+import { Comment, withDirectives, vShow } from 'vue'
+import { offset, shift, flip, autoPlacement } from '@floating-ui/core'
+import { useManualEffect } from '@visoning/vue-floating-core'
+import type { Middleware } from '@visoning/vue-floating-core'
+import { FloatingComponent } from '@visoning/vue-floating-core/components'
+import type {
+  FloatingComponentSlotProps,
+  FloatingComponentExposed
+} from '@visoning/vue-floating-core/components'
 import {
   useClick,
   useFocus,
@@ -24,14 +27,18 @@ import {
   useInteractionsContext
 } from '@visoning/vue-floating-interactions'
 
-import { Interaction, PopupExposed, PopupProps } from './Popup.types'
+import { Interaction, PopupProps } from './Popup.types'
 import { mergeListeners, mergeProps } from '../utils/mergeProps'
-import { transformListeners, createVueMountProxy, createElement } from '../utils/compat'
-import { isOn } from '../utils/isOn'
+import {
+  transformOn,
+  createSimpleCompatVueInstance,
+  createCompatElement,
+  isOn
+} from '../utils/compat'
 import { useElementProps } from '../utils/useElementsProps'
 
 export const Popup = defineComponent({
-  name: 'Popup',
+  name: 'VisoningPopup',
 
   props: PopupProps,
 
@@ -59,8 +66,6 @@ export const Popup = defineComponent({
 
     const referenceRef = ref<HTMLElement>()
     const popupRef = ref<HTMLElement>()
-
-    const arrowRef = ref<HTMLElement>()
 
     const floatingComponentRef = ref<FloatingComponentExposed>()
 
@@ -126,17 +131,10 @@ export const Popup = defineComponent({
     //
     // Expose ====================================
     //
-
-    const floatingDataRef = computed(() => floatingComponentRef.value?.floatingData)
-
-    const updateFloating = () => floatingComponentRef.value?.update()
-
-    const popupExposed: PopupExposed = {
-      floatingData: floatingDataRef,
-      update: updateFloating
-    }
-
-    expose(popupExposed)
+    expose({
+      floatingData: computed(() => floatingComponentRef.value?.floatingData),
+      update: () => floatingComponentRef.value?.update()
+    })
 
     //
     // Render helpers ====================================
@@ -170,13 +168,6 @@ export const Popup = defineComponent({
       if (props.autoPlacement) {
         middleware.push(autoPlacement(normalizeMiddlewareOptions(props.autoPlacement)))
       }
-      if (props.showArrow && arrowRef.value) {
-        middleware.push(
-          arrow({
-            element: arrowRef.value
-          })
-        )
-      }
 
       return middleware.concat(props.middleware || [])
     })
@@ -186,16 +177,16 @@ export const Popup = defineComponent({
 
     const createTeleport = () => {
       if (props.appendToBody) {
-        const popupPortal = createVueMountProxy({
+        const teltportInstance = createSimpleCompatVueInstance({
           render() {
             return popupTeleportNodeRef.value
           }
         })
-        popupPortal.mount()
+        teltportInstance.mount()
 
-        document.body.appendChild(popupPortal.$el!)
+        document.body.appendChild(teltportInstance.$el!)
 
-        return popupPortal.unmount
+        return teltportInstance.unmount
       }
     }
 
@@ -210,14 +201,6 @@ export const Popup = defineComponent({
 
     onBeforeMount(mountTeleport)
     onBeforeUnmount(unmountTeleport)
-
-    // render arrow
-    const renderArrow = () => {
-      const arrow = props.arrow
-      const createArrow = arrow ? (typeof arrow === 'function' ? arrow : () => arrow) : slots.arrow
-
-      return createArrow && createArrow(floatingDataRef.value!)
-    }
 
     // render popup
     const getPopupStyle = (data: FloatingComponentSlotProps) => {
@@ -243,7 +226,7 @@ export const Popup = defineComponent({
 
       let popup: VNode | null = null
       if (mergedOpen || !props.destoryedOnClosed) {
-        popup = createElement(
+        popup = createCompatElement(
           'div',
           {
             data: mergeProps(elementPropsRef.value.floating, {
@@ -258,8 +241,12 @@ export const Popup = defineComponent({
               ]
             })
           },
-          [slots.default?.(slotProps), props.showArrow && renderArrow()]
+          slots.default?.(slotProps)
         )
+
+        if (isVue3) {
+          withDirectives(popup, [[vShow, mergedOpen, 'show']])
+        }
       }
 
       popup = popupWrapper ? popupWrapper(popup) : popup
@@ -313,7 +300,7 @@ export const Popup = defineComponent({
         }
 
         data.attrs = attrs
-        data.on = mergeListeners(data.on, transformListeners(on))
+        data.on = mergeListeners(data.on, transformOn(on))
         ;(reference as any).data = data
       }
 
@@ -325,7 +312,7 @@ export const Popup = defineComponent({
     //
 
     return () =>
-      createElement(FloatingComponent, {
+      createCompatElement(FloatingComponent, {
         data: {
           ref: floatingComponentRef,
           floatingNode: popupRef.value,

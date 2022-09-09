@@ -1,6 +1,6 @@
 export { Popup } from './Popup'
 
 export { PopupProps } from './Popup.types'
-export type { Interaction } from './Popup.types'
+export type { Interaction, PopupExposed, PopupSlotProps } from './Popup.types'
 
-// TODO: export floating type
+export * from './exports'

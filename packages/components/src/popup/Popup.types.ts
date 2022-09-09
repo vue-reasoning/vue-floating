@@ -1,4 +1,4 @@
-import type { ExtractPropTypes, PropType, Ref, VNode } from 'vue-demi'
+import type { ExtractPropTypes, PropType, VNode } from 'vue-demi'
 import type {
   AutoPlacementOptions,
   FlipOptions,
@@ -138,20 +138,6 @@ export const PopupProps = {
   },
 
   /**
-   * Whether to show arrow if set.
-   * @default true
-   */
-  showArrow: {
-    type: Boolean,
-    default: true
-  },
-
-  /**
-   * VNode | slot
-   */
-  arrow: [Object, Function] as PropType<VNode | null | ((data: FloatingData) => VNode | null)>,
-
-  /**
    * Whether destroy popup when closed.
    */
   destoryedOnClosed: Boolean,
@@ -180,7 +166,7 @@ export const PopupProps = {
 export type PopupProps = ExtractPropTypes<typeof PopupProps>
 
 export interface PopupExposed {
-  floatingData: Readonly<Ref<FloatingData | undefined>>
+  floatingData: FloatingData | undefined
   update: () => void
 }
 
