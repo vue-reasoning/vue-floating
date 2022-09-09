@@ -21,7 +21,10 @@ export const PopoverOwnProps = {
   /**
    * @see https://cn.vuejs.org/guide/built-ins/transition.html
    */
-  transitionProps: [String, Object] as PropType<string | Record<string, any>>,
+  transitionProps: {
+    type: [String, Object] as PropType<string | Record<string, any>>,
+    default: 'visoning-popover'
+  },
 
   /**
    * Whether to show arrow if set.
@@ -33,9 +36,9 @@ export const PopoverOwnProps = {
   },
 
   /**
-   * For style uniformity, we will never enable the configuration of arrow middleware, 
+   * For style uniformity, we will never enable the configuration of arrow middleware,
    * you can customize arrow to make arrow more as expected.
-   * 
+   *
    * support: VNode | slot
    */
   arrow: [Object, Function] as PropType<VNode | null | CreateArrow>,

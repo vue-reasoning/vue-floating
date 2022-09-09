@@ -128,14 +128,10 @@ export const PopupProps = {
 
   /**
    * This determines whether GPU-accelerated styles are used to position the popup.
-   * When this value is `true`, popup will use the 3D transforms on high PPI displays and 2D transforms on low PPI displays.
+   * When this value is `true`, popup will use the 3D transforms.
    * When this value is `false`, popup will use top/left properties.
-   * @default true
    */
-  gpuAcceleration: {
-    type: Boolean,
-    default: true
-  },
+  gpuAcceleration: Boolean,
 
   /**
    * Whether destroy popup when closed.

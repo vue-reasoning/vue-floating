@@ -4,9 +4,11 @@ $popoverCls: 'visoning-popover';
 
 $namespace: $popoverCls;
 
-@mixin popover($block: '') {
-  @include namespace($block) {
-    @content;
+@mixin popover($blocks...) {
+  @each $block in $blocks {
+    @include namespace($block) {
+      @content;
+    }
   }
 }
 

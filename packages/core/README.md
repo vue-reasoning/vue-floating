@@ -104,7 +104,7 @@ export declare function useAutoUpdate(
 ## Built-in Component
 
 To facilitate developing Vue components based on useFloating, we also provide a minimal [FloatingComponent](https://github.com/vue-reasoning/vue-floating/tree/main/packages/core/src/components).
-All our floating components are based on it!
+[All our floating components](https://github.com/vue-reasoning/vue-floating/tree/main/packages/components) are based on it!
 
 ## License
 

@@ -77,7 +77,7 @@
 }
 
 @include popover-placement(bottom) {
-  padding-top: 6px
+  padding-top: 6px;
 }
 
 @include arrow-placement(bottom) {
@@ -86,10 +86,26 @@
 }
 
 @include popover-placement(left) {
-  padding-right: 6px
+  padding-right: 6px;
 }
 
 @include arrow-placement(left) {
   transform: rotateZ(-45deg);
   right: 2px;
+}
+
+//
+// Default transition
+//
+@include popover(enter, enter-from, leave-to) {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+@include popover(enter-active) {
+  transition: opacity 150ms cubic-bezier(0, 0, 0.2, 1), transform 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@include popover(leave-active) {
+  transition: opacity 100ms cubic-bezier(0.4, 0, 1, 1), transform 100ms cubic-bezier(0.4, 0, 1, 1);
 }
