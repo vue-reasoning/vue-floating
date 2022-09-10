@@ -5,7 +5,7 @@ import { createCompatElement, createSimpleCompatVueInstance } from '../src/utils
 
 import './index.css'
 
-const appendToBodyRef = ref(true)
+const appendToBodyRef = ref<string | boolean>('body')
 
 const proxy = createSimpleCompatVueInstance({
   render() {
@@ -15,7 +15,7 @@ const proxy = createSimpleCompatVueInstance({
           'button',
           {
             data: {
-              onClick: () => (appendToBodyRef.value = !appendToBodyRef.value)
+              onClick: () => (appendToBodyRef.value = !appendToBodyRef.value ? 'body' : false)
             }
           },
           [`appendToBody: ${appendToBodyRef.value}`]
@@ -26,7 +26,7 @@ const proxy = createSimpleCompatVueInstance({
           title: 'Popover content:',
           content: 'Can be any react node!',
           interactions: ['click'],
-          appendToBody: appendToBodyRef.value,
+          appendTo: appendToBodyRef.value,
           'onUpdate:open': (open) => console.log(open)
         },
         scopedSlots: {

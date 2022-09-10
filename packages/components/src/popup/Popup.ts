@@ -7,11 +7,10 @@ import {
   getCurrentInstance,
   isVue3,
   watch,
-  onBeforeMount,
   onBeforeUnmount
 } from 'vue-demi'
 import type { VNode } from 'vue-demi'
-import { Comment, withDirectives, vShow } from 'vue'
+import { Comment, withDirectives, vShow, Teleport } from 'vue'
 import { offset, shift, flip, autoPlacement } from '@floating-ui/core'
 import { useManualEffect } from '@visoning/vue-floating-core'
 import type { Middleware } from '@visoning/vue-floating-core'
@@ -172,11 +171,14 @@ export const Popup = defineComponent({
       return middleware.concat(props.middleware || [])
     })
 
-    // popup portal
+    // popup teleport
+
+    // When it's given a value, it means it's being teleported in Vue2,
+    // so we need to watch for its value and mount it.
     const popupTeleportNodeRef = ref<VNode | null>(null)
 
-    const createTeleport = () => {
-      if (props.appendToBody) {
+    if (!isVue3) {
+      const createTeleport = () => {
         const teltportInstance = createSimpleCompatVueInstance({
           render() {
             return popupTeleportNodeRef.value
@@ -184,23 +186,32 @@ export const Popup = defineComponent({
         })
         teltportInstance.mount()
 
-        document.body.appendChild(teltportInstance.$el!)
+        const { appendTo } = props
+        const target = typeof appendTo === 'string' ? document.querySelector(appendTo) : appendTo
+        // Throw error
+        ;(target as HTMLElement).appendChild(teltportInstance.$el!)
 
         return teltportInstance.unmount
       }
+
+      // Vue loses placeholder node during transition processing,
+      // so each time we need to recreate
+      const { clear: unmountTeleport, reset: mountTeleport } = useManualEffect(createTeleport)
+
+      watch(
+        () => props.appendTo,
+        (appendTo) => {
+          if (appendTo) {
+            mountTeleport()
+          } else {
+            unmountTeleport()
+          }
+        }
+      )
+
+      onMounted(mountTeleport)
+      onBeforeUnmount(unmountTeleport)
     }
-
-    // Vue loses placeholder node during transition processing,
-    // so each time we need to recreate
-    const { clear: unmountTeleport, reset: mountTeleport } = useManualEffect(createTeleport)
-
-    watch(
-      () => props.appendToBody,
-      () => mountTeleport()
-    )
-
-    onBeforeMount(mountTeleport)
-    onBeforeUnmount(unmountTeleport)
 
     // render popup
     const getPopupStyle = (data: FloatingComponentSlotProps) => {
@@ -215,53 +226,64 @@ export const Popup = defineComponent({
 
       return {
         position: data.strategy,
-        left: `${data.x}px`,
-        top: `${data.y}px`
+        top: `${data.y}px`,
+        left: `${data.x}px`
       }
     }
 
     const renderPopup = (slotProps: FloatingComponentSlotProps) => {
-      const { popupWrapper } = props
       const { value: mergedOpen } = mergedOpenRef
-
-      let popup: VNode | null = null
-      if (mergedOpen || !props.destoryedOnClosed) {
-        popup = createCompatElement(
-          'div',
-          {
-            data: mergeProps(
-              elementPropsRef.value.floating,
-              {
-                ref: popupRef as any,
-                class: 'visoning-popup',
-                style: getPopupStyle(slotProps)
-              },
-              !isVue3
-                ? {
-                    directives: [
-                      {
-                        name: 'show',
-                        value: mergedOpen
-                      }
-                    ]
-                  }
-                : null
-            )
-          },
-          slots.default?.(slotProps)
-        )
-
-        if (isVue3) {
-          withDirectives(popup, [[vShow, mergedOpen, 'show']])
-        }
+      // v-if
+      if (!mergedOpen && props.destoryedOnClosed) {
+        return
       }
 
+      let popup = createCompatElement(
+        'div',
+        {
+          data: mergeProps(elementPropsRef.value.floating, {
+            ref: popupRef as any,
+            class: 'visoning-popup',
+            style: getPopupStyle(slotProps)
+          })
+        },
+        slots.default?.(slotProps)
+      )
+
+      // v-show
+      if (isVue3) {
+        withDirectives(popup as any, [[vShow, mergedOpen, 'show']])
+      } else {
+        // TODO: filter show directive first??
+        ;((popup as any).data.directives || ((popup as any).data.directives = [])).push({
+          name: 'show',
+          value: mergedOpen
+        })
+      }
+
+      // wrapper
+      const { popupWrapper } = props
       popup = popupWrapper ? popupWrapper(popup) : popup
 
-      if (!props.appendToBody) {
-        popupTeleportNodeRef.value = null
+      popupTeleportNodeRef.value = null
+
+      if (!props.appendTo) {
         return popup
+      }
+
+      // teleport
+      if (isVue3) {
+        return createCompatElement(
+          Teleport,
+          {
+            data: {
+              to: props.appendTo
+            }
+          },
+          [popup]
+        )
       } else {
+        // hand over to watch to handle
         popupTeleportNodeRef.value = popup
       }
     }
@@ -283,9 +305,10 @@ export const Popup = defineComponent({
         const {
           class: kls,
           style,
-          ...mergedProps
+          ...mergedAttrs
         } = mergeProps(
           {
+            // elementProps will always pass only attrs
             ...data.attrs,
             class: data.class,
             style: data.style
@@ -298,11 +321,11 @@ export const Popup = defineComponent({
 
         const on: Record<string, any> = {}
         const attrs: Record<string, any> = {}
-        for (const key in mergedProps) {
+        for (const key in mergedAttrs) {
           if (isOn(key)) {
-            on[key] = mergedProps[key]
+            on[key] = mergedAttrs[key]
           } else {
-            attrs[key] = mergedProps[key]
+            attrs[key] = mergedAttrs[key]
           }
         }
 
@@ -338,7 +361,7 @@ export const Popup = defineComponent({
 })
 
 const isNotTextNode = isVue3
-  ? (child: any) => child.type !== Comment
+  ? (child: any) => child.type && child.type !== Comment
   : (child: any) => child.tag || (child.isComment && child.asyncFactory)
 
 function getPopoverRealChild(children: VNode[]): VNode | undefined {

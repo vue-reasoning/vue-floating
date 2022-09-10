@@ -123,6 +123,7 @@ export const FloatingComponent = defineComponent({
       if (floating) {
         if (isVue3) {
           return [
+            // @ts-expect-error
             cloneVNode(reference, {
               ref: referenceRef
             }),

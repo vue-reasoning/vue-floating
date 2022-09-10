@@ -81,23 +81,32 @@ export const Popover = defineComponent({
     //
 
     const transitionWrapper = (popup: any) => {
-      const { transitionProps, popupWrapper } = props
+      const { transitionProps, popupWrapper: userWrapper } = props
 
       if (transitionProps) {
-        const rawPopup = popup
-        popup = createCompatElement(
-          isVue3 ? Transition : 'transition',
-          {
-            data: typeof transitionProps === 'string' ? { name: transitionProps } : transitionProps,
+        const normalizedProps =
+          typeof transitionProps === 'string' ? { name: transitionProps } : transitionProps
+
+        if (isVue3) {
+          const rawPopup = popup
+          popup = createCompatElement(Transition, {
+            data: normalizedProps,
             scopedSlots: {
               default: () => rawPopup
             }
-          },
-          !isVue3 && [rawPopup]
-        )
+          })
+        } else {
+          popup = createCompatElement(
+            isVue3 ? Transition : 'transition',
+            {
+              data: normalizedProps
+            },
+            [popup]
+          )
+        }
       }
 
-      return typeof popupWrapper === 'function' ? popupWrapper(popup) : popup
+      return typeof userWrapper === 'function' ? userWrapper(popup) : popup
     }
 
     // render content

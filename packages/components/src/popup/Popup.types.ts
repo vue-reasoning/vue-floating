@@ -17,7 +17,14 @@ import { pick } from '../utils/pick'
 export type Interaction = 'click' | 'hover' | 'focus'
 
 export const PopupProps = {
-  ...pick(FloatingComponentProps, ['placement', 'strategy', 'middleware', 'autoUpdate']),
+  ...pick(FloatingComponentProps, [
+    // TODO: are virtual element implemented internally??
+    'referenceNode',
+    'placement',
+    'strategy',
+    'middleware',
+    'autoUpdate'
+  ]),
 
   /**
    * Whether to open popup.
@@ -38,26 +45,29 @@ export const PopupProps = {
   disabled: Boolean,
 
   /**
-   * When this value is `true`, popup will be teleport to the body.
-   * If you need a custom teleport target, you can set to `false` and use `popupWrapper`
+   * When this value is `true`, popup will be teleport to the target.
+   * The teleport to target must be already in the DOM when the <Teleport> component is mounted.
+   * @see https://vuejs.org/guide/built-ins/teleport.html
+   *
+   * Or you can customize the teleport logic, set `appendTo` to false, and use `popupWrapper`,
+   * for simple example
    * ```tsx
    * {
-   *   appendToBody: false,
+   *   appendTo: false,
    *   popupWrapper: (popup) => h(
    *    Teleport,
    *    {
-   *      to: '#id'
+   *      to: anyTarget
    *    },
    *    [popup]
    *   )
    * }
    * ```
-   * @default true
+   * @default "body"
    */
-  appendToBody: {
-    type: Boolean,
-    default: true
-  },
+  appendTo: {
+    default: 'body'
+  } as unknown as { type: PropType<string | false | HTMLElement>; default: string },
 
   /**
    * Which actions cause popup shown. enum of 'hover','click','focus'.
