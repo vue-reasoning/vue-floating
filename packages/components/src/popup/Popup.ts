@@ -10,7 +10,7 @@ import {
   onBeforeUnmount
 } from 'vue-demi'
 import type { VNode } from 'vue-demi'
-import { Comment, withDirectives, vShow, Teleport } from 'vue'
+import { Comment, withDirectives, vShow, Teleport, cloneVNode } from 'vue'
 import { offset, shift, flip, autoPlacement } from '@floating-ui/core'
 import { useManualEffect } from '@visoning/vue-floating-core'
 import type { Middleware } from '@visoning/vue-floating-core'
@@ -29,13 +29,9 @@ import type { InteractionInfo } from '@visoning/vue-floating-interactions'
 
 import { Interaction, PopupProps } from './Popup.types'
 import { mergeListeners, mergeProps } from '../utils/mergeProps'
-import {
-  transformOn,
-  createSimpleCompatVueInstance,
-  createCompatElement,
-  isOn
-} from '../utils/compat'
+import { createSimpleCompatVueInstance, createCompatElement } from '../utils/compat'
 import { useElementProps } from '../utils/useElementsProps'
+import { isOn, transformLegacyListeners } from '../utils/on'
 
 export const Popup = defineComponent({
   name: 'VisoningPopup',
@@ -74,13 +70,15 @@ export const Popup = defineComponent({
 
     const floatingComponentRef = ref<FloatingComponentExposed>()
 
-    const currentInstance = getCurrentInstance()
-    const updateReference = () => {
-      referenceRef.value = currentInstance?.proxy?.$el as HTMLElement
-    }
+    if (!isVue3) {
+      const currentInstance = getCurrentInstance()
+      const updateReference = () => {
+        referenceRef.value = currentInstance?.proxy?.$el as HTMLElement
+      }
 
-    onMounted(updateReference)
-    onUpdated(updateReference)
+      onMounted(updateReference)
+      onUpdated(updateReference)
+    }
 
     //
     // Interactions ====================================
@@ -297,16 +295,21 @@ export const Popup = defineComponent({
 
     // render reference
     const renderReference = (slotProps: FloatingComponentSlotProps) => {
-      const reference = slots.reference && getPopoverRealChild(slots.reference(slotProps))
+      let reference = slots.reference && getPopoverRealChild(slots.reference(slotProps))
       if (!reference) {
         return
       }
 
       if (isVue3) {
-        ;(reference as any).props = mergeProps(
-          (reference as any).props,
-          elementPropsRef.value.reference
-        )
+        reference = cloneVNode(
+          // @ts-expect-error
+          reference,
+          {
+            ...elementPropsRef.value.reference,
+            ref: referenceRef
+          },
+          true
+        ) as any
       } else {
         const data = (reference as any).data || {}
         const {
@@ -337,7 +340,7 @@ export const Popup = defineComponent({
         }
 
         data.attrs = attrs
-        data.on = mergeListeners(data.on, transformOn(on))
+        data.on = mergeListeners(data.on, transformLegacyListeners(on))
         ;(reference as any).data = data
       }
 
@@ -352,6 +355,7 @@ export const Popup = defineComponent({
       createCompatElement(FloatingComponent, {
         data: {
           ref: floatingComponentRef,
+          referenceNode: referenceRef.value,
           floatingNode: popupRef.value,
           disabled: disabledRef.value,
           placement: props.placement,

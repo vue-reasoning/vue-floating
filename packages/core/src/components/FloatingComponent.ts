@@ -1,19 +1,7 @@
-import {
-  defineComponent,
-  toRef,
-  ref,
-  computed,
-  getCurrentInstance,
-  onMounted,
-  onUpdated,
-  onBeforeUnmount,
-  watch,
-  isVue3
-} from 'vue-demi'
-import { cloneVNode } from 'vue'
+import { defineComponent, toRef, computed, onBeforeUnmount, watch, isVue3 } from 'vue-demi'
 
 import { useFloating, useAutoUpdate } from '..'
-import type { UseFloatingOptions, UseAutoUpdateOptions, ReferenceType } from '..'
+import type { UseFloatingOptions, UseAutoUpdateOptions } from '..'
 import { FloatingComponentProps } from './FloatingComponent.types'
 
 export const FloatingComponent = defineComponent({
@@ -30,20 +18,8 @@ export const FloatingComponent = defineComponent({
     // Elements ====================================
     //
 
-    const referenceRef = ref<ReferenceType>()
+    const referenceRef = toRef(props, 'referenceNode')
     const floatingRef = toRef(props, 'floatingNode')
-
-    if (!isVue3) {
-      // in Vue2, we can safely put floating nodes in reference children,
-      // so we can use $el to update
-      const currentInstance = getCurrentInstance()
-      const updateReference = () => {
-        referenceRef.value = currentInstance?.proxy?.$el as HTMLElement
-      }
-
-      onMounted(updateReference)
-      onUpdated(updateReference)
-    }
 
     //
     // Floating ====================================
@@ -58,11 +34,7 @@ export const FloatingComponent = defineComponent({
       }
     })
 
-    const floatingReturn = useFloating(
-      computed(() => props.referenceNode || referenceRef.value),
-      floatingRef,
-      useFloatingOptionsRef
-    )
+    const floatingReturn = useFloating(referenceRef, floatingRef, useFloatingOptionsRef)
 
     watch(floatingReturn.data, (data) => emit('update', data), {
       immediate: true
@@ -122,13 +94,7 @@ export const FloatingComponent = defineComponent({
       const floating = slots.default?.(floatingData.value)
       if (floating) {
         if (isVue3) {
-          return [
-            // @ts-expect-error
-            cloneVNode(reference, {
-              ref: referenceRef
-            }),
-            ...floating
-          ]
+          return [reference, floating]
           // Or, this ensures that Vue2 behaves like Vue3
           // but I'm not sure if there is any unpredictable error
           // const TEXT_CHILDREN = 1 << 3

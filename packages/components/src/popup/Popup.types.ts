@@ -44,10 +44,6 @@ export const PopupProps = {
    */
   disabled: Boolean,
 
-  width: [String, Function] as PropType<
-    string | ((targetSize: { width: number; height: number }) => string)
-  >,
-
   /**
    * When this value is `true`, popup will be teleport to the target.
    * The teleport to target must be already in the DOM when the <Teleport> component is mounted.
@@ -72,6 +68,10 @@ export const PopupProps = {
   appendTo: {
     default: 'body'
   } as unknown as { type: PropType<string | false | HTMLElement>; default: string },
+
+  width: [String, Function] as PropType<
+    string | ((targetSize: { width: number; height: number }) => string)
+  >,
 
   /**
    * Which actions cause popup shown. enum of 'hover','click','focus'.

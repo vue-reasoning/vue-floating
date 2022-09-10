@@ -7,10 +7,11 @@ import { Popup, PopupExposed } from '../popup'
 import type { PopupSlotProps } from '../popup'
 import { createCompatElement } from '../utils/compat'
 import { isEmpty } from '../utils/isEmpty'
-import { omit } from '../utils/omit'
-import { PopoverOwnProps, PopoverProps, PopoverSlotProps } from './Popover.types'
+import { pick } from '../utils/pick'
+import { PopoverExtendsPopupProps, PopoverProps, PopoverSlotProps } from './Popover.types'
 
 import './styles/index.scss'
+import { listenersForward } from '../utils/listenersForward'
 
 const prefixCls = 'visoning-popover'
 
@@ -81,7 +82,7 @@ export const Popover = defineComponent({
     //
 
     const transitionWrapper = (popup: any) => {
-      const { transitionProps, popupWrapper: userWrapper } = props
+      const { transitionProps, popoverWrapper: userWrapper } = props
 
       if (transitionProps) {
         const normalizedProps =
@@ -155,13 +156,12 @@ export const Popover = defineComponent({
     return () =>
       createCompatElement(Popup, {
         data: {
-          ...omit(props, Object.keys([PopoverOwnProps])),
+          ...pick(props, Object.keys(PopoverExtendsPopupProps) as Array<keyof PopoverProps>),
+          ...listenersForward(emit, ['onUpdate:open', 'open', 'close']),
           ref: popupExposedRef,
           middleware: middlewareRef.value,
-          popupWrapper: transitionWrapper,
-          'onUpdate:open': (...args: any[]) => emit('update:open', ...args),
-          onOpen: (...args: any[]) => emit('open', ...args),
-          onClose: (...args: any[]) => emit('close', ...args)
+          popupProps: props.popoverProps,
+          popupWrapper: transitionWrapper
         },
         scopedSlots: {
           reference: slots.reference,

@@ -1,14 +1,14 @@
-import type { ExtractPropTypes, Prop, PropType, UnwrapRef } from 'vue-demi'
+import type { ExtractPropTypes, PropType, UnwrapRef } from 'vue-demi'
 
 import type {
+  ReferenceType,
   FloatingType,
   Middleware,
   Placement,
   Strategy,
   MiddlewareData,
   UseAutoUpdateOptions,
-  UseFloatingData,
-  VirtualElement
+  UseFloatingData
 } from '..'
 
 export type { FloatingType, Middleware, Placement, Strategy, MiddlewareData }
@@ -19,16 +19,18 @@ export type AutoUpdateOptions = UseAutoUpdateOptions
 
 export const FloatingComponentProps = {
   /**
-   * Floating don't care where floating node from, so it doesn't capture internally.
-   */
-  floatingNode: {} as Prop<FloatingType | null>,
-
-  /**
-   * You can position a floating element relative to a virtual element instead of a real one. 
+   * FloatingComponent don't care where reference node from, so it doesn't capture internally.
+   *
+   * You can position a floating element relative to a virtual element instead of a real one.
    * This enables things like positioning context menus or following the cursor.
    * @see https://floating-ui.com/docs/virtual-elements
    */
-  referenceNode: {} as PropType<VirtualElement | null>,
+  referenceNode: {} as { type: PropType<ReferenceType | null> },
+
+  /**
+   * FloatingComponent don't care where floating node from, so it doesn't capture internally.
+   */
+  floatingNode: {} as { type: PropType<FloatingType | null> },
 
   /**
    * Whether to disable the floating.

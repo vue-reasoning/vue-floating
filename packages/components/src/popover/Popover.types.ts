@@ -1,5 +1,8 @@
 import type { ExtractPropTypes, PropType, VNode } from 'vue-demi'
+
 import { PopupProps, PopupSlotProps } from '../popup'
+import type { FloatingData } from '../popup'
+import { pick } from '../utils/pick'
 
 export type Interaction = 'click' | 'hover' | 'focus'
 
@@ -7,7 +10,39 @@ export type PopoverSlotProps = PopupSlotProps
 
 export type CreateArrow = (props: PopoverSlotProps) => VNode | null
 
-export const PopoverOwnProps = {
+export const PopoverExtendsPopupProps = {
+  ...pick(PopupProps, [
+    'referenceNode',
+    'placement',
+    'strategy',
+    'middleware',
+    'autoUpdate',
+    'open',
+    'defaultOpen',
+    'delay',
+    'clickDelay',
+    'hoverDelay',
+    'focusDelay',
+    'width',
+    'appendTo',
+    'interactions',
+    'offset',
+    'shift',
+    'flip',
+    'autoPlacement',
+    'gpuAcceleration',
+    'destoryedOnClosed',
+    'referenceProps',
+    'zIndex',
+    'onUpdate:open',
+    'onOpen',
+    'onClose'
+  ])
+} as const
+
+export const PopoverProps = {
+  ...PopoverExtendsPopupProps,
+
   /**
    * support: string | VNode | slot
    */
@@ -64,14 +99,22 @@ export const PopoverOwnProps = {
   /**
    * HTML attributes of node.
    */
-  arrowProps: Object as PropType<Record<string, any>>
-} as const
+  arrowProps: Object as PropType<Record<string, any>>,
 
-export type PopoverOwnProps = ExtractPropTypes<typeof PopoverOwnProps>
+  /**
+   * HTML attributes of node.
+   */
+  popoverProps: PopupProps.popupProps,
 
-export const PopoverProps = {
-  ...PopupProps,
-  ...PopoverOwnProps
+  /**
+   * Custom popover node wrapper.
+   */
+  popoverWrapper: PopupProps.popupWrapper
 } as const
 
 export type PopoverProps = ExtractPropTypes<typeof PopoverProps>
+
+export interface PopoverExposed {
+  floatingData: FloatingData | undefined
+  update: () => void
+}

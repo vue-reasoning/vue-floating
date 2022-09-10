@@ -1,7 +1,7 @@
 import { isVue2 } from 'vue-demi'
 import { mergeProps as _mergeProps } from 'vue'
 
-import { isOn } from './compat'
+import { isOn } from './on'
 
 // Copied from Vue
 

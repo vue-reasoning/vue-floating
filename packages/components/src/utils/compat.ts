@@ -2,10 +2,7 @@ import { isVue3, Vue2, h } from 'vue-demi'
 import { createApp } from 'vue'
 
 import { mergeListeners } from './mergeProps'
-
-function identity<T>(value: T): T {
-  return value
-}
+import { isOn, normalizeOn } from './on'
 
 export interface CompatVNodeData {
   data: Record<string, any>
@@ -72,12 +69,9 @@ export function createCompatElement(
 
   for (const key in compatData) {
     if (isOn(key)) {
-      transformData.on = mergeListeners(
-        transformData.on,
-        transformOn({
-          [key]: compatData[key]
-        })
-      )
+      transformData.on = mergeListeners(transformData.on, {
+        [normalizeOn(key)]: compatData[key]
+      })
     } else if (legacyReserveKeys.includes(key)) {
       transformData[key] = compatData[key]
     } else {
@@ -93,22 +87,6 @@ export function createCompatElement(
 
   return h(tag, transformData, children)
 }
-
-const onRE = /^on[^a-z]/
-export const isOn = (key: string) => onRE.test(key)
-
-export const transformOn = isVue3
-  ? identity
-  : (listeners: Record<string, any>) => {
-      return Object.entries(listeners).reduce((listeners, [key, value]) => {
-        if (isOn(key)) {
-          key = key.replace(/^on-?/, '')
-          key = key.charAt(0).toLowerCase() + key.slice(1)
-        }
-        listeners[key] = value
-        return listeners
-      }, {} as Record<string, any>)
-    }
 
 export interface VueMountProxy {
   readonly $el: Element | null
