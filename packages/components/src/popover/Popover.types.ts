@@ -19,6 +19,15 @@ export const PopoverOwnProps = {
   title: [String, Object] as PropType<string | VNode>,
 
   /**
+   * The theme of the popover.
+   * @default 'light'
+   */
+  theme: {
+    type: String as PropType<'dark' | 'light'>,
+    default: 'light'
+  },
+
+  /**
    * @see https://cn.vuejs.org/guide/built-ins/transition.html
    */
   transitionProps: {

@@ -10,7 +10,7 @@ import {
   FloatingComponentSlotProps,
   FloatingData
 } from '@visoning/vue-floating-core/components'
-import type { Delay } from '@visoning/vue-floating-interactions'
+import type { Delay, InteractionInfo } from '@visoning/vue-floating-interactions'
 
 import { pick } from '../utils/pick'
 
@@ -43,6 +43,10 @@ export const PopupProps = {
    * Whether to disable the floating.
    */
   disabled: Boolean,
+
+  width: [String, Function] as PropType<
+    string | ((targetSize: { width: number; height: number }) => string)
+  >,
 
   /**
    * When this value is `true`, popup will be teleport to the target.
@@ -164,9 +168,24 @@ export const PopupProps = {
   popupWrapper: Function as PropType<(popup: VNode | null) => VNode>,
 
   /**
+   * Popup z-index.
+   */
+  zIndex: Number,
+
+  /**
    * Callback on open status changes.
    */
-  'onUpdate:open': Function as PropType<(open: boolean) => void>
+  'onUpdate:open': Function as PropType<(open: boolean, info: InteractionInfo) => void>,
+
+  /**
+   * Callback on popup open.
+   */
+  onOpen: Function as PropType<(info: InteractionInfo) => void>,
+
+  /**
+   * Callback on popup close.
+   */
+  onClose: Function as PropType<(info: InteractionInfo) => void>
 } as const
 
 export type PopupProps = ExtractPropTypes<typeof PopupProps>

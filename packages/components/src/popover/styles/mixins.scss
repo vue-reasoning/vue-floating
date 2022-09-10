@@ -1,6 +1,75 @@
-@import '../../theme-utils';
+@use 'sass:list' as list;
+@use 'sass:map' as map;
 
-$popoverCls: 'visoning-popover';
+@import '../../theme-utils';
+@import 'config';
+
+//
+// Variables
+//
+
+@function _get-var($prop, $theme: 'light') {
+  @return map.get($popover-variables, $prop, $theme);
+}
+
+@function get-var($prop) {
+  @return _get-var($prop, 'light');
+}
+
+@function get-dark-var() {
+  @return _get-var($prop, 'dark');
+}
+
+@mixin _popover-css-var-declare($theme: 'light', $props...) {
+  @each $prop in $props {
+    #{map.get($popover-variables, $prop, 'var')}: _get-var($prop, $theme);
+  }
+}
+
+@mixin popover-css-var-declare($props...) {
+  @include _popover-css-var-declare('light', $props);
+}
+
+@mixin popover-css-var-declare-dark($props...) {
+  @include _popover-css-var-declare('dark', $props);
+}
+
+@function _get-popover-css-var-value($theme: 'light', $prop) {
+  $value: _get-var($prop, $theme);
+  $var-prop: map.get($popover-variables, $prop, 'var');
+
+  @if variable-exists($var-prop) {
+    @return var(#{map.get($popover-variables, $prop, 'var')}, $value);
+  } @else {
+    @return $value;
+  }
+}
+
+@function get-popover-css-var-value($prop) {
+  @return _get-popover-css-var-value('light', $prop);
+}
+
+@function get-popover-css-var-value-dark($prop) {
+  @return _get-popover-css-var-value('dark', $prop);
+}
+
+@mixin _popover-style($theme: 'light', $props...) {
+  @each $prop in $props {
+    #{map.get($popover-variables, $prop, 'prop')}: _get-popover-css-var-value($theme, $prop);
+  }
+}
+
+@mixin popover-style($props...) {
+  @include _popover-style('light', $props...);
+}
+
+@mixin popover-style-dark($props...) {
+  @include _popover-style('dark', $props...);
+}
+
+//
+// Namespace
+//
 
 $namespace: $popoverCls;
 
@@ -12,22 +81,68 @@ $namespace: $popoverCls;
   }
 }
 
-$placement-mark: 'data-placement';
+//
+// Theme
+//
 
-@mixin placement($placement: '', $root: '') {
+@mixin popover-theme($theme) {
+  @include namespace($theme, '.') {
+    @content;
+  }
+}
+
+@mixin popover-dark($blocks...) {
+  @include popover-theme($theme-name-dark) {
+    @if list.length($blocks) > 0 {
+      @include popover($blocks) {
+        @content;
+      }
+    } @else {
+      @content;
+    }
+  }
+}
+
+@mixin popover-theme-css-var {
+}
+
+@mixin popover-theme-style($block, $props) {
+  @include popover($block) {
+    @content;
+
+    @include popover-style($props...);
+  }
+
+  @include popover-dark($block) {
+    @include popover-style-dark($props...);
+  }
+}
+
+//
+// Placement
+//
+
+@function get-placement-selector($placement: '') {
   $value: if($placement == '', '', '*=' + $placement + '');
   $selector: #{'[' + $placement-mark + $value + ']'};
+  @return $selector;
+}
 
-  #{$root + $selector} {
+@mixin with-placement($placement: '', $root: '') {
+  #{$root + get-placement-selector($placement)} {
     @content;
   }
 }
 
-@mixin popover-placement($placement: '') {
-  @include placement($placement, '.' + $popoverCls) {
+@mixin popover-with-placement($placement: '') {
+  @include with-placement($placement, '.' + $popoverCls) {
     @content;
   }
 }
+
+//
+// With arrow
+//
 
 @mixin with-arrow {
   &.with-arrow {
@@ -35,8 +150,8 @@ $placement-mark: 'data-placement';
   }
 }
 
-@mixin arrow-placement($placement: '') {
-  @include popover-placement($placement) {
+@mixin arrow-in-popover-placement($placement: '') {
+  @include popover-with-placement($placement) {
     @include popover(arrow) {
       @content;
     }

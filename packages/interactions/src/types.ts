@@ -13,7 +13,7 @@ export type Delay = number | Partial<Record<DelayType, number>> | undefined
 
 export interface InteractionInfo {
   type: string | null
-  event: Event | null
+  event?: Event | null
 }
 
 export const makeInteractionInfoFactory =

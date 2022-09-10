@@ -25,7 +25,7 @@ const proxy = createSimpleCompatVueInstance({
         data: {
           title: 'Popover content:',
           content: 'Can be any react node!',
-          interactions: ['click'],
+          theme: 'dark',
           appendTo: appendToBodyRef.value,
           'onUpdate:open': (open) => console.log(open)
         },

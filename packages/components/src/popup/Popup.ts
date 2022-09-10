@@ -25,6 +25,7 @@ import {
   useHover,
   useInteractionsContext
 } from '@visoning/vue-floating-interactions'
+import type { InteractionInfo } from '@visoning/vue-floating-interactions'
 
 import { Interaction, PopupProps } from './Popup.types'
 import { mergeListeners, mergeProps } from '../utils/mergeProps'
@@ -47,17 +48,22 @@ export const Popup = defineComponent({
     //
 
     const uncontrolledOpenRef = ref(!!props.defaultOpen)
-    const mergedOpenRef = computed({
-      get() {
-        return props.open === undefined ? uncontrolledOpenRef.value : props.open
-      },
-      set(newOpen) {
-        uncontrolledOpenRef.value = newOpen
-        if (newOpen !== props.open) {
-          emit('update:open', newOpen)
+    const mergedOpenRef = computed(() =>
+      props.open === undefined ? uncontrolledOpenRef.value : props.open
+    )
+
+    const setOpen = (open: boolean, info: InteractionInfo) => {
+      uncontrolledOpenRef.value = open
+      if (open !== props.open) {
+        emit('update:open', open, info)
+
+        if (open) {
+          emit('open', info)
+        } else {
+          emit('close', info)
         }
       }
-    })
+    }
 
     //
     // Element refs ====================================
@@ -84,14 +90,14 @@ export const Popup = defineComponent({
     const interactionsContext = useInteractionsContext(referenceRef, popupRef)
 
     watch(interactionsContext.open, (open) => {
-      if (mergedOpenRef.value !== open) {
-        mergedOpenRef.value = open
-      }
+      setOpen(open, interactionsContext.info.value)
     })
 
     watch(mergedOpenRef, (mergedOpen) => {
       if (interactionsContext.open.value !== mergedOpen) {
-        interactionsContext.setOpen(mergedOpen)
+        interactionsContext.setOpen(mergedOpen, {
+          type: 'component'
+        })
       }
     })
 
@@ -220,7 +226,8 @@ export const Popup = defineComponent({
           position: data.strategy,
           top: 0,
           left: 0,
-          transform: `translate3d(${data.x}px, ${data.y}px, 0px)`
+          transform: `translate3d(${data.x}px, ${data.y}px, 0px)`,
+          zIndex: props.zIndex
         }
       }
 

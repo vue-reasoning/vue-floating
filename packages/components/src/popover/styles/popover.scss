@@ -1,28 +1,36 @@
+@use 'sass:map' as map;
+
+@import 'config';
 @import 'mixins';
 
 // CSS Variables
-// --arrow-bg
-// --arrow-box-shadow
+// --vp-font-color
+// --vp-bg-color
+// --vp-box-shadow
+// --vp-arrow-box-shadow
 
 //
 // Popover
 //
 
 @include popover() {
+  @include popover-css-var-declare(map.keys($popover-variables));
+
   position: relative;
+}
+
+@include popover-dark() {
+  @include popover-css-var-declare-dark(map.keys($popover-variables));
 }
 
 //
 // Content
 //
 
-@include popover(content) {
+@include popover-theme-style(content, (font-color, bg-color, box-shadow)) {
   padding: 12px 24px;
-  color: #162d3d;
   font-size: 14px;
   line-height: 18px;
-  background: #fff;
-  box-shadow: 0 6px 6px 0 rgba(22, 45, 61, 0.06), 0 0 18px 0 rgba(22, 45, 61, 0.12);
   border-radius: 8px;
   box-sizing: border-box;
 }
@@ -31,8 +39,7 @@
 // Title
 //
 
-@include popover(title) {
-  color: #162d3d;
+@include popover-theme-style(title, (font-color)) {
   font-size: 18px;
   font-weight: 500;
   line-height: 24px;
@@ -42,54 +49,67 @@
 // Arrow
 //
 
-@include popover(arrow) {
+@include popover-theme-style(arrow, (arrow-box-shadow)) {
   position: absolute;
   width: 8px;
   height: 8px;
   border-style: solid;
-  box-shadow: var(--arrow-box-shadow, 3px 3px 6px rgb(0 0 0 / 10%));
   box-sizing: border-box;
   transform: rotateZ(45deg);
 }
 
-@include arrow-placement() {
+@include arrow-in-popover-placement() {
   margin: 0;
   border-width: 4px;
-  border-color: transparent var(--arrow-bg, #fff) var(--arrow-bg, #fff) transparent;
+  border-color: transparent get-popover-css-var-value(bg-color) get-popover-css-var-value(bg-color)
+    transparent;
 }
 
-@include popover-placement(top) {
+@include popover-dark() {
+  $popover-selector: '';
+
+  @include popover(arrow) {
+    border-color: transparent get-popover-css-var-value-dark(bg-color)
+      get-popover-css-var-value-dark(bg-color) transparent;
+  }
+}
+
+//
+// Placement & Arrow
+//
+
+@include popover-with-placement(top) {
   padding-bottom: 6px;
 }
 
-@include arrow-placement(top) {
+@include arrow-in-popover-placement(top) {
   transform: rotateZ(45deg);
   bottom: 2px;
 }
 
-@include popover-placement(right) {
+@include popover-with-placement(right) {
   padding-left: 6px;
 }
 
-@include arrow-placement(right) {
+@include arrow-in-popover-placement(right) {
   transform: rotateZ(135deg);
   left: 2px;
 }
 
-@include popover-placement(bottom) {
+@include popover-with-placement(bottom) {
   padding-top: 6px;
 }
 
-@include arrow-placement(bottom) {
+@include arrow-in-popover-placement(bottom) {
   transform: rotateZ(-135deg);
   top: 2px;
 }
 
-@include popover-placement(left) {
+@include popover-with-placement(left) {
   padding-right: 6px;
 }
 
-@include arrow-placement(left) {
+@include arrow-in-popover-placement(left) {
   transform: rotateZ(-45deg);
   right: 2px;
 }

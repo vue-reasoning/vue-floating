@@ -122,7 +122,8 @@ export const Popover = defineComponent({
         {
           data: {
             class: classNames(prefixCls, {
-              'with-arrow': showArrow
+              'with-arrow': showArrow,
+              dark: props.theme === 'dark'
             }),
             'data-placement': slotProps.placement
           }
@@ -158,7 +159,9 @@ export const Popover = defineComponent({
           ref: popupExposedRef,
           middleware: middlewareRef.value,
           popupWrapper: transitionWrapper,
-          'onUpdate:open': (open: boolean) => emit('update:open', open)
+          'onUpdate:open': (...args: any[]) => emit('update:open', ...args),
+          onOpen: (...args: any[]) => emit('open', ...args),
+          onClose: (...args: any[]) => emit('close', ...args)
         },
         scopedSlots: {
           reference: slots.reference,

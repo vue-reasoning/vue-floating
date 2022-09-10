@@ -1,10 +1,10 @@
 @import 'config';
 
-@mixin namespace($module: '') {
+@mixin namespace($module: '', $separator: '-') {
   $M: $namespace;
 
   @if $module != '' {
-    $M: $M + '-' + $module;
+    $M: $M + $separator + $module;
   }
 
   .#{$M} {
