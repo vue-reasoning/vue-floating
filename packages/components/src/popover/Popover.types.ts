@@ -6,13 +6,13 @@ import { pick } from '../utils/pick'
 
 export type Interaction = 'click' | 'hover' | 'focus'
 
-export type PopoverSlotProps = PopupSlotProps
+export type PopoverArrowSlotProps = PopupSlotProps
 
-export type CreateArrow = (props: PopoverSlotProps) => VNode | null
+export type CreateArrow = (props: PopoverArrowSlotProps) => VNode | null
 
 export const PopoverExtendsPopupProps = {
   ...pick(PopupProps, [
-    'referenceNode',
+    'virtualElement',
     'placement',
     'strategy',
     'middleware',
@@ -23,7 +23,6 @@ export const PopoverExtendsPopupProps = {
     'clickDelay',
     'hoverDelay',
     'focusDelay',
-    'width',
     'appendTo',
     'interactions',
     'offset',
@@ -33,10 +32,12 @@ export const PopoverExtendsPopupProps = {
     'gpuAcceleration',
     'destoryedOnClosed',
     'referenceProps',
+    'popupProps',
     'zIndex',
     'onUpdate:open',
     'onOpen',
-    'onClose'
+    'onClose',
+    'onFloatingDataUpdate'
   ])
 } as const
 

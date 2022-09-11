@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import { computed, defineComponent, h, isVue3, ref } from 'vue-demi'
+import { defineComponent, computed, ref, h, isVue3 } from 'vue-demi'
 import { Transition } from 'vue'
 import { arrow as coreArrow } from '@floating-ui/core'
 
@@ -8,14 +8,21 @@ import type { PopupSlotProps } from '../popup'
 import { createCompatElement } from '../utils/compat'
 import { isEmpty } from '../utils/isEmpty'
 import { pick } from '../utils/pick'
-import { PopoverExtendsPopupProps, PopoverProps, PopoverSlotProps } from './Popover.types'
+import { listenersForward } from '../utils/listenersForward'
+import { mergeProps } from '../utils/mergeProps'
+import { PopoverExtendsPopupProps, PopoverProps, PopoverArrowSlotProps } from './Popover.types'
 
 import './styles/index.scss'
-import { listenersForward } from '../utils/listenersForward'
 
 const prefixCls = 'visoning-popover'
 
+const PopoverInstanceMark = '__visoning_popover'
+
+export const isProxyInstance = () => {}
+
 export const Popover = defineComponent({
+  [PopoverInstanceMark]: true,
+
   name: 'Popover',
 
   props: PopoverProps,
@@ -29,13 +36,13 @@ export const Popover = defineComponent({
 
     const arrowRef = ref<HTMLElement>()
 
-    const getArrowStyle = ({ placement, middlewareData }: PopoverSlotProps) => {
+    const getArrowStyle = ({ placement, middlewareData }: PopoverArrowSlotProps) => {
       const top = middlewareData.arrow?.y ?? 0
       const left = middlewareData.arrow?.x ?? 0
 
       const style: Record<string, any> = {
-        '--arrow-top': `${top}px`,
-        '--arrow-left': `${left}px`
+        '--vp-arrow-top': `${top}px`,
+        '--vp-arrow-left': `${left}px`
       }
 
       // Because another value in the opposite direction to placement is always 0,
@@ -49,7 +56,7 @@ export const Popover = defineComponent({
       return style
     }
 
-    const createArrow = (slotProps: PopoverSlotProps) => {
+    const createArrow = (slotProps: PopoverArrowSlotProps) => {
       const customArrow = props.arrow || slots.arrow
       if (customArrow) {
         return typeof customArrow === 'function' ? customArrow(slotProps) : customArrow
@@ -122,11 +129,13 @@ export const Popover = defineComponent({
         'div',
         {
           data: {
-            class: classNames(prefixCls, {
-              'with-arrow': showArrow,
-              dark: props.theme === 'dark'
-            }),
-            'data-placement': slotProps.placement
+            ...mergeProps(props.popoverProps, {
+              class: classNames(prefixCls, {
+                'with-arrow': showArrow,
+                dark: props.theme === 'dark'
+              }),
+              'data-placement': slotProps.placement
+            })
           }
         },
         [
@@ -153,14 +162,17 @@ export const Popover = defineComponent({
       )
     }
 
-    return () =>
-      createCompatElement(Popup, {
+    return () => {
+      const extendsProps = {
+        ...pick(props, Object.keys(PopoverExtendsPopupProps) as Array<keyof PopoverProps>),
+        ...listenersForward(emit, ['onUpdate:open', 'open', 'close', 'onFloatingDataUpdate'])
+      }
+
+      return createCompatElement(Popup, {
         data: {
-          ...pick(props, Object.keys(PopoverExtendsPopupProps) as Array<keyof PopoverProps>),
-          ...listenersForward(emit, ['onUpdate:open', 'open', 'close']),
+          ...extendsProps,
           ref: popupExposedRef,
           middleware: middlewareRef.value,
-          popupProps: props.popoverProps,
           popupWrapper: transitionWrapper
         },
         scopedSlots: {
@@ -168,5 +180,6 @@ export const Popover = defineComponent({
           default: renderContent
         }
       })
+    }
   }
 })

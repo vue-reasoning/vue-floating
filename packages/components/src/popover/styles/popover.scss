@@ -8,6 +8,8 @@
 // --vp-font-color
 // --vp-bg-color
 // --vp-box-shadow
+// --vp-arrow-top
+// --vp-arrow-left
 // --vp-arrow-box-shadow
 
 //
@@ -15,13 +17,13 @@
 //
 
 @include popover() {
-  @include popover-css-var-declare(map.keys($popover-variables));
+  @include popover-css-var-declare(map.keys($popover-variables)...);
 
   position: relative;
 }
 
 @include popover-dark() {
-  @include popover-css-var-declare-dark(map.keys($popover-variables));
+  @include popover-css-var-declare-dark(map.keys($popover-variables)...);
 }
 
 //

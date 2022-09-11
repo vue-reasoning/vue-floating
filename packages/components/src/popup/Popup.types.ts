@@ -6,20 +6,27 @@ import type {
   ShiftOptions
 } from '@floating-ui/core'
 import {
-  FloatingComponentProps,
-  FloatingComponentSlotProps,
+  FloatingCreator,
+  FloatingCreatorProps,
   FloatingData
 } from '@visoning/vue-floating-core/components'
 import type { Delay, InteractionInfo } from '@visoning/vue-floating-interactions'
 
 import { pick } from '../utils/pick'
+import type { VirtualElement } from '@visoning/vue-floating-core'
+
+export interface PopupExposed {
+  getFloatingData: () => FloatingData | undefined
+  updatePosition: () => void
+}
+
+export type PopupSlotProps = FloatingData
 
 export type Interaction = 'click' | 'hover' | 'focus'
 
 export const PopupProps = {
-  ...pick(FloatingComponentProps, [
+  ...pick(FloatingCreatorProps, [
     // TODO: are virtual element implemented internally??
-    'referenceNode',
     'placement',
     'strategy',
     'middleware',
@@ -45,16 +52,23 @@ export const PopupProps = {
   disabled: Boolean,
 
   /**
+   * You can position a floating element relative to a virtual element instead of a real one.
+   * This enables things like positioning context menus or following the cursor.
+   * @see https://floating-ui.com/docs/virtual-elements
+   */
+  virtualElement: Object as PropType<VirtualElement>,
+
+  /**
    * When this value is `true`, popup will be teleport to the target.
    * The teleport to target must be already in the DOM when the <Teleport> component is mounted.
    * @see https://vuejs.org/guide/built-ins/teleport.html
    *
-   * Or you can customize the teleport logic, set `appendTo` to false, and use `popupWrapper`,
+   * Or you can customize the teleport logic, set `appendTo` to false, and use `floatingWrapper`,
    * for simple example
    * ```tsx
    * {
    *   appendTo: false,
-   *   popupWrapper: (popup) => h(
+   *   floatingWrapper: (popup) => h(
    *    Teleport,
    *    {
    *      to: anyTarget
@@ -68,10 +82,6 @@ export const PopupProps = {
   appendTo: {
     default: 'body'
   } as unknown as { type: PropType<string | false | HTMLElement>; default: string },
-
-  width: [String, Function] as PropType<
-    string | ((targetSize: { width: number; height: number }) => string)
-  >,
 
   /**
    * Which actions cause popup shown. enum of 'hover','click','focus'.
@@ -104,8 +114,6 @@ export const PopupProps = {
   /**
    * When this value is `false`, even if the popup is closed, floating will update the position as needed,
    * unless popup is disabled.
-   *
-   * This is useful when the style of the position conflicts with the style of the popup entry.
    */
   autoUpdateOnClosed: Boolean,
 
@@ -168,6 +176,11 @@ export const PopupProps = {
   popupWrapper: Function as PropType<(popup: VNode | null) => VNode>,
 
   /**
+   * Custom floating node wrapper.
+   */
+  floatingWrapper: Function as PropType<(popup: VNode | null) => VNode>,
+
+  /**
    * Popup z-index.
    */
   zIndex: Number,
@@ -185,14 +198,9 @@ export const PopupProps = {
   /**
    * Callback on popup close.
    */
-  onClose: Function as PropType<(info: InteractionInfo) => void>
+  onClose: Function as PropType<(info: InteractionInfo) => void>,
+
+  onFloatingDataUpdate: Function as PropType<(data: FloatingData) => void>
 } as const
 
 export type PopupProps = ExtractPropTypes<typeof PopupProps>
-
-export interface PopupExposed {
-  floatingData: FloatingData | undefined
-  update: () => void
-}
-
-export type PopupSlotProps = FloatingComponentSlotProps

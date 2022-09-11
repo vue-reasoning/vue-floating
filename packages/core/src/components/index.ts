@@ -1,2 +1,2 @@
-export * from './FloatingComponent'
-export * from './FloatingComponent.types'
+export * from './FloatingCreator'
+export * from './FloatingCreator.types'

@@ -27,11 +27,11 @@
 }
 
 @mixin popover-css-var-declare($props...) {
-  @include _popover-css-var-declare('light', $props);
+  @include _popover-css-var-declare('light', $props...);
 }
 
 @mixin popover-css-var-declare-dark($props...) {
-  @include _popover-css-var-declare('dark', $props);
+  @include _popover-css-var-declare('dark', $props...);
 }
 
 @function _get-popover-css-var-value($theme: 'light', $prop) {

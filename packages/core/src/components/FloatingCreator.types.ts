@@ -6,36 +6,40 @@ import type {
   Middleware,
   Placement,
   Strategy,
-  MiddlewareData,
   UseAutoUpdateOptions,
   UseFloatingData
 } from '..'
-
-export type { FloatingType, Middleware, Placement, Strategy, MiddlewareData }
 
 export type FloatingData = UseFloatingData
 
 export type AutoUpdateOptions = UseAutoUpdateOptions
 
-export const FloatingComponentProps = {
+export type FloatingCreatorSlotProps = FloatingData
+
+export interface FloatingCreatorExposed {
+  getFloatingData: () => FloatingData
+  updatePosition: () => void
+}
+
+export const FloatingCreatorProps = {
   /**
-   * FloatingComponent don't care where reference node from, so it doesn't capture internally.
+   * Whether to disable the floating.
+   */
+  disabled: Boolean,
+
+  /**
+   * Reference element.
    *
    * You can position a floating element relative to a virtual element instead of a real one.
    * This enables things like positioning context menus or following the cursor.
    * @see https://floating-ui.com/docs/virtual-elements
    */
-  referenceNode: {} as { type: PropType<ReferenceType | null> },
+  reference: {} as { type: PropType<ReferenceType | null> },
 
   /**
-   * FloatingComponent don't care where floating node from, so it doesn't capture internally.
+   * Floating element.
    */
-  floatingNode: {} as { type: PropType<FloatingType | null> },
-
-  /**
-   * Whether to disable the floating.
-   */
-  disabled: Boolean,
+  floating: {} as { type: PropType<FloatingType | null> },
 
   /**
    * Where to place the floating element relative to its reference element.
@@ -77,11 +81,4 @@ export const FloatingComponentProps = {
   onUpdate: Function as PropType<(data: UnwrapRef<FloatingData>) => void>
 } as const
 
-export type FloatingComponentProps = ExtractPropTypes<typeof FloatingComponentProps>
-
-export type FloatingComponentSlotProps = UnwrapRef<FloatingData>
-
-export interface FloatingComponentExposed {
-  floatingData: FloatingData
-  update: () => void
-}
+export type FloatingCreatorProps = ExtractPropTypes<typeof FloatingCreatorProps>

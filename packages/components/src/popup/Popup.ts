@@ -1,23 +1,24 @@
 import {
+  isVue3,
   defineComponent,
   ref,
   computed,
-  onMounted,
-  onUpdated,
-  getCurrentInstance,
-  isVue3,
   watch,
-  onBeforeUnmount
+  getCurrentInstance,
+  onBeforeUnmount,
+  onMounted,
+  onUpdated
 } from 'vue-demi'
 import type { VNode } from 'vue-demi'
-import { Comment, withDirectives, vShow, Teleport, cloneVNode } from 'vue'
+import { withDirectives, vShow, Teleport, cloneVNode } from 'vue'
 import { offset, shift, flip, autoPlacement } from '@floating-ui/core'
 import { useManualEffect } from '@visoning/vue-floating-core'
 import type { Middleware } from '@visoning/vue-floating-core'
-import { FloatingComponent } from '@visoning/vue-floating-core/components'
-import type {
-  FloatingComponentSlotProps,
-  FloatingComponentExposed
+import {
+  FloatingCreator,
+  FloatingCreatorExposed,
+  FloatingCreatorSlotProps,
+  FloatingData
 } from '@visoning/vue-floating-core/components'
 import {
   useClick,
@@ -27,14 +28,22 @@ import {
 } from '@visoning/vue-floating-interactions'
 import type { InteractionInfo } from '@visoning/vue-floating-interactions'
 
-import { Interaction, PopupProps } from './Popup.types'
+import { Interaction, PopupExposed, PopupProps } from './Popup.types'
 import { mergeListeners, mergeProps } from '../utils/mergeProps'
 import { createSimpleCompatVueInstance, createCompatElement } from '../utils/compat'
 import { useElementProps } from '../utils/useElementsProps'
 import { isOn, transformLegacyListeners } from '../utils/on'
+import { getRawChildren, wrapTextNodeIfNeed } from '../utils/getRawChildren'
+import { useForwardReferenceContext } from './ForwardReferenceContext'
+
+const popupCls = 'visoning-popup'
+
+const floatingCls = 'visoning-floating'
 
 export const Popup = defineComponent({
   name: 'VisoningPopup',
+
+  inheritAttrs: !isVue3,
 
   props: PopupProps,
 
@@ -65,15 +74,15 @@ export const Popup = defineComponent({
     // Element refs ====================================
     //
 
-    const referenceRef = ref<HTMLElement>()
-    const popupRef = ref<HTMLElement>()
+    const floatingElRef = ref<HTMLElement>()
+    const referenceElRef = ref<HTMLElement>()
 
-    const floatingComponentRef = ref<FloatingComponentExposed>()
+    const mergedReferenceElRef = computed(() => props.virtualElement || referenceElRef.value)
 
+    const currentInstance = getCurrentInstance()
     if (!isVue3) {
-      const currentInstance = getCurrentInstance()
       const updateReference = () => {
-        referenceRef.value = currentInstance?.proxy?.$el as HTMLElement
+        referenceElRef.value = currentInstance?.proxy?.$el as HTMLElement
       }
 
       onMounted(updateReference)
@@ -85,7 +94,7 @@ export const Popup = defineComponent({
     //
 
     // interactions context
-    const interactionsContext = useInteractionsContext(referenceRef, popupRef)
+    const interactionsContext = useInteractionsContext(mergedReferenceElRef, floatingElRef)
 
     watch(interactionsContext.open, (open) => {
       setOpen(open, interactionsContext.info.value)
@@ -134,21 +143,20 @@ export const Popup = defineComponent({
     //
     // Expose ====================================
     //
-    expose({
-      floatingData: computed(() => floatingComponentRef.value?.floatingData),
-      update: () => floatingComponentRef.value?.update()
-    })
+
+    const floatingCreatorExposedRef = ref<FloatingCreatorExposed>()
+
+    const exposed: PopupExposed = {
+      getFloatingData: () => floatingCreatorExposedRef.value?.getFloatingData(),
+      updatePosition: () => floatingCreatorExposedRef.value?.updatePosition()
+    }
+
+    expose(exposed)
 
     //
-    // Render helpers ====================================
+    // Middleware ====================================
     //
 
-    // disabled
-    const disabledRef = computed(
-      () => props.disabled || (!mergedOpenRef.value && !props.autoUpdateOnClosed)
-    )
-
-    // middleware
     const normalizeMiddlewareOptions = (
       opt: boolean | Record<string, any>,
       candidate: Record<string, any> = {}
@@ -175,19 +183,59 @@ export const Popup = defineComponent({
       return middleware.concat(props.middleware || [])
     })
 
-    // popup teleport
+    //
+    // Render ====================================
+    //
 
-    // When it's given a value, it means it's being teleported in Vue2,
-    // so we need to watch for its value and mount it.
-    const popupTeleportNodeRef = ref<VNode | null>(null)
+    // render popup
+    const renderPopup = (slotProps: FloatingCreatorSlotProps) => {
+      const { value: mergedOpen } = mergedOpenRef
+      // v-if
+      if (!mergedOpen && props.destoryedOnClosed) {
+        return
+      }
+
+      let popupNode = createCompatElement(
+        'div',
+        {
+          data: mergeProps(elementPropsRef.value.floating, {
+            class: popupCls
+          })
+        },
+        slots.default?.(slotProps)
+      )
+
+      // v-show
+      if (isVue3) {
+        withDirectives(popupNode as any, [[vShow, mergedOpen, 'show']])
+      } else {
+        const vShowDirective = {
+          name: 'show',
+          value: mergedOpen
+        }
+        // TODO: filter show directive first??
+        ;((popupNode as any).data.directives || ((popupNode as any).data.directives = [])).push(
+          vShowDirective
+        )
+      }
+
+      // wrapper
+      const { popupWrapper } = props
+
+      return popupWrapper ? popupWrapper(popupNode) : popupNode
+    }
+
+    // append to
+    const floatingNodeRef = ref<VNode | null>(null)
 
     if (!isVue3) {
       const createTeleport = () => {
         const teltportInstance = createSimpleCompatVueInstance({
           render() {
-            return popupTeleportNodeRef.value
+            return floatingNodeRef.value
           }
         })
+
         teltportInstance.mount()
 
         const { appendTo } = props
@@ -195,6 +243,7 @@ export const Popup = defineComponent({
         // Throw error
         ;(target as HTMLElement).appendChild(teltportInstance.$el!)
 
+        // return clear effect
         return teltportInstance.unmount
       }
 
@@ -217,8 +266,7 @@ export const Popup = defineComponent({
       onBeforeUnmount(unmountTeleport)
     }
 
-    // render popup
-    const getPopupStyle = (data: FloatingComponentSlotProps) => {
+    const getFloatingStyle = (data: FloatingCreatorSlotProps) => {
       if (props.gpuAcceleration) {
         return {
           position: data.strategy,
@@ -232,86 +280,88 @@ export const Popup = defineComponent({
       return {
         position: data.strategy,
         top: `${data.y}px`,
-        left: `${data.x}px`
+        left: `${data.x}px`,
+        zIndex: props.zIndex
       }
     }
 
-    const renderPopup = (slotProps: FloatingComponentSlotProps) => {
-      const { value: mergedOpen } = mergedOpenRef
-      // v-if
-      if (!mergedOpen && props.destoryedOnClosed) {
-        return
-      }
-
-      let popup = createCompatElement(
+    // render floating
+    const renderFloating = (slotProps: FloatingCreatorSlotProps, popupNode?: VNode) => {
+      let floatingNode = createCompatElement(
         'div',
         {
-          data: mergeProps(elementPropsRef.value.floating, {
-            ref: popupRef as any,
-            class: 'visoning-popup',
-            style: getPopupStyle(slotProps)
-          })
+          data: {
+            ref: floatingElRef,
+            class: floatingCls,
+            style: getFloatingStyle(slotProps)
+          }
         },
-        slots.default?.(slotProps)
+        [popupNode]
       )
 
-      // v-show
-      if (isVue3) {
-        withDirectives(popup as any, [[vShow, mergedOpen, 'show']])
-      } else {
-        // TODO: filter show directive first??
-        ;((popup as any).data.directives || ((popup as any).data.directives = [])).push({
-          name: 'show',
-          value: mergedOpen
-        })
+      // wrapper
+      if (props.floatingWrapper) {
+        floatingNode = props.floatingWrapper(floatingNode)
       }
 
-      // wrapper
-      const { popupWrapper } = props
-      popup = popupWrapper ? popupWrapper(popup) : popup
-
-      popupTeleportNodeRef.value = null
+      floatingNodeRef.value = null
 
       if (!props.appendTo) {
-        return popup
+        return floatingNode
       }
 
       // teleport
       if (isVue3) {
-        return createCompatElement(
-          Teleport,
-          {
-            data: {
-              to: props.appendTo
-            }
+        return createCompatElement(Teleport, {
+          data: {
+            to: props.appendTo
           },
-          [popup]
-        )
+          scopedSlots: {
+            default: () => [floatingNode]
+          }
+        })
       } else {
-        // hand over to watch to handle
-        popupTeleportNodeRef.value = popup
+        floatingNodeRef.value = floatingNode
       }
     }
 
     // render reference
-    const renderReference = (slotProps: FloatingComponentSlotProps) => {
-      let reference = slots.reference && getPopoverRealChild(slots.reference(slotProps))
-      if (!reference) {
+    const renderReference = (slotProps: FloatingCreatorSlotProps, floatingNode?: VNode) => {
+      const rawChildren = slots.reference && getRawChildren(slots.reference(slotProps))
+      if (!rawChildren) {
         return
       }
 
+      let rawChild = wrapTextNodeIfNeed(rawChildren[0] as any) as any
+
       if (isVue3) {
-        reference = cloneVNode(
-          // @ts-expect-error
-          reference,
-          {
-            ...elementPropsRef.value.reference,
-            ref: referenceRef
-          },
-          true
-        ) as any
+        rawChild = cloneVNode(rawChild, {
+          ...mergeProps(currentInstance?.proxy.$attrs, elementPropsRef.value.reference)
+        })
+
+        // Capture reference
+        // Because Vue supports element hoisting for HOC, so we can do this,
+        // it is also to avoid that the real $el cannot be obtained through currentInstance
+        // when the node is in the Fragment.
+        withDirectives(rawChild as any, [
+          [
+            {
+              mounted(el) {
+                referenceElRef.value = el
+              },
+              updated(el) {
+                referenceElRef.value = el
+              },
+              unmounted() {
+                referenceElRef.value = undefined
+              }
+            }
+          ]
+        ]) as unknown as VNode
+
+        return [rawChild, floatingNode]
       } else {
-        const data = (reference as any).data || {}
+        const data = rawChild.data || (rawChild.data = {})
         const {
           class: kls,
           style,
@@ -326,9 +376,6 @@ export const Popup = defineComponent({
           elementPropsRef.value.reference
         )
 
-        data.class = kls
-        data.style = style
-
         const on: Record<string, any> = {}
         const attrs: Record<string, any> = {}
         for (const key in mergedAttrs) {
@@ -339,47 +386,43 @@ export const Popup = defineComponent({
           }
         }
 
+        data.class = kls
+        data.style = style
         data.attrs = attrs
         data.on = mergeListeners(data.on, transformLegacyListeners(on))
-        ;(reference as any).data = data
+
+        if (floatingNode) {
+          rawChild.children = (
+            Array.isArray(rawChild.children) ? rawChild.children : ([rawChild.children] as any)
+          )
+            .filter((child: any) => child != undefined)
+            .concat(floatingNode)
+        }
       }
 
-      return reference
+      return rawChild
     }
 
-    //
-    // Render ====================================
-    //
+    return () => {
+      const disabledFloating = props.disabled || (!mergedOpenRef.value && !props.autoUpdateOnClosed)
 
-    return () =>
-      createCompatElement(FloatingComponent, {
+      return createCompatElement(FloatingCreator, {
         data: {
-          ref: floatingComponentRef,
-          referenceNode: referenceRef.value,
-          floatingNode: popupRef.value,
-          disabled: disabledRef.value,
+          ref: floatingCreatorExposedRef,
+          reference: mergedReferenceElRef.value,
+          floating: floatingElRef.value,
+          disabled: disabledFloating,
           placement: props.placement,
           strategy: props.strategy,
           middleware: middlewareRef.value,
-          autoUpdate: props.autoUpdate
+          autoUpdate: props.autoUpdate,
+          onUpdate: (floatingData: FloatingData) => emit('floating-data-update', floatingData)
         },
         scopedSlots: {
-          default: renderPopup,
-          reference: renderReference
+          default: (slotProps: FloatingCreatorSlotProps) =>
+            renderReference(slotProps, renderFloating(slotProps, renderPopup(slotProps)))
         }
       })
-  }
-})
-
-const isNotTextNode = isVue3
-  ? (child: any) => child.type && child.type !== Comment
-  : (child: any) => child.tag || (child.isComment && child.asyncFactory)
-
-function getPopoverRealChild(children: VNode[]): VNode | undefined {
-  for (let i = 0; i < children.length; i++) {
-    const child = children[i]
-    if (isNotTextNode(child as any)) {
-      return child
     }
   }
-}
+})
