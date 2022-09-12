@@ -71,7 +71,7 @@
 // Namespace
 //
 
-$namespace: $popoverCls;
+$namespace: $popover-cls;
 
 @mixin popover($blocks...) {
   @each $block in $blocks {
@@ -135,7 +135,7 @@ $namespace: $popoverCls;
 }
 
 @mixin popover-with-placement($placement: '') {
-  @include with-placement($placement, '.' + $popoverCls) {
+  @include with-placement($placement, '.' + $popover-cls) {
     @content;
   }
 }

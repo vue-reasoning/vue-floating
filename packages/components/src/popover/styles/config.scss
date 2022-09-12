@@ -1,44 +1,53 @@
-$popoverCls: 'visoning-popover';
+$popover-cls: 'visoning-popover';
 
 $theme-name-dark: 'dark';
 
 $placement-mark: 'data-placement';
 
+// Common
+$--vpopover-content-padding: 12px 24px;
+
 // Light
-$--vp-font-color: #162d3d;
-$--vp-bg-color: #ffffff;
-$--vp-box-shadow: 0 6px 6px 0 rgba(22, 45, 61, 0.06), 0 0 18px 0 rgba(22, 45, 61, 0.12);
-$--vp-arrow-box-shadow: 3px 3px 6px rgb(0 0 0 / 10%);
+$--vpopover-font-color: #162d3d;
+$--vpopover-bg-color: #ffffff;
+$--vpopover-box-shadow: 0 6px 6px 0 rgba(22, 45, 61, 0.06), 0 0 18px 0 rgba(22, 45, 61, 0.12);
+$--vpopover-arrow-box-shadow: 3px 3px 6px rgb(0 0 0 / 10%);
 
 // Dark
-$--vp-font-color-dark: #ffffff;
-$--vp-bg-color-dark: #162d3d;
-$--vp-box-shadow-dark: 0 6px 6px 0 rgba(22, 45, 61, 0.06), 0 0 18px 0 rgba(22, 45, 61, 0.12);
-$--vp-arrow-box-shadow-dark: 3px 3px 6px rgb(0 0 0 / 10%);
+$--vpopover-font-color-dark: #ffffff;
+$--vpopover-bg-color-dark: #162d3d;
+$--vpopover-box-shadow-dark: 0 6px 6px 0 rgba(22, 45, 61, 0.06), 0 0 18px 0 rgba(22, 45, 61, 0.12);
+$--vpopover-arrow-box-shadow-dark: 3px 3px 6px rgb(0 0 0 / 10%);
 
 $popover-variables: (
+  content-padding: (
+    var: '--vpopover-content-padding',
+    prop: 'padding',
+    light: $--vpopover-content-padding,
+    dark: $--vpopover-content-padding
+  ),
   font-color: (
-    var: '--vp-font-color',
+    var: '--vpopover-font-color',
     prop: 'color',
-    light: $--vp-font-color,
-    dark: $--vp-font-color-dark
+    light: $--vpopover-font-color,
+    dark: $--vpopover-font-color-dark
   ),
   bg-color: (
-    var: '--vp-bg-color',
+    var: '--vpopover-bg-color',
     prop: 'background-color',
-    light: $--vp-bg-color,
-    dark: $--vp-bg-color-dark
+    light: $--vpopover-bg-color,
+    dark: $--vpopover-bg-color-dark
   ),
   box-shadow: (
-    var: '--vp-box-shadow',
+    var: '--vpopover-box-shadow',
     prop: 'box-shadow',
-    light: $--vp-box-shadow,
-    dark: $--vp-box-shadow-dark
+    light: $--vpopover-box-shadow,
+    dark: $--vpopover-box-shadow-dark
   ),
   arrow-box-shadow: (
-    var: '--vp-arrow-box-shadow',
+    var: '--vpopover-arrow-box-shadow',
     prop: 'box-shadow',
-    light: $--vp-arrow-box-shadow,
-    dark: $--vp-arrow-box-shadow-dark
+    light: $--vpopover-arrow-box-shadow,
+    dark: $--vpopover-arrow-box-shadow-dark
   )
 ) !default;

@@ -22,7 +22,8 @@
     "packages/global.d.ts",
     "packages/*/src",
     "packages/*/*.ts",
-    "packages/*/__tests__"
+    "packages/*/__tests__",
+    "rollup.config.ts"
   ],
   "exclude": ["node_modules"]
 }

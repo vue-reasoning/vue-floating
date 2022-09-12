@@ -3,22 +3,32 @@ import type { ExtractPropTypes, PropType, VNode } from 'vue-demi'
 import { FloatingData, PopoverProps } from '../popover'
 import type { PopoverArrowSlotProps } from '../popover'
 import { pick } from '../utils/pick'
-import type { CSSProperties } from 'vue'
 
-export type { CreateArrow } from '../popover'
+export interface TooltipExposed {
+  floatingData: FloatingData | undefined
+  update: () => void
+}
+
+export type TooltipArrowSlotProps = PopoverArrowSlotProps
 
 export const TooltipExtendsPopoverProps = {
   ...pick(PopoverProps, [
-    'referenceNode',
     'placement',
     'strategy',
     'middleware',
     'autoUpdate',
     'open',
     'defaultOpen',
-    'delay',
-    'width',
+    'disabled',
+    'virtualElement',
     'appendTo',
+    'delay',
+    'clickDelay',
+    'hoverDelay',
+    'focusDelay',
+    'keepOpenWhenPopupHover',
+    'closeWhenClickOutside',
+    'autoUpdateOnClosed',
     'offset',
     'shift',
     'flip',
@@ -26,15 +36,12 @@ export const TooltipExtendsPopoverProps = {
     'gpuAcceleration',
     'destoryedOnClosed',
     'referenceProps',
+    'floatingWrapper',
     'zIndex',
     'onUpdate:open',
     'onOpen',
     'onClose',
-    'theme',
-    'transitionProps',
-    'showArrow',
-    'arrow',
-    'arrowProps'
+    'onFloatingDataUpdate'
   ])
 } as const
 
@@ -69,10 +76,3 @@ export const TooltipProps = {
 } as const
 
 export type TooltipProps = ExtractPropTypes<typeof TooltipProps>
-
-export interface TooltipExposed {
-  floatingData: FloatingData | undefined
-  update: () => void
-}
-
-export type TooltipArrowSlotProps = PopoverArrowSlotProps

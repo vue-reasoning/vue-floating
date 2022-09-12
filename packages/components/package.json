@@ -15,9 +15,11 @@
     }
   },
   "scripts": {
-    "build": "tsup",
-    "demo:2": "vue-demi-switch 2.7 vue2 & vite",
-    "demo:3": "vue-demi-switch 3 vue & vite",
+    "build": "vite build & pnpm build:dts",
+    "build:dts": "tsup src/index.ts --dts-only",
+    "demo": "cd ./demo & vite",
+    "demo:2": "vue-demi-switch 2.7 vue2 & pnpm demo",
+    "demo:3": "vue-demi-switch 3 vue & pnpm demo",
     "test": "vitest"
   },
   "keywords": [
@@ -28,8 +30,7 @@
     "popup",
     "positioning",
     "vue",
-    "hooks",
-    "vue-hooks"
+    "component"
   ],
   "author": "nooooooom <https://github.com/nooooooom>",
   "license": "MIT",
@@ -40,9 +41,9 @@
   },
   "dependencies": {
     "@floating-ui/core": "^1.0.0",
+    "@floating-ui/dom": "^1.0.0",
     "@visoning/vue-floating-core": "workspace:*",
-    "@visoning/vue-floating-interactions": "workspace:*",
-    "classnames": "^2.3.1"
+    "@visoning/vue-floating-interactions": "workspace:*"
   },
   "devDependencies": {
     "sass": "^1.54.8"

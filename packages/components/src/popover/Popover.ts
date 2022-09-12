@@ -1,4 +1,3 @@
-import classNames from 'classnames'
 import { defineComponent, computed, ref, h, isVue3 } from 'vue-demi'
 import { Transition } from 'vue'
 import { arrow as coreArrow } from '@floating-ui/core'
@@ -14,16 +13,10 @@ import { PopoverExtendsPopupProps, PopoverProps, PopoverArrowSlotProps } from '.
 
 import './styles/index.scss'
 
-const prefixCls = 'visoning-popover'
-
-const PopoverInstanceMark = '__visoning_popover'
-
-export const isProxyInstance = () => {}
+const popoverCls = 'visoning-popover'
 
 export const Popover = defineComponent({
-  [PopoverInstanceMark]: true,
-
-  name: 'Popover',
+  name: 'VisoningPopover',
 
   props: PopoverProps,
 
@@ -65,7 +58,7 @@ export const Popover = defineComponent({
       return createCompatElement('div', {
         data: {
           ref: arrowRef,
-          class: `${prefixCls}-arrow`,
+          class: `${popoverCls}-arrow`,
           style: getArrowStyle(slotProps)
         }
       })
@@ -130,10 +123,13 @@ export const Popover = defineComponent({
         {
           data: {
             ...mergeProps(props.popoverProps, {
-              class: classNames(prefixCls, {
-                'with-arrow': showArrow,
-                dark: props.theme === 'dark'
-              }),
+              class: [
+                popoverCls,
+                {
+                  'with-arrow': showArrow,
+                  dark: props.theme === 'dark'
+                }
+              ],
               'data-placement': slotProps.placement
             })
           }
@@ -142,14 +138,14 @@ export const Popover = defineComponent({
           h(
             'div',
             {
-              class: `${prefixCls}-content`
+              class: `${popoverCls}-content`
             },
             [
               hasTitle
                 ? h(
                     'div',
                     {
-                      class: `${prefixCls}-title`
+                      class: `${popoverCls}-title`
                     },
                     [title]
                   )

@@ -5,12 +5,12 @@
 
 // CSS Variables
 
-// --vp-font-color
-// --vp-bg-color
-// --vp-box-shadow
-// --vp-arrow-top
-// --vp-arrow-left
-// --vp-arrow-box-shadow
+// --vpopover-font-color
+// --vpopover-bg-color
+// --vpopover-box-shadow
+// --vpopover-arrow-top
+// --vpopover-arrow-left
+// --vpopover-arrow-box-shadow
 
 //
 // Popover
@@ -30,8 +30,7 @@
 // Content
 //
 
-@include popover-theme-style(content, (font-color, bg-color, box-shadow)) {
-  padding: 12px 24px;
+@include popover-theme-style(content, (content-padding, font-color, bg-color, box-shadow)) {
   font-size: 14px;
   line-height: 18px;
   border-radius: 8px;

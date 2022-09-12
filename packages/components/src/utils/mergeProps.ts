@@ -1,4 +1,4 @@
-import { isVue2 } from 'vue-demi'
+import { isVue3 } from 'vue-demi'
 import { mergeProps as _mergeProps } from 'vue'
 
 import { isOn } from './on'
@@ -7,7 +7,7 @@ import { isOn } from './on'
 
 type MergeProps = (...props: (Record<string, any> | undefined | null)[]) => Record<string, any>
 
-export const mergeProps: MergeProps = isVue2
+export const mergeProps: MergeProps = !isVue3
   ? (...args) => {
       const ret: Record<string, any> = {}
       for (let i = 0; i < args.length; i++) {

@@ -5,15 +5,12 @@ import type {
   OffsetOptions,
   ShiftOptions
 } from '@floating-ui/core'
-import {
-  FloatingCreator,
-  FloatingCreatorProps,
-  FloatingData
-} from '@visoning/vue-floating-core/components'
+import { FloatingCreatorProps } from '@visoning/vue-floating-core/components'
+import type { FloatingData } from '@visoning/vue-floating-core/components'
+import type { VirtualElement } from '@visoning/vue-floating-core'
 import type { Delay, InteractionInfo } from '@visoning/vue-floating-interactions'
 
 import { pick } from '../utils/pick'
-import type { VirtualElement } from '@visoning/vue-floating-core'
 
 export interface PopupExposed {
   getFloatingData: () => FloatingData | undefined

@@ -4,7 +4,10 @@ import { PopupProps, PopupSlotProps } from '../popup'
 import type { FloatingData } from '../popup'
 import { pick } from '../utils/pick'
 
-export type Interaction = 'click' | 'hover' | 'focus'
+export interface PopoverExposed {
+  floatingData: FloatingData | undefined
+  update: () => void
+}
 
 export type PopoverArrowSlotProps = PopupSlotProps
 
@@ -12,19 +15,23 @@ export type CreateArrow = (props: PopoverArrowSlotProps) => VNode | null
 
 export const PopoverExtendsPopupProps = {
   ...pick(PopupProps, [
-    'virtualElement',
     'placement',
     'strategy',
     'middleware',
     'autoUpdate',
     'open',
     'defaultOpen',
+    'disabled',
+    'virtualElement',
+    'appendTo',
+    'interactions',
     'delay',
     'clickDelay',
     'hoverDelay',
     'focusDelay',
-    'appendTo',
-    'interactions',
+    'keepOpenWhenPopupHover',
+    'closeWhenClickOutside',
+    'autoUpdateOnClosed',
     'offset',
     'shift',
     'flip',
@@ -32,7 +39,7 @@ export const PopoverExtendsPopupProps = {
     'gpuAcceleration',
     'destoryedOnClosed',
     'referenceProps',
-    'popupProps',
+    'floatingWrapper',
     'zIndex',
     'onUpdate:open',
     'onOpen',
@@ -89,15 +96,6 @@ export const PopoverProps = {
   arrow: [Object, Function] as PropType<VNode | null | CreateArrow>,
 
   /**
-   * Whether the arrow is shown in the center of the reference.
-   * @default true
-   */
-  // arrowShowInCenter: {
-  //   type: Boolean,
-  //   default: true
-  // },
-
-  /**
    * HTML attributes of node.
    */
   arrowProps: Object as PropType<Record<string, any>>,
@@ -114,8 +112,3 @@ export const PopoverProps = {
 } as const
 
 export type PopoverProps = ExtractPropTypes<typeof PopoverProps>
-
-export interface PopoverExposed {
-  floatingData: FloatingData | undefined
-  update: () => void
-}

@@ -1,4 +1,4 @@
-import { computed, ref, unref, watch } from 'vue-demi'
+import { computed, ref, unref } from 'vue-demi'
 import { computePosition } from '@floating-ui/dom'
 
 import type {
@@ -41,12 +41,12 @@ export function useFloating(
     middlewareData: {}
   })
 
-  const safeUpdate = () => {
+  const updatePosotion = () => {
     const reference = unref(referenceRef)
     const floating = unref(floatingRef)
+
     if (reference && floating) {
-      const { value: options } = optionsRef
-      computePosition(reference, floating, options).then((data) => {
+      computePosition(reference, floating, optionsRef.value).then((data) => {
         dataRef.value = data
       })
     }
@@ -56,9 +56,10 @@ export function useFloating(
     detect: detectElements,
     mesure: watchElements,
     stop: stopWatchElements
-  } = useQualifiedRefs([referenceRef, floatingRef], (qualifys) => qualifys && safeUpdate())
+  } = useQualifiedRefs([referenceRef, floatingRef], (qualifys) => qualifys && updatePosotion())
 
   let disabled: boolean = false
+
   const handleOptionsChange = (options: UseFloatingOptions) => {
     const lastDisabled = disabled
     disabled = !!options.disabled
@@ -72,7 +73,7 @@ export function useFloating(
         stopWatchElements()
       }
     } else if (!disabled) {
-      safeUpdate()
+      updatePosotion()
     }
   }
 
@@ -82,7 +83,7 @@ export function useFloating(
 
   return {
     data: dataRef,
-    update: safeUpdate,
+    update: updatePosotion,
     stop: () => {
       stopWatchProps()
       stopWatchElements()

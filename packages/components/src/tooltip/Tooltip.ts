@@ -1,7 +1,5 @@
-import classNames from 'classnames'
-import { defineComponent, h, ref } from 'vue-demi'
+import { defineComponent, h } from 'vue-demi'
 
-import type { PopupExposed } from '../popup'
 import { createCompatElement } from '../utils/compat'
 import { isEmpty } from '../utils/isEmpty'
 import { pick } from '../utils/pick'
@@ -20,10 +18,8 @@ export const Tooltip = defineComponent({
   props: TooltipProps,
 
   setup(props, { emit, slots }) {
-    const popoverExposedRef = ref<PopupExposed>()
-
     //
-    // Arrow ====================================
+    // Render ====================================
     //
 
     // render content
@@ -55,13 +51,12 @@ export const Tooltip = defineComponent({
     return () => {
       const extendsProps = {
         ...pick(props, Object.keys(TooltipExtendsPopoverProps) as Array<keyof TooltipProps>),
-        ...listenersForward(emit, ['onUpdate:open', 'open', 'close'])
+        ...listenersForward(emit, ['onUpdate:open', 'open', 'close', 'onFloatingDataUpdate'])
       }
 
       return createCompatElement(Popover, {
         data: {
           ...extendsProps,
-          ref: popoverExposedRef,
           interactions: ['hover'],
           popoverProps: mergeProps(props.tooltipProps, {
             class: prefixCls
@@ -70,6 +65,7 @@ export const Tooltip = defineComponent({
         },
         scopedSlots: {
           reference: slots.reference,
+          arrow: slots.arrow,
           content: renderContent
         }
       })

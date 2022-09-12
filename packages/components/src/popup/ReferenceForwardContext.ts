@@ -12,6 +12,14 @@ const injectionKey = Symbol(
   'ForwardReferenceInjectionKey'
 ) as InjectionKey<ForwardReferenceContextValue>
 
+const EMPTY_VALUE = {}
+
+export const useSafeReferenceForwardContent = () => {
+  // prevent Vue from console errors in dev
+  const contextValue = inject(injectionKey, EMPTY_VALUE)
+  return contextValue === EMPTY_VALUE ? undefined : (contextValue as ForwardReferenceContextValue)
+}
+
 export const useReferenceForwardContext = () => {
   const contextValue = useSafeReferenceForwardContent()
   if (!contextValue) {
@@ -22,14 +30,6 @@ export const useReferenceForwardContext = () => {
     )
   }
   return contextValue
-}
-
-const EMPTY_VALUE = {}
-
-export const useSafeReferenceForwardContent = () => {
-  // prevent Vue from console errors in dev
-  const contextValue = inject(injectionKey, EMPTY_VALUE)
-  return contextValue === EMPTY_VALUE ? undefined : (contextValue as ForwardReferenceContextValue)
 }
 
 export const providePopupContextValue = (contextValue: ForwardReferenceContextValue) => {
