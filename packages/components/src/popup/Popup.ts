@@ -6,8 +6,7 @@ import {
   watch,
   getCurrentInstance,
   onBeforeUnmount,
-  onMounted,
-  onUpdated
+  onMounted
 } from 'vue-demi'
 import type { VNode } from 'vue-demi'
 import { withDirectives, vShow, Teleport, cloneVNode } from 'vue'
@@ -34,11 +33,16 @@ import { createSimpleCompatVueInstance, createCompatElement } from '../utils/com
 import { useElementProps } from '../utils/useElementsProps'
 import { isOn, transformLegacyListeners } from '../utils/on'
 import { getRawChildren, wrapTextNodeIfNeed } from '../utils/getRawChildren'
-import { useForwardReferenceContext } from './ForwardReferenceContext'
+import {
+  createReferenceForwardContext,
+  useSafeReferenceForwardContent
+} from './ReferenceForwardContext'
+import { useFirseRealElement } from '../utils/useFirstRealElement'
 
-const popupCls = 'visoning-popup'
-
-const floatingCls = 'visoning-floating'
+const classNames = {
+  popup: 'visoning-popup',
+  floating: 'visoning-floating'
+} as const
 
 export const Popup = defineComponent({
   name: 'VisoningPopup',
@@ -74,20 +78,33 @@ export const Popup = defineComponent({
     // Element refs ====================================
     //
 
-    const floatingElRef = ref<HTMLElement>()
-    const referenceElRef = ref<HTMLElement>()
-
-    const mergedReferenceElRef = computed(() => props.virtualElement || referenceElRef.value)
-
     const currentInstance = getCurrentInstance()
-    if (!isVue3) {
-      const updateReference = () => {
-        referenceElRef.value = currentInstance?.proxy?.$el as HTMLElement
-      }
 
-      onMounted(updateReference)
-      onUpdated(updateReference)
+    // reference capture
+    const firstRealElementRef = useFirseRealElement(currentInstance)
+    const referenceForwardRef = createReferenceForwardContext()
+
+    const referenceRealElementRef = computed(
+      () =>
+        // We will wrap the text node as a real element node,
+        // if the root node of a component is text, then this component is a multi-subset component.
+        // In this case, we cannot know exactly which subset the user wants As a real reference,
+        // so we need to return "null" for ForwardReference to pass.
+        firstRealElementRef.value || referenceForwardRef.value
+    )
+
+    // reference forward
+    const referenceForward = useSafeReferenceForwardContent()
+    if (referenceForward) {
+      watch(referenceRealElementRef, () =>
+        referenceForward.forwardReference(referenceRealElementRef.value)
+      )
     }
+
+    const mergedReferenceElRef = computed(
+      () => props.virtualElement || referenceRealElementRef.value
+    )
+    const floatingElRef = ref<HTMLElement>()
 
     //
     // Interactions ====================================
@@ -199,7 +216,7 @@ export const Popup = defineComponent({
         'div',
         {
           data: mergeProps(elementPropsRef.value.floating, {
-            class: popupCls
+            class: classNames.popup
           })
         },
         slots.default?.(slotProps)
@@ -292,7 +309,7 @@ export const Popup = defineComponent({
         {
           data: {
             ref: floatingElRef,
-            class: floatingCls,
+            class: classNames.floating,
             style: getFloatingStyle(slotProps)
           }
         },
@@ -336,29 +353,8 @@ export const Popup = defineComponent({
 
       if (isVue3) {
         rawChild = cloneVNode(rawChild, {
-          ...mergeProps(currentInstance?.proxy.$attrs, elementPropsRef.value.reference)
+          ...mergeProps(currentInstance?.proxy?.$attrs, elementPropsRef.value.reference)
         })
-
-        // Capture reference
-        // Because Vue supports element hoisting for HOC, so we can do this,
-        // it is also to avoid that the real $el cannot be obtained through currentInstance
-        // when the node is in the Fragment.
-        withDirectives(rawChild as any, [
-          [
-            {
-              mounted(el) {
-                referenceElRef.value = el
-              },
-              updated(el) {
-                referenceElRef.value = el
-              },
-              unmounted() {
-                referenceElRef.value = undefined
-              }
-            }
-          ]
-        ]) as unknown as VNode
-
         return [rawChild, floatingNode]
       } else {
         const data = rawChild.data || (rawChild.data = {})

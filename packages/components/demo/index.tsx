@@ -38,7 +38,8 @@ const proxy = createSimpleCompatVueInstance({
                 title: 'Popover content:',
                 content: 'Can be any react node!',
                 theme: 'dark',
-                appendTo: appendToBodyRef.value,
+                // appendTo: appendToBodyRef.value,
+                appendTo: false,
                 'onUpdate:open': (open) => console.log('popover', open)
               },
               scopedSlots: {
@@ -48,18 +49,18 @@ const proxy = createSimpleCompatVueInstance({
             })
         }
       }),
-      createCompatElement(Tooltip, {
-        data: {
-          content: 'Can be any react node!',
-          theme: 'dark',
-          appendTo: appendToBodyRef.value,
-          'onUpdate:open': (open) => console.log('tooltip', open)
-        },
-        scopedSlots: {
-          default: () => h('div', 'My Tooltip'),
-          reference: () => h('button', 'Hover and transition')
-        }
-      })
+      // createCompatElement(Tooltip, {
+      //   data: {
+      //     content: 'Can be any react node!',
+      //     theme: 'dark',
+      //     appendTo: appendToBodyRef.value,
+      //     'onUpdate:open': (open) => console.log('tooltip', open)
+      //   },
+      //   scopedSlots: {
+      //     default: () => h('div', 'My Tooltip'),
+      //     reference: () => h('button', 'Hover and transition')
+      //   }
+      // })
     ])
   }
 })
