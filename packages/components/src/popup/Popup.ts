@@ -133,7 +133,8 @@ export const Popup = defineComponent({
         interactionsContext,
         computed(() => ({
           disabled: !hasInteraction('hover'),
-          delay: props.hoverDelay ?? props.delay
+          delay: props.hoverDelay ?? props.delay,
+          keepOpenWhenPopupHover: !!props.keepOpenWhenPopupHover
         }))
       ),
       useFocus(
@@ -147,7 +148,8 @@ export const Popup = defineComponent({
         interactionsContext,
         computed(() => ({
           disabled: !hasInteraction('click'),
-          delay: props.clickDelay ?? props.delay
+          delay: props.clickDelay ?? props.delay,
+          closeWhenClickOutside: !!props.closeWhenClickOutside
         }))
       ),
       // user

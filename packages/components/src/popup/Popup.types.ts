@@ -58,6 +58,8 @@ export const PopupProps = {
    */
   virtualElement: Object as PropType<VirtualElement>,
 
+  // virtualElementId: String,
+
   /**
    * When this value is `true`, popup will be teleport to the target.
    * The teleport to target must be already in the DOM when the <Teleport> component is mounted.
@@ -68,12 +70,14 @@ export const PopupProps = {
    * ```tsx
    * {
    *   appendTo: false,
-   *   floatingWrapper: (popup) => h(
+   *   floatingWrapper: (floating) => h(
    *    Teleport,
    *    {
    *      to: anyTarget
    *    },
-   *    [popup]
+   *    {
+   *      default: () => [floating]
+   *    }
    *   )
    * }
    * ```
@@ -110,6 +114,23 @@ export const PopupProps = {
    * Delay in ms, before popup is open/close on focus/blur.
    */
   focusDelay: [Number, Object] as PropType<Delay>,
+
+  /**
+   * Whether to keep the popup open on mouse hover
+   */
+  keepOpenWhenPopupHover: {
+    type: Boolean,
+    default: true
+  },
+
+  /**
+   * Whether to close by clicking outside.
+   * @default true
+   */
+  closeWhenClickOutside: {
+    type: Boolean,
+    default: true
+  },
 
   /**
    * When this value is `false`, even if the popup is closed, floating will update the position as needed,
@@ -200,6 +221,9 @@ export const PopupProps = {
    */
   onClose: Function as PropType<(info: InteractionInfo) => void>,
 
+  /**
+   * Callback on floating data update.
+   */
   onFloatingDataUpdate: Function as PropType<(data: FloatingData) => void>
 } as const
 

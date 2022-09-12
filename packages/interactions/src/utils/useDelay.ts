@@ -9,7 +9,7 @@ export interface UseDelayReturn {
   delaying: Ref<boolean>
 }
 
-export function useDelay(delay?: MaybeRef<number | undefined>, cb?: Function): UseDelayReturn {
+export function useDelay(delay?: MaybeRef<number | undefined>, cb?: () => void): UseDelayReturn {
   const delayingRef = ref(false)
 
   if (!delay) {

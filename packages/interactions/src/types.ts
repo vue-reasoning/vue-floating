@@ -1,5 +1,6 @@
+import type { ComputedRef, Ref } from 'vue-demi'
+import { computed, unref, isRef } from 'vue-demi'
 import type { ReferenceType } from '@visoning/vue-floating-core'
-import type { Ref } from 'vue-demi'
 
 export type MaybeRef<T> = T | Ref<T>
 
@@ -8,21 +9,10 @@ export interface ElementRefs<RT extends ReferenceType = ReferenceType> {
   floating: Ref<HTMLElement | null | undefined>
 }
 
-export type DelayType = 'open' | 'close'
-export type Delay = number | Partial<Record<DelayType, number>> | undefined
-
 export interface InteractionInfo {
   type: string | null
   event?: Event | null
 }
-
-export const makeInteractionInfoFactory =
-  <T extends InteractionInfo = InteractionInfo>(type: InteractionInfo['type']) =>
-  (event: T['event']): T =>
-    ({
-      type,
-      event
-    } as T)
 
 export interface InteractionsContext<
   RT extends ReferenceType = ReferenceType,
@@ -37,4 +27,21 @@ export interface InteractionsContext<
 export interface ElementProps {
   reference?: Record<string, any>
   floating?: Record<string, any>
+}
+
+export type DelayType = 'open' | 'close'
+export type Delay = number | Partial<Record<DelayType, number>> | undefined
+
+export function getDelay(type: DelayType, delay: Ref<Delay>): ComputedRef<number | undefined>
+export function getDelay(type: DelayType, delay?: Delay): number | undefined
+export function getDelay(
+  type: DelayType,
+  delay?: MaybeRef<Delay>
+): ComputedRef<number | undefined> | number | undefined
+export function getDelay(
+  type: DelayType,
+  delay?: MaybeRef<Delay>
+): ComputedRef<number | undefined> | number | undefined {
+  const get = (delay: Delay) => (typeof delay === 'number' ? delay : delay && delay[type])
+  return isRef(delay) ? computed(() => get(unref(delay))) : get(delay)
 }

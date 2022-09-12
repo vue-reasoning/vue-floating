@@ -1,18 +1,16 @@
 import { computed, unref, watch } from 'vue-demi'
 import type { Ref } from 'vue-demi'
+import { useManualEffect } from '@visoning/vue-floating-core'
 
 import type { ElementProps, InteractionsContext, MaybeRef, InteractionInfo, Delay } from '../types'
-import { makeInteractionInfoFactory } from '../types'
 import { useDelayInteraction } from '../utils/useDelayInteraction'
 import { contains } from '../utils/contains'
 import { getDocument } from '../utils/getDocument'
 
-export const HoverKey = 'hover'
-
-const makeHoverInfo = makeInteractionInfoFactory<HoverInteractionInfo>(HoverKey)
+export const HoverInteractionType = 'hover'
 
 export interface HoverInteractionInfo extends InteractionInfo {
-  type: typeof HoverKey
+  type: typeof HoverInteractionType
   event: PointerEvent
 }
 
@@ -40,12 +38,17 @@ export interface UseHoverOptions {
   delay?: Delay
 
   /**
+   * Whether to keep the open status on mouse hover
+   */
+  keepOpenWhenPopupHover?: boolean
+
+  /**
    * Instead of closing the floating element when the cursor leaves its reference,
    * we can leave it open until a certain condition is satisfied.
    *
    * This handler runs on `pointermove`.
    */
-  handleClose?: (event: PointerEvent) => boolean
+  handleLeave?: (event: PointerEvent) => boolean
 }
 
 export function useHover(
@@ -53,17 +56,31 @@ export function useHover(
   options: MaybeRef<UseHoverOptions> = {}
 ): Readonly<Ref<ElementProps>> {
   const optionsRef = computed(() => unref(options))
-  const userControlRef = computed(() => optionsRef.value.handleClose)
-  const userWantControlRef = computed(() => !!userControlRef.value)
 
-  let triggerEvent: HoverInteractionInfo['event']
+  const interactionInfo = {
+    type: HoverInteractionType
+  } as HoverInteractionInfo
+
+  const setInteractionInfo = (
+    type: HoverInteractionInfo['type'],
+    event: HoverInteractionInfo['event']
+  ) => {
+    interactionInfo.type = type
+    interactionInfo.event = event
+  }
+
+  const userControl = useManualEffect(() => {
+    const doc = getDocument(context.refs.floating.value)
+    doc.addEventListener('pointermove', handlePointerMove)
+
+    return () => {
+      doc.removeEventListener('pointermove', handlePointerMove)
+    }
+  })
 
   const { open: openDelay, close: closeDelay } = useDelayInteraction(
     computed(() => optionsRef.value.delay),
-    {
-      open: () => context.setOpen(true, makeHoverInfo(triggerEvent)),
-      close: () => context.setOpen(false, makeHoverInfo(triggerEvent))
-    }
+    (open) => context.setOpen(open, interactionInfo)
   )
 
   const isAllowPointerEvent = ({ pointerType }: PointerEvent) => {
@@ -71,13 +88,16 @@ export function useHover(
     return !pointerTypes || pointerTypes.includes(pointerType as MousePointerType)
   }
 
-  const triggerInContainers = (event: PointerEvent) => {
+  const inContainers = (target: Element) => {
     const { floating, reference } = context.refs
-    return contains(event.relatedTarget as Element, [floating.value, reference.value])
+    const containers = optionsRef.value.keepOpenWhenPopupHover
+      ? [floating.value, reference.value]
+      : [reference.value]
+    return contains(target, containers)
   }
 
   const handlePointerEnter = (event: PointerEvent) => {
-    clearUserControlEffect()
+    userControl.clear()
 
     if (!isAllowPointerEvent(event)) {
       return
@@ -86,67 +106,45 @@ export function useHover(
     closeDelay.clear()
 
     if (!context.open.value) {
-      triggerEvent = event
+      setInteractionInfo(HoverInteractionType, event)
       openDelay.delay()
     }
   }
 
   const handlePointerLeave = (event: PointerEvent) => {
-    if (!isAllowPointerEvent(event) || triggerInContainers(event)) {
+    if (!isAllowPointerEvent(event) || inContainers(event.relatedTarget as Element)) {
       return
     }
 
     openDelay.clear()
 
-    const doClose = () => {
-      if (context.open.value) {
-        triggerEvent = event
+    if (context.open.value) {
+      if (optionsRef.value.handleLeave) {
+        userControl.reset()
+      } else {
+        setInteractionInfo(HoverInteractionType, event)
         closeDelay.delay()
       }
     }
-
-    if (context.open.value) {
-      if (userWantControlRef.value) {
-        handleUserControl(doClose)
-      } else {
-        doClose()
-      }
-    }
   }
 
-  let userControlEffect: Function | null = null
+  const handlePointerMove = (event: PointerEvent) => {
+    const handleLeave = optionsRef.value.handleLeave
 
-  const handleUserControl = (next: Function) => {
-    clearUserControlEffect()
-
-    const handlePointerMove = (event: PointerEvent) => {
-      if (!context.open.value || !userWantControlRef.value) {
-        clearUserControlEffect()
-        return
-      }
-
-      if (userControlRef.value!(event)) {
-        next()
-      }
+    if (!context.open.value || !handleLeave) {
+      userControl.clear()
+      return
     }
 
-    const doc = getDocument(context.refs.floating.value)
-    doc.addEventListener('pointermove', handlePointerMove)
+    setInteractionInfo(HoverInteractionType, event)
 
-    userControlEffect = () => {
-      doc.removeEventListener('pointermove', handlePointerMove)
-    }
-  }
-
-  const clearUserControlEffect = () => {
-    if (userControlEffect) {
-      userControlEffect()
-      userControlEffect = null
+    if (handleLeave(event)) {
+      closeDelay.delay()
     }
   }
 
   const handleFloatingPointerEnter = (event: PointerEvent) => {
-    clearUserControlEffect()
+    userControl.clear()
 
     if (!isAllowPointerEvent(event)) {
       return
@@ -156,28 +154,19 @@ export function useHover(
   }
 
   const handleFloatingPointerLeave = (event: PointerEvent) => {
-    if (!isAllowPointerEvent(event) || triggerInContainers(event)) {
+    if (!isAllowPointerEvent(event) || inContainers(event.relatedTarget as Element)) {
       return
     }
 
-    triggerEvent = event
+    setInteractionInfo(HoverInteractionType, event)
     closeDelay.delay()
   }
 
   watch(context.open, () => {
     openDelay.clear()
     closeDelay.clear()
-    clearUserControlEffect()
+    userControl.clear()
   })
-
-  watch(
-    () => optionsRef.value.disabled,
-    (disabled) => {
-      if (disabled) {
-        clearUserControlEffect()
-      }
-    }
-  )
 
   const elementProps = {
     reference: {
@@ -190,5 +179,18 @@ export function useHover(
     }
   }
 
-  return computed(() => (optionsRef.value.disabled ? {} : elementProps))
+  return computed(() => {
+    const { value: options } = optionsRef
+    if (options.disabled) {
+      return {}
+    }
+
+    if (!options.keepOpenWhenPopupHover) {
+      return {
+        reference: elementProps.reference
+      }
+    }
+
+    return elementProps
+  })
 }

@@ -1,15 +1,16 @@
 import { computed, Ref, ref, unref, watch } from 'vue-demi'
+import { useManualEffect } from '@visoning/vue-floating-core'
 
 import type { ElementProps, InteractionsContext, MaybeRef, InteractionInfo, Delay } from '../types'
-import { makeInteractionInfoFactory } from '../types'
+import { getDocument } from '../utils/getDocument'
 import { useDelayInteraction } from '../utils/useDelayInteraction'
+import { contains } from '../utils/contains'
 
-export const ClickKey = 'click'
-
-const makeClickInfo = makeInteractionInfoFactory<ClickInteractionInfo>(ClickKey)
+export const ClickInteractionType = 'click'
+export const ClickOutsideInteractionType = 'clickOutside'
 
 export interface ClickInteractionInfo extends InteractionInfo {
-  type: typeof ClickKey
+  type: typeof ClickInteractionType | typeof ClickOutsideInteractionType
   event: KeyboardEvent | MouseEvent
 }
 
@@ -37,6 +38,11 @@ export interface UseClickOptions {
   delay?: Delay
 
   /**
+   * Whether to close by clicking outside.
+   */
+  closeWhenClickOutside?: boolean
+
+  /**
    * Callback before reference click, This handler runs on click.
    * We will use the return value of the callback to confirm whether the click should be allowed or not.
    */
@@ -49,29 +55,57 @@ export function useClick(
 ): Readonly<Ref<ElementProps>> {
   const optionsRef = computed(() => unref(options))
 
-  let triggerEvent: ClickInteractionInfo['event']
+  const interactionInfo = {
+    type: ClickInteractionType
+  } as ClickInteractionInfo
+
+  const setInteractionInfo = (
+    type: ClickInteractionInfo['type'],
+    event: ClickInteractionInfo['event']
+  ) => {
+    interactionInfo.type = type
+    interactionInfo.event = event
+  }
 
   const { open: openDelay, close: closeDelay } = useDelayInteraction(
     computed(() => optionsRef.value.delay),
-    {
-      open: () => context.setOpen(true, makeClickInfo(triggerEvent)),
-      close: () => context.setOpen(false, makeClickInfo(triggerEvent))
-    }
+    (open) => context.setOpen(open, interactionInfo)
   )
 
-  watch(context.open, () => {
-    openDelay.clear()
-    closeDelay.clear()
+  const inContainers = (target: Element) => {
+    const { floating, reference } = context.refs
+    const containers = [floating.value, reference.value]
+    return contains(target, containers)
+  }
+
+  const handleClickOutside = (event: PointerEvent) => {
+    if (
+      isAllowPointerEvent(event) &&
+      // to other handlers
+      !inContainers(event.target as Element) &&
+      context.open.value
+    ) {
+      setInteractionInfo(ClickOutsideInteractionType, event)
+      openDelay.clear()
+      closeDelay.delay()
+    }
+  }
+
+  const clickOutside = useManualEffect(() => {
+    const doc = getDocument(context.refs.floating.value)
+    doc.addEventListener('pointerdown', handleClickOutside)
+
+    return () => doc.removeEventListener('pointerdown', handleClickOutside)
   })
 
   const toggle = (event: ClickInteractionInfo['event']) => {
-    triggerEvent = event
-
     const userControl = optionsRef.value.handleToggle
     const currentOpen = context.open.value
     if (userControl && !userControl(event, currentOpen)) {
       return
     }
+
+    setInteractionInfo(ClickInteractionType, event)
 
     if (currentOpen || openDelay.delaying.value) {
       openDelay.clear()
@@ -128,6 +162,16 @@ export function useClick(
       toggle(event)
     }
   }
+
+  watch(context.open, (open) => {
+    openDelay.clear()
+    closeDelay.clear()
+    clickOutside.clear()
+
+    if (open && optionsRef.value.closeWhenClickOutside) {
+      clickOutside.reset()
+    }
+  })
 
   const elementProps = {
     reference: {
