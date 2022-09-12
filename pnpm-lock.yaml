@@ -51,8 +51,8 @@ importers:
     specifiers:
       '@floating-ui/core': ^1.0.0
       '@floating-ui/dom': ^1.0.0
-      '@visoning/vue-floating-core': workspace:*
-      '@visoning/vue-floating-interactions': workspace:*
+      '@visoning/vue-floating-core': 0.0.1
+      '@visoning/vue-floating-interactions': 0.0.1
       sass: ^1.54.8
     dependencies:
       '@floating-ui/core': 1.0.0

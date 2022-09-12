@@ -37,7 +37,7 @@ const proxy = createSimpleCompatVueInstance({
             createCompatElement(Popover, {
               data: {
                 title: 'Popover content:',
-                content: 'Can be any react node!',
+                content: 'Can be any node!',
                 theme: 'dark',
                 // appendTo: appendToBodyRef.value,
                 appendTo: false,
@@ -53,7 +53,7 @@ const proxy = createSimpleCompatVueInstance({
       }),
       createCompatElement(Tooltip, {
         data: {
-          content: 'Can be any react node!',
+          content: 'Can be any node!',
           theme: 'dark',
           appendTo: appendToBodyRef.value,
           'onUpdate:open': (open) => console.log('tooltip', open)

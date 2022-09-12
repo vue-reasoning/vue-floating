@@ -68,8 +68,6 @@
 }
 
 @include popover-dark() {
-  $popover-selector: '';
-
   @include popover(arrow) {
     border-color: transparent get-popover-css-var-value-dark(bg-color)
       get-popover-css-var-value-dark(bg-color) transparent;
