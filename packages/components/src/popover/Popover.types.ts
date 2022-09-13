@@ -48,6 +48,8 @@ export const PopoverExtendsPopupProps = {
   ])
 } as const
 
+export const PopoverTransitionName = 'visoning-popover'
+
 export const PopoverProps = {
   ...PopoverExtendsPopupProps,
 
@@ -70,12 +72,17 @@ export const PopoverProps = {
     default: 'light'
   },
 
+  size: {
+    type: String as PropType<'small' | 'meduim'>,
+    default: 'meduim'
+  },
+
   /**
    * @see https://cn.vuejs.org/guide/built-ins/transition.html
    */
   transitionProps: {
     type: [String, Object] as PropType<string | Record<string, any>>,
-    default: 'visoning-popover'
+    default: PopoverTransitionName
   },
 
   /**
@@ -101,9 +108,14 @@ export const PopoverProps = {
   arrowProps: Object as PropType<Record<string, any>>,
 
   /**
-   * HTML attributes of node.
+   * HTML attributes of popover node.
    */
   popoverProps: PopupProps.popupProps,
+
+  /**
+   * HTML attributes of popover-content node.
+   */
+  contentProps: PopupProps.popupProps,
 
   /**
    * Custom popover node wrapper.

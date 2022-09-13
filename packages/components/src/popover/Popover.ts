@@ -1,5 +1,5 @@
 import { defineComponent, computed, ref, h, isVue3 } from 'vue-demi'
-import { Transition } from 'vue'
+import Vue3 from 'vue'
 import { arrow as coreArrow } from '@floating-ui/core'
 
 import { Popup, PopupExposed } from '../popup'
@@ -9,7 +9,8 @@ import { isEmpty } from '../utils/isEmpty'
 import { pick } from '../utils/pick'
 import { listenersForward } from '../utils/listenersForward'
 import { mergeProps } from '../utils/mergeProps'
-import { PopoverExtendsPopupProps, PopoverProps, PopoverArrowSlotProps } from './Popover.types'
+import { PopoverExtendsPopupProps, PopoverProps, PopoverTransitionName } from './Popover.types'
+import type { PopoverArrowSlotProps } from './Popover.types'
 
 import './styles/index.scss'
 
@@ -82,33 +83,39 @@ export const Popover = defineComponent({
     //
 
     const transitionWrapper = (popup: any) => {
-      const { transitionProps, popoverWrapper: userWrapper } = props
+      const { transitionProps, popoverWrapper } = props
 
       if (transitionProps) {
-        const normalizedProps =
-          typeof transitionProps === 'string' ? { name: transitionProps } : transitionProps
+        const transitionData =
+          typeof transitionProps === 'string'
+            ? { name: transitionProps }
+            : { name: PopoverTransitionName, ...transitionProps }
 
         if (isVue3) {
           const rawPopup = popup
-          popup = createCompatElement(Transition, {
-            data: normalizedProps,
+          popup = createCompatElement(Vue3.Transition, {
+            data: transitionData,
             scopedSlots: {
               default: () => rawPopup
             }
           })
         } else {
           popup = createCompatElement(
-            isVue3 ? Transition : 'transition',
+            'transition',
             {
-              data: normalizedProps
+              data: transitionData
             },
             [popup]
           )
         }
       }
 
-      return typeof userWrapper === 'function' ? userWrapper(popup) : popup
+      return typeof popoverWrapper === 'function' ? popoverWrapper(popup) : popup
     }
+
+    //
+    // Render ====================================
+    //
 
     // render content
     const renderContent = (slotProps: PopupSlotProps) => {
@@ -125,9 +132,9 @@ export const Popover = defineComponent({
             ...mergeProps(props.popoverProps, {
               class: [
                 popoverCls,
+                `size-${props.size}`,
                 {
-                  'with-arrow': showArrow,
-                  dark: props.theme === 'dark'
+                  'theme-dark': props.theme === 'dark'
                 }
               ],
               'data-placement': slotProps.placement
@@ -135,21 +142,15 @@ export const Popover = defineComponent({
           }
         },
         [
-          h(
+          createCompatElement(
             'div',
             {
-              class: `${popoverCls}-content`
+              data: mergeProps(props.contentProps, {
+                class: `${popoverCls}-content`
+              })
             },
             [
-              hasTitle
-                ? h(
-                    'div',
-                    {
-                      class: `${popoverCls}-title`
-                    },
-                    [title]
-                  )
-                : null,
+              hasTitle ? h('div', { class: `${popoverCls}-title` }, [title]) : null,
               hasContent ? content : slots.default?.()
             ]
           ),

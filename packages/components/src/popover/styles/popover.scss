@@ -1,10 +1,10 @@
 @use 'sass:map' as map;
-
-@import 'config';
-@import 'mixins';
+@use 'mixins' as *;
+@use 'config';
 
 // CSS Variables
 
+// --vpopover-content-padding
 // --vpopover-font-color
 // --vpopover-bg-color
 // --vpopover-box-shadow
@@ -17,20 +17,20 @@
 //
 
 @include popover() {
-  @include popover-css-var-declare(map.keys($popover-variables)...);
+  @include use-popover-css-var-declare(map.keys($popover-variables)...);
 
   position: relative;
 }
 
-@include popover-dark() {
-  @include popover-css-var-declare-dark(map.keys($popover-variables)...);
+@include popover-with-dark() {
+  @include use-popover-css-var-declare-dark(map.keys($popover-variables)...);
 }
 
 //
 // Content
 //
 
-@include popover-theme-style(content, (content-padding, font-color, bg-color, box-shadow)) {
+@include popover-with-theme-style(content, (content-padding, font-color, bg-color, box-shadow)) {
   font-size: 14px;
   line-height: 18px;
   border-radius: 8px;
@@ -41,7 +41,7 @@
 // Title
 //
 
-@include popover-theme-style(title, (font-color)) {
+@include popover-with-theme-style(title, (font-color)) {
   font-size: 18px;
   font-weight: 500;
   line-height: 24px;
@@ -51,7 +51,7 @@
 // Arrow
 //
 
-@include popover-theme-style(arrow, (arrow-box-shadow)) {
+@include popover-with-theme-style(arrow, (arrow-box-shadow)) {
   position: absolute;
   width: 8px;
   height: 8px;
@@ -60,14 +60,14 @@
   transform: rotateZ(45deg);
 }
 
-@include arrow-in-popover-placement() {
+@include arrow-in-popover-with-placement() {
   margin: 0;
   border-width: 4px;
   border-color: transparent get-popover-css-var-value(bg-color) get-popover-css-var-value(bg-color)
     transparent;
 }
 
-@include popover-dark() {
+@include popover-with-dark() {
   @include popover(arrow) {
     border-color: transparent get-popover-css-var-value-dark(bg-color)
       get-popover-css-var-value-dark(bg-color) transparent;
@@ -82,7 +82,7 @@
   padding-bottom: 6px;
 }
 
-@include arrow-in-popover-placement(top) {
+@include arrow-in-popover-with-placement(top) {
   transform: rotateZ(45deg);
   bottom: 2px;
 }
@@ -91,7 +91,7 @@
   padding-left: 6px;
 }
 
-@include arrow-in-popover-placement(right) {
+@include arrow-in-popover-with-placement(right) {
   transform: rotateZ(135deg);
   left: 2px;
 }
@@ -100,7 +100,7 @@
   padding-top: 6px;
 }
 
-@include arrow-in-popover-placement(bottom) {
+@include arrow-in-popover-with-placement(bottom) {
   transform: rotateZ(-135deg);
   top: 2px;
 }
@@ -109,7 +109,7 @@
   padding-right: 6px;
 }
 
-@include arrow-in-popover-placement(left) {
+@include arrow-in-popover-with-placement(left) {
   transform: rotateZ(-45deg);
   right: 2px;
 }
@@ -129,4 +129,16 @@
 
 @include popover(leave-active) {
   transition: opacity 100ms cubic-bezier(0.4, 0, 1, 1), transform 100ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+//
+// Size
+//
+
+@include popover-with-size(small) {
+  @include popover(content) {
+    padding: 8px 12px 7px 12px;
+    font-size: 12px;
+    line-height: 15px;
+  }
 }

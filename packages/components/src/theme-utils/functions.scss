@@ -1,0 +1,81 @@
+@use 'sass:map' as map;
+@use 'sass:meta' as meta;
+@use 'sass:list' as list;
+@use 'config';
+
+//
+// Variables
+//
+
+@function gen-variable($css-var, $css-prop, $light-value, $theme-value) {
+  @if meta.type-of($css-var) == 'list' {
+    $keys: map.values($variable-keys);
+    $values: $css-var;
+
+    $variable: ();
+
+    $length: min(list.length($keys), list.length($keys));
+
+    @for $i from 1 to $length {
+      $variable: map.merge($variable, (#{list.nth($keys, $i)}: list.nth($values, $i)));
+    }
+  } @else {
+    @debug $variable-key-css-var;
+    @return (
+      #{$variable-key-css-var}: $css-var,
+      #{$variable-key-css-prop}: $css-prop,
+      #{$variable-key-theme-light}: $light-value,
+      #{$variable-key-theme-dark}: $theme-value
+    );
+  }
+}
+
+@function get-css-value($variables, $prop, $theme: $default-theme) {
+  @return map.get($variables, $prop, $theme);
+}
+
+@function get-css-value-dark($variables, $prop) {
+  @return map.get($variables, $prop, $variable-key-theme-dark);
+}
+
+@function get-css-var-name($variables, $prop) {
+  @return map.get($variables, $prop, $variable-key-css-var);
+}
+
+@function get-css-prop($variables, $prop) {
+  @return map.get($variables, $prop, $variable-key-css-prop);
+}
+
+@function get-css-var-value($variables, $prop, $theme: $default-theme) {
+  $value: get-css-value($variables, $prop, $theme);
+  $css-var-name: get-css-var-name($variables, $prop);
+
+  @if variable-exists($css-var-name) {
+    @return var(#{$css-var-name}, #{$value});
+  } @else {
+    @return $value;
+  }
+}
+
+@function get-css-var-value-dark($variables, $prop) {
+  @return get-css-var-value($variables, $prop, $variable-key-theme-dark);
+}
+
+@function normalize-theme-and-props($theme, $props...) {
+  @if $theme != '' and $theme != $variable-key-theme-light and $theme != $variable-key-theme-dark {
+    $props: list.append($props, $theme);
+    $theme: $default-theme;
+  }
+
+  @return (theme: $theme, props: $props);
+}
+
+//
+// Data Placement
+//
+
+@function get-placement-selector($placement: '') {
+  $value: if($placement == '', '', '*=' + $placement + '');
+  $selector: #{'[' + $placement-attr + $value + ']'};
+  @return $selector;
+}

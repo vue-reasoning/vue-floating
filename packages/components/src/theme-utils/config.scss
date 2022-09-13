@@ -1,1 +1,21 @@
-$namespace: 'visoning' !default;
+@use 'sass:map' as map;
+
+$placement-attr: 'data-placement';
+
+//
+// Variable Key
+//
+
+$variable-keys: (
+  css-var: 'css-var',
+  css-prop: 'css-prop',
+  theme-light: 'theme-light',
+  theme-dark: 'theme-dark'
+);
+
+$variable-key-css-var: map.get($variable-keys, 'css-var');
+$variable-key-css-prop: map.get($variable-keys, 'css-prop');
+$variable-key-theme-light: map.get($variable-keys, 'theme-light');
+$variable-key-theme-dark: map.get($variable-keys, 'theme-dark');
+
+$default-theme: $variable-key-theme-light;

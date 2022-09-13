@@ -1,100 +1,78 @@
 @use 'sass:list' as list;
+@use 'sass:meta' as meta;
 @use 'sass:map' as map;
 
-@import '../../theme-utils';
+@use '../../theme-utils';
 @import 'config';
-
-//
-// Variables
-//
-
-@function _get-var($prop, $theme: 'light') {
-  @return map.get($popover-variables, $prop, $theme);
-}
-
-@function get-var($prop) {
-  @return _get-var($prop, 'light');
-}
-
-@function get-dark-var() {
-  @return _get-var($prop, 'dark');
-}
-
-@mixin _popover-css-var-declare($theme: 'light', $props...) {
-  @each $prop in $props {
-    #{map.get($popover-variables, $prop, 'var')}: _get-var($prop, $theme);
-  }
-}
-
-@mixin popover-css-var-declare($props...) {
-  @include _popover-css-var-declare('light', $props...);
-}
-
-@mixin popover-css-var-declare-dark($props...) {
-  @include _popover-css-var-declare('dark', $props...);
-}
-
-@function _get-popover-css-var-value($theme: 'light', $prop) {
-  $value: _get-var($prop, $theme);
-  $var-prop: map.get($popover-variables, $prop, 'var');
-
-  @if variable-exists($var-prop) {
-    @return var(#{map.get($popover-variables, $prop, 'var')}, $value);
-  } @else {
-    @return $value;
-  }
-}
-
-@function get-popover-css-var-value($prop) {
-  @return _get-popover-css-var-value('light', $prop);
-}
-
-@function get-popover-css-var-value-dark($prop) {
-  @return _get-popover-css-var-value('dark', $prop);
-}
-
-@mixin _popover-style($theme: 'light', $props...) {
-  @each $prop in $props {
-    #{map.get($popover-variables, $prop, 'prop')}: _get-popover-css-var-value($theme, $prop);
-  }
-}
-
-@mixin popover-style($props...) {
-  @include _popover-style('light', $props...);
-}
-
-@mixin popover-style-dark($props...) {
-  @include _popover-style('dark', $props...);
-}
 
 //
 // Namespace
 //
 
-$namespace: $popover-cls;
-
 @mixin popover($blocks...) {
-  @each $block in $blocks {
-    @include namespace($block) {
+  @if list.length($blocks) > 0 {
+    @each $block in $blocks {
+      .#{$popover-cls}-#{$block} {
+        @content;
+      }
+    }
+  } @else {
+    .#{$popover-cls} {
       @content;
     }
   }
 }
 
 //
-// Theme
+// Variables
 //
 
-@mixin popover-theme($theme) {
-  @include namespace($theme, '.') {
-    @content;
+@function get-popover-css-var-value($prop, $theme: $default-theme) {
+  @return get-css-var-value($popover-variables, $prop, $theme);
+}
+
+@function get-popover-css-var-value-dark($prop) {
+  @return get-css-var-value($popover-variables, $prop, $variable-key-theme-dark);
+}
+
+@mixin use-popover-css-var-declare($theme: $default-theme, $props...) {
+  $normalized: normalize-theme-and-props($theme, $props...);
+
+  @include use-css-var-declare(
+    $popover-variables,
+    map.get($normalized, 'theme'),
+    map.get($normalized, map.get($normalized, 'props'))...
+  );
+}
+
+@mixin use-popover-css-var-declare-dark($props...) {
+  @include use-popover-css-var-declare($variable-key-theme-dark, $props...);
+}
+
+@mixin use-popover-var-style($theme: $default-theme, $props...) {
+  $normalized: normalize-theme-and-props($theme, $props...);
+
+  @each $prop in map.get($normalized, 'props') {
+    #{get-css-prop($popover-variables, $prop)}: get-css-var-value(
+      $popover-variables,
+      $prop,
+      map.get($normalized, 'theme')
+    );
   }
 }
 
-@mixin popover-dark($blocks...) {
-  @include popover-theme($theme-name-dark) {
+@mixin use-popover-var-style-dark($props...) {
+  @include use-popover-var-style($variable-key-theme-dark, $props...);
+}
+
+//
+// Theme
+//
+
+@mixin popover-with-dark($blocks...) {
+  .#{$popover-cls}.#{$theme-cls-dark} {
     @if list.length($blocks) > 0 {
-      @include popover($blocks) {
+      @include popover($blocks...) {
         @content;
       }
     } @else {
@@ -103,36 +81,21 @@ $namespace: $popover-cls;
   }
 }
 
-@mixin popover-theme-css-var {
-}
-
-@mixin popover-theme-style($block, $props) {
+@mixin popover-with-theme-style($block, $props) {
   @include popover($block) {
     @content;
 
-    @include popover-style($props...);
+    @include use-popover-var-style($props...);
   }
 
-  @include popover-dark($block) {
-    @include popover-style-dark($props...);
+  @include popover-with-dark($block) {
+    @include use-popover-var-style-dark($props...);
   }
 }
 
 //
 // Placement
 //
-
-@function get-placement-selector($placement: '') {
-  $value: if($placement == '', '', '*=' + $placement + '');
-  $selector: #{'[' + $placement-mark + $value + ']'};
-  @return $selector;
-}
-
-@mixin with-placement($placement: '', $root: '') {
-  #{$root + get-placement-selector($placement)} {
-    @content;
-  }
-}
 
 @mixin popover-with-placement($placement: '') {
   @include with-placement($placement, '.' + $popover-cls) {
@@ -141,19 +104,27 @@ $namespace: $popover-cls;
 }
 
 //
-// With arrow
+// Arrow
 //
 
-@mixin with-arrow {
-  &.with-arrow {
-    @content;
-  }
-}
-
-@mixin arrow-in-popover-placement($placement: '') {
+@mixin arrow-in-popover-with-placement($placement: '') {
   @include popover-with-placement($placement) {
     @include popover(arrow) {
       @content;
     }
+  }
+}
+
+//
+// Size
+//
+
+@function get-popover-size-selector($size) {
+  @return '.size-' + $size;
+}
+
+@mixin popover-with-size($size) {
+  .#{$popover-cls}#{get-popover-size-selector($size)} {
+    @content;
   }
 }

@@ -1,5 +1,5 @@
 import { isVue3, Vue2, h } from 'vue-demi'
-import { createApp } from 'vue'
+import Vue3 from 'vue'
 
 import { mergeListeners } from './mergeProps'
 import { isOn, normalizeOn } from './on'
@@ -99,7 +99,7 @@ export const createSimpleCompatVueInstance = (options?: any): VueMountProxy => {
   const proxy = {} as VueMountProxy
 
   if (isVue3) {
-    const app = createApp(options)
+    const app = Vue3.createApp(options)
     let v3Instance: any
 
     proxy.mount = (container) =>

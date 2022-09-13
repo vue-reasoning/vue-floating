@@ -55,6 +55,7 @@ const proxy = createSimpleCompatVueInstance({
         data: {
           content: 'Can be any node!',
           theme: 'dark',
+          size: 'small',
           appendTo: appendToBodyRef.value,
           'onUpdate:open': (open) => console.log('tooltip', open)
         },

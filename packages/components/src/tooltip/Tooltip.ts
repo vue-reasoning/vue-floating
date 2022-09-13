@@ -8,8 +8,6 @@ import { Popover } from '../popover'
 import { listenersForward } from '../utils/listenersForward'
 import { mergeProps } from '../utils/mergeProps'
 
-// import './styles/index.scss'
-
 const prefixCls = 'visoning-tooltip'
 
 export const Tooltip = defineComponent({

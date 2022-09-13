@@ -1,8 +1,8 @@
+@import '../../theme-utils';
+
 $popover-cls: 'visoning-popover';
 
-$theme-name-dark: 'dark';
-
-$placement-mark: 'data-placement';
+$theme-cls-dark: 'theme-dark';
 
 // Common
 $--vpopover-content-padding: 12px 24px;
@@ -20,34 +20,39 @@ $--vpopover-box-shadow-dark: 0 6px 6px 0 rgba(22, 45, 61, 0.06), 0 0 18px 0 rgba
 $--vpopover-arrow-box-shadow-dark: 3px 3px 6px rgb(0 0 0 / 10%);
 
 $popover-variables: (
-  content-padding: (
-    var: '--vpopover-content-padding',
-    prop: 'padding',
-    light: $--vpopover-content-padding,
-    dark: $--vpopover-content-padding
-  ),
-  font-color: (
-    var: '--vpopover-font-color',
-    prop: 'color',
-    light: $--vpopover-font-color,
-    dark: $--vpopover-font-color-dark
-  ),
-  bg-color: (
-    var: '--vpopover-bg-color',
-    prop: 'background-color',
-    light: $--vpopover-bg-color,
-    dark: $--vpopover-bg-color-dark
-  ),
-  box-shadow: (
-    var: '--vpopover-box-shadow',
-    prop: 'box-shadow',
-    light: $--vpopover-box-shadow,
-    dark: $--vpopover-box-shadow-dark
-  ),
-  arrow-box-shadow: (
-    var: '--vpopover-arrow-box-shadow',
-    prop: 'box-shadow',
-    light: $--vpopover-arrow-box-shadow,
-    dark: $--vpopover-arrow-box-shadow-dark
-  )
+  content-padding:
+    gen-variable(
+      '--vpopover-content-padding',
+      'padding',
+      $--vpopover-content-padding,
+      $--vpopover-content-padding
+    ),
+  font-color:
+    gen-variable(
+      '--vpopover-font-color',
+      'color',
+      $--vpopover-font-color,
+      $--vpopover-font-color-dark
+    ),
+  bg-color:
+    gen-variable(
+      '--vpopover-bg-color',
+      'background-color',
+      $--vpopover-bg-color,
+      $--vpopover-bg-color-dark
+    ),
+  box-shadow:
+    gen-variable(
+      '--vpopover-box-shadow',
+      'box-shadow',
+      $--vpopover-box-shadow,
+      $--vpopover-box-shadow-dark
+    ),
+  arrow-box-shadow:
+    gen-variable(
+      '--vpopover-arrow-box-shadow',
+      'box-shadow',
+      $--vpopover-arrow-box-shadow,
+      $--vpopover-arrow-box-shadow-dark
+    )
 ) !default;

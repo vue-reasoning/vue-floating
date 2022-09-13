@@ -1,5 +1,5 @@
 import { isVue3 } from 'vue-demi'
-import { mergeProps as _mergeProps } from 'vue'
+import Vue3 from 'vue'
 
 import { isOn } from './on'
 
@@ -28,7 +28,7 @@ export const mergeProps: MergeProps = !isVue3
       }
       return ret
     }
-  : (_mergeProps as MergeProps)
+  : (Vue3.mergeProps as MergeProps)
 
 export function mergeListeners(...args: (Record<string, any> | undefined)[]) {
   const ret: Record<string, Function[]> = {}

@@ -9,7 +9,7 @@ import {
   onMounted
 } from 'vue-demi'
 import type { VNode } from 'vue-demi'
-import { withDirectives, vShow, Teleport, cloneVNode } from 'vue'
+import Vue3 from 'vue'
 import { offset, shift, flip, autoPlacement } from '@floating-ui/core'
 import { useManualEffect } from '@visoning/vue-floating-core'
 import type { Middleware } from '@visoning/vue-floating-core'
@@ -47,7 +47,7 @@ const classNames = {
 export const Popup = defineComponent({
   name: 'VisoningPopup',
 
-  inheritAttrs: !isVue3,
+  inheritAttrs: false,
 
   props: PopupProps,
 
@@ -226,7 +226,7 @@ export const Popup = defineComponent({
 
       // v-show
       if (isVue3) {
-        withDirectives(popupNode as any, [[vShow, mergedOpen, 'show']])
+        Vue3.withDirectives(popupNode as any, [[Vue3.vShow, mergedOpen, 'show']])
       } else {
         const vShowDirective = {
           name: 'show',
@@ -331,7 +331,7 @@ export const Popup = defineComponent({
 
       // teleport
       if (isVue3) {
-        return createCompatElement(Teleport, {
+        return createCompatElement(Vue3.Teleport, {
           data: {
             to: props.appendTo
           },
@@ -354,7 +354,7 @@ export const Popup = defineComponent({
       let rawChild = wrapTextNodeIfNeed(rawChildren[0] as any) as any
 
       if (isVue3) {
-        rawChild = cloneVNode(rawChild, {
+        rawChild = Vue3.cloneVNode(rawChild, {
           ...mergeProps(currentInstance?.proxy?.$attrs, elementPropsRef.value.reference)
         })
         return [rawChild, floatingNode]

@@ -1,6 +1,6 @@
 {
   "name": "@visoning/vue-floating-interactions",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "files": [
     "dist"
   ],
@@ -34,6 +34,7 @@
     "directory": "packages/interactions"
   },
   "dependencies": {
-    "@visoning/vue-floating-core": "workspace:*"
+    "vue-demi": "*",
+    "@visoning/vue-floating-core": "workspace:^0.0.12"
   }
 }

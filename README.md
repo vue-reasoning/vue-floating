@@ -1,1 +1,1 @@
-# vue-floating
+# @visoning/vue-floating
