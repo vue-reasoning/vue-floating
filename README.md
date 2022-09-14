@@ -20,7 +20,7 @@ npm i @visoning/vue-floating-interactions
 
 ### Vue position components
 
-Some common positioning components implemented based on [@visoning/vue-floating-interactions](https://github.com/vue-reasoning/vue-floating/tree/main/packages/core) and @visoning/vue-floating-interactions(https://github.com/vue-reasoning/vue-floating/tree/main/packages/interactions).
+Some common positioning components implemented based on [@visoning/vue-floating-interactions](https://github.com/vue-reasoning/vue-floating/tree/main/packages/core) and [@visoning/vue-floating-interactions](https://github.com/vue-reasoning/vue-floating/tree/main/packages/interactions).
 
 ```shell
 npm i @visoning/vue-floating-components
