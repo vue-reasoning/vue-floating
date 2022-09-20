@@ -9,6 +9,7 @@ import vue2Jsx from '@vitejs/plugin-vue2-jsx'
 export default defineConfig({
   resolve: {
     alias: {
+      'vue': 'vue-demi',
       '@visoning/vue-floating-core': resolve(__dirname, '../../core/src'),
       '@visoning/vue-floating-interactions': resolve(__dirname, '../../interactions/src')
     }

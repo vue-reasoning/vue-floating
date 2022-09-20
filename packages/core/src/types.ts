@@ -7,14 +7,13 @@ import type {
   Strategy
 } from '@floating-ui/core'
 import type { VirtualElement } from '@floating-ui/dom'
+import type { MaybeRef } from '@visoning/vue-utility'
 
 export type { Middleware, MiddlewareData, Placement, Strategy, VirtualElement }
 
 export type ReferenceType = Element | VirtualElement
 
 export type FloatingType = HTMLElement
-
-export type MaybeRef<T> = T | Ref<T>
 
 export type MaybeRefType<T> = MaybeRef<T | undefined | null>
 

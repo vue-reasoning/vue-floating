@@ -1,74 +1,73 @@
 import type { ExtractPropTypes, PropType, VNode } from 'vue-demi'
+import {
+  createListenerPropsForwarder,
+  pick,
+  withDefaultProps
+} from '@visoning/vue-utility'
 
-import { FloatingData, PopoverProps } from '../popover'
+import { PopoverDefaultProps, PopoverExposed, PopoverProps } from '../popover'
 import type { PopoverArrowSlotProps } from '../popover'
-import { pick } from '../utils/pick'
 
-export interface TooltipExposed {
-  floatingData: FloatingData | undefined
-  update: () => void
-}
+export interface TooltipExposed extends PopoverExposed {}
 
 export type TooltipArrowSlotProps = PopoverArrowSlotProps
 
-export const TooltipExtendsPopoverProps = {
-  ...pick(PopoverProps, [
-    'placement',
-    'strategy',
-    'middleware',
-    'autoUpdate',
-    'open',
-    'defaultOpen',
-    'disabled',
-    'virtualElement',
-    'appendTo',
-    'delay',
-    'clickDelay',
-    'hoverDelay',
-    'focusDelay',
-    'keepOpenWhenPopupHover',
-    'closeWhenClickOutside',
-    'autoUpdateOnClosed',
-    'offset',
-    'shift',
-    'flip',
-    'autoPlacement',
-    'gpuAcceleration',
-    'destoryedOnClosed',
-    'size',
-    'transitionProps',
-    'showArrow',
-    'arrow',
-    'arrowProps',
-    'referenceProps',
-    'contentProps',
-    'floatingWrapper',
-    'zIndex',
-    'onUpdate:open',
-    'onOpen',
-    'onClose',
-    'onFloatingDataUpdate'
-  ])
-} as const
+export const PopoverListenerPropsForwarder = createListenerPropsForwarder(
+  PopoverProps,
+  ['onFloatingDataUpdate', 'onOpen', 'onClose', 'onUpdate:open']
+)
 
-export const TooltipProps = {
-  ...TooltipExtendsPopoverProps,
+export const ExtendsPopoverProps = pick(PopoverProps, [
+  'placement',
+  'strategy',
+  'middleware',
+  'autoUpdate',
+  'open',
+  'defaultOpen',
+  'disabled',
+  'virtualElement',
+  'appendTo',
+  'interactions',
+  'delay',
+  'clickDelay',
+  'hoverDelay',
+  'focusDelay',
+  'keepOpenWhenPopupHover',
+  'closeWhenClickOutside',
+  'autoUpdateOnClosed',
+  'offset',
+  'shift',
+  'flip',
+  'autoPlacement',
+  'gpuAcceleration',
+  'destoryedOnClosed',
+  'size',
+  'transitionProps',
+  'showArrow',
+  'arrow',
+  'arrowProps',
+  'referenceProps',
+  'floatingWrapper',
+  'zIndex'
+])
+
+export const TooltipPropsType = {
+  ...ExtendsPopoverProps,
+
+  ...PopoverListenerPropsForwarder.props,
 
   /**
    * support: string | VNode | slot
    */
-  content: [String, Object] as PropType<string | VNode>,
+  content: [String, Function] as PropType<string | (() => VNode)>,
 
   /**
    * align tooltip content. enum of CSS text-align.
    * @default 'start'
    */
-  textAlign: {
-    type: String as PropType<
-      'center' | 'end' | 'justify' | 'left' | 'match-parent' | 'right' | 'start'
-    >,
-    default: 'start'
-  },
+  textAlign: String as PropType<
+    'center' | 'end' | 'justify' | 'left' | 'match-parent' | 'right' | 'start'
+  >,
 
   /**
    * HTML attributes of node.
@@ -80,5 +79,15 @@ export const TooltipProps = {
    */
   tooltipWrapper: PopoverProps.popoverWrapper
 } as const
+
+export const TooltipDefaultProps = {
+  ...PopoverDefaultProps,
+  textAlign: 'start'
+} as const
+
+export const TooltipProps = withDefaultProps(
+  TooltipPropsType,
+  TooltipDefaultProps
+)
 
 export type TooltipProps = ExtractPropTypes<typeof TooltipProps>

@@ -1,10 +1,10 @@
 import { computed, ref, unref } from 'vue-demi'
 import { computePosition } from '@floating-ui/dom'
+import type { MaybeRef } from '@visoning/vue-floating-interactions'
 
 import type {
   MaybeReferenceRef,
   MaybeFloatingRef,
-  MaybeRef,
   UseFloatingOptions,
   UseFloatingReturn,
   UseFloatingData
@@ -56,7 +56,10 @@ export function useFloating(
     detect: detectElements,
     mesure: watchElements,
     stop: stopWatchElements
-  } = useQualifiedRefs([referenceRef, floatingRef], (qualifys) => qualifys && updatePosotion())
+  } = useQualifiedRefs(
+    [referenceRef, floatingRef],
+    (qualifys) => qualifys && updatePosotion()
+  )
 
   let disabled: boolean = false
 
@@ -77,9 +80,13 @@ export function useFloating(
     }
   }
 
-  const { stop: stopWatchProps } = useFloatingOptionsChange(optionsRef, handleOptionsChange, {
-    immediate: true
-  })
+  const { stop: stopWatchProps } = useFloatingOptionsChange(
+    optionsRef,
+    handleOptionsChange,
+    {
+      immediate: true
+    }
+  )
 
   return {
     data: dataRef,

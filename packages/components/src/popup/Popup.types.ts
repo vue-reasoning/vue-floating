@@ -5,43 +5,50 @@ import type {
   OffsetOptions,
   ShiftOptions
 } from '@floating-ui/core'
-import { FloatingCreatorProps } from '@visoning/vue-floating-core/components'
+import {
+  FloatingCreatorDefaultProps,
+  FloatingCreatorProps
+} from '@visoning/vue-floating-core/components'
 import type { FloatingData } from '@visoning/vue-floating-core/components'
-import type { VirtualElement } from '@visoning/vue-floating-core'
-import type { Delay, InteractionInfo } from '@visoning/vue-floating-interactions'
-
-import { pick } from '../utils/pick'
+import type {
+  FloatingType,
+  ReferenceType,
+  VirtualElement
+} from '@visoning/vue-floating-core'
+import {
+  createListenerPropsForwarder,
+  pick,
+  withDefaultProps
+} from '@visoning/vue-utility'
 
 export interface PopupExposed {
-  getFloatingData: () => FloatingData | undefined
   updatePosition: () => void
+  getFloatingData: () => FloatingData | undefined
+  getElements: () => {
+    floating: FloatingType | undefined
+    reference: ReferenceType | undefined
+  }
 }
 
 export type PopupSlotProps = FloatingData
 
-export type Interaction = 'click' | 'hover' | 'focus'
+export const FloatingCreatorListenerPropsForwarder =
+  createListenerPropsForwarder(FloatingCreatorProps, ['onFloatingDataUpdate'])
 
-export const PopupProps = {
+export const PopupPropsType = {
   ...pick(FloatingCreatorProps, [
-    // TODO: are virtual element implemented internally??
     'placement',
     'strategy',
     'middleware',
     'autoUpdate'
   ]),
 
+  ...FloatingCreatorListenerPropsForwarder.props,
+
   /**
    * Whether to open popup.
    */
-  open: {
-    type: Boolean,
-    default: undefined
-  },
-
-  /**
-   * Default open when not manually set.
-   */
-  defaultOpen: Boolean,
+  open: Boolean,
 
   /**
    * Whether to disable the floating.
@@ -78,56 +85,9 @@ export const PopupProps = {
    *   )
    * }
    * ```
-   * @default "body"
+   * @default 'body'
    */
-  appendTo: {
-    default: 'body'
-  } as unknown as { type: PropType<string | false | HTMLElement>; default: string },
-
-  /**
-   * Which actions cause popup shown. enum of 'hover','click','focus'.
-   */
-  interactions: {
-    type: Array as PropType<Interaction[]>,
-    default: () => ['hover']
-  },
-
-  /**
-   * Common delay in ms, before popup is open/close.
-   */
-  delay: [Number, Object] as PropType<Delay>,
-
-  /**
-   * Delay in ms, before popup is open/close on pointer click.
-   */
-  clickDelay: [Number, Object] as PropType<Delay>,
-
-  /**
-   * Delay in ms, before popup is open/close on pointer enter/leave.
-   */
-  hoverDelay: [Number, Object] as PropType<Delay>,
-
-  /**
-   * Delay in ms, before popup is open/close on focus/blur.
-   */
-  focusDelay: [Number, Object] as PropType<Delay>,
-
-  /**
-   * Whether to keep the popup open on mouse hover
-   */
-  keepOpenWhenPopupHover: {
-    type: Boolean,
-    default: true
-  },
-
-  /**
-   * Whether to close by clicking outside.
-   * @default true
-   */
-  closeWhenClickOutside: {
-    type: Boolean,
-    default: true
-  },
+  appendTo: {} as PropType<string | false | HTMLElement>,
 
   /**
    * When this value is `false`, even if the popup is closed, floating will update the position as needed,
@@ -146,10 +106,7 @@ export const PopupProps = {
    * @default true
    * @see https://floating-ui.com/docs/shift
    */
-  shift: {
-    type: [Boolean, Object] as PropType<boolean | ShiftOptions>,
-    default: true
-  },
+  shift: [Boolean, Object] as PropType<boolean | ShiftOptions>,
 
   /**
    * Changes the placement of the popup element to the opposite one by default in order to keep it in view.
@@ -190,38 +147,28 @@ export const PopupProps = {
 
   /**
    * Custom popup node wrapper.
+   * The basic DOM structure is `<Floating/> -> <Popup/> -> <PopupContent/>`.
    */
   popupWrapper: Function as PropType<(popup: VNode | null) => VNode>,
 
   /**
    * Custom floating node wrapper.
+   * The basic DOM structure is `<Floating/> -> <Popup/> -> <PopupContent/>`.
    */
   floatingWrapper: Function as PropType<(popup: VNode | null) => VNode>,
 
   /**
    * Popup z-index.
    */
-  zIndex: Number,
-
-  /**
-   * Callback on open status changes.
-   */
-  'onUpdate:open': Function as PropType<(open: boolean, info: InteractionInfo) => void>,
-
-  /**
-   * Callback on popup open.
-   */
-  onOpen: Function as PropType<(info: InteractionInfo) => void>,
-
-  /**
-   * Callback on popup close.
-   */
-  onClose: Function as PropType<(info: InteractionInfo) => void>,
-
-  /**
-   * Callback on floating data update.
-   */
-  onFloatingDataUpdate: Function as PropType<(data: FloatingData) => void>
+  zIndex: Number
 } as const
+
+export const PopupDefaultProps = {
+  ...FloatingCreatorDefaultProps,
+  appendTo: 'body',
+  shift: true
+} as const
+
+export const PopupProps = withDefaultProps(PopupPropsType, PopupDefaultProps)
 
 export type PopupProps = ExtractPropTypes<typeof PopupProps>

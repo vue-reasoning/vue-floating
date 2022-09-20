@@ -1,23 +1,14 @@
 export { Popover } from './Popover'
 
-export { PopoverProps, PopoverExtendsPopupProps } from './Popover.types'
-export type { PopoverArrowSlotProps, CreateArrow, PopoverExposed } from './Popover.types'
-
 export {
-  useReferenceForwardContext,
-  useSafeReferenceForwardContent,
-  providePopupContextValue,
-  createReferenceForwardContext
-} from '../popup'
+  PopoverPropsType,
+  PopoverDefaultProps,
+  PopoverProps,
+  PopoverTransitionName
+} from './Popover.types'
 export type {
-  FloatingData,
-  Interaction,
-  AutoUpdateOptions,
-  Middleware,
-  MiddlewareData,
-  Placement,
-  Strategy,
-  VirtualElement,
-  ForwardReferenceType,
-  ForwardReferenceContextValue
-} from '../popup'
+  PopoverExposed,
+  PopoverArrowSlotProps,
+  CreateArrow,
+  Interaction
+} from './Popover.types'

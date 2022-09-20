@@ -1,8 +1,6 @@
-import { noop } from './noop'
-
 export type CreateEffect = () => (() => void) | void
 
-export const createEmptyEffect: CreateEffect = () => noop
+export const createEmptyEffect: CreateEffect = () => () => {}
 
 export interface UseManualEffectReturn {
   clear: () => void

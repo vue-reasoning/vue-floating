@@ -5,7 +5,10 @@ export type {
   Strategy,
   VirtualElement
 } from '@visoning/vue-floating-core'
-export type { FloatingData, AutoUpdateOptions } from '@visoning/vue-floating-core/components'
+export type {
+  FloatingData,
+  AutoUpdateOptions
+} from '@visoning/vue-floating-core/components'
 
 export {
   useReferenceForwardContext,
@@ -13,25 +16,26 @@ export {
   providePopupContextValue,
   createReferenceForwardContext
 } from './popup'
-export type { ForwardReferenceType, ForwardReferenceContextValue } from './popup'
+export type {
+  ForwardReferenceType,
+  ForwardReferenceContextValue
+} from './popup'
 
 //
 // Popup
 //
 
-export { Popup, PopupProps } from './popup'
-export type { Interaction, PopupExposed, PopupSlotProps } from './popup'
+export { PopupPropsType, PopupDefaultProps, PopupProps } from './popup'
+export type { PopupExposed, PopupSlotProps } from './popup'
 
 //
 // Popover
 //
 
-export { Popover, PopoverProps, PopoverExtendsPopupProps } from './popover'
-export type { PopoverExposed, PopoverArrowSlotProps, CreateArrow } from './popover'
+export * from './popover'
 
 //
 // Tooltip
 //
 
-export { Tooltip, TooltipProps, TooltipExtendsPopoverProps } from './tooltip'
-export type { TooltipExposed, TooltipArrowSlotProps } from './tooltip'
+export * from './tooltip'

@@ -1,4 +1,5 @@
 import type { ExtractPropTypes, PropType, UnwrapRef } from 'vue-demi'
+import { withDefaultProps } from '@visoning/vue-utility'
 
 import type {
   ReferenceType,
@@ -21,12 +22,7 @@ export interface FloatingCreatorExposed {
   updatePosition: () => void
 }
 
-export const FloatingCreatorProps = {
-  /**
-   * Whether to disable the floating.
-   */
-  disabled: Boolean,
-
+export const FloatingCreatorPropsType = {
   /**
    * Reference element.
    *
@@ -42,22 +38,25 @@ export const FloatingCreatorProps = {
   floating: {} as { type: PropType<FloatingType | null> },
 
   /**
+   * Whether to disable the floating.
+   */
+  disabled: Boolean,
+
+  /**
    * Where to place the floating element relative to its reference element.
    * @see https://floating-ui.com/docs/computePosition#placement
+   *
+   * @default 'bottom'
    */
-  placement: {
-    type: String as PropType<Placement>,
-    default: 'bottom' as Placement
-  },
+  placement: String as PropType<Placement>,
 
   /**
    * This is the type of CSS position property to use.
    * @see https://floating-ui.com/docs/computePosition#strategy
+   *
+   * @default 'absolute'
    */
-  strategy: {
-    type: String as PropType<Strategy>,
-    default: 'absolute'
-  },
+  strategy: String as PropType<Strategy>,
 
   /**
    * They alter the positioning coordinates from the basic placement to customize the position,
@@ -69,16 +68,28 @@ export const FloatingCreatorProps = {
   /**
    * This function adds listeners that automatically call an update function when necessary
    * so that the floating element remains “anchored” to the reference element in a variety of scenarios without detaching.
+   *
+   * @default true
    */
-  autoUpdate: {
-    type: [Boolean, Object] as PropType<boolean | AutoUpdateOptions>,
-    default: true
-  },
+  autoUpdate: [Boolean, Object] as PropType<boolean | AutoUpdateOptions>,
 
   /**
    * Callback on floating data status changes.
    */
-  onUpdate: Function as PropType<(data: UnwrapRef<FloatingData>) => void>
+  onFloatingDataUpdate: Function as PropType<
+    (data: UnwrapRef<FloatingData>) => void
+  >
 } as const
+
+export const FloatingCreatorDefaultProps = {
+  placement: 'bottom',
+  strategy: 'absolute',
+  autoUpdate: true
+} as const
+
+export const FloatingCreatorProps = withDefaultProps(
+  FloatingCreatorPropsType,
+  FloatingCreatorDefaultProps
+)
 
 export type FloatingCreatorProps = ExtractPropTypes<typeof FloatingCreatorProps>

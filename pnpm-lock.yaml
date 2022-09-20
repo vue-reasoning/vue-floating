@@ -9,6 +9,7 @@ importers:
       '@vitejs/plugin-vue-jsx': ^2.0.1
       '@vitejs/plugin-vue2': ^1.1.2
       '@vitejs/plugin-vue2-jsx': ^1.0.3
+      '@vue/compiler-sfc': ^3.2.39
       '@vue/test-utils': ^2.0.2
       cross-env: ^7.0.3
       jsdom: ^20.0.0
@@ -32,6 +33,7 @@ importers:
       '@vitejs/plugin-vue-jsx': 2.0.1_vite@3.0.2+vue@3.2.39
       '@vitejs/plugin-vue2': 1.1.2_vite@3.0.2+vue@3.2.39
       '@vitejs/plugin-vue2-jsx': 1.0.3_vite@3.0.2+vue@3.2.39
+      '@vue/compiler-sfc': 3.2.39
       '@vue/test-utils': 2.0.2_vue@3.2.39
       cross-env: 7.0.3
       jsdom: 20.0.0
@@ -51,14 +53,18 @@ importers:
     specifiers:
       '@floating-ui/core': ^1.0.0
       '@floating-ui/dom': ^1.0.0
-      '@visoning/vue-floating-core': 0.0.1
-      '@visoning/vue-floating-interactions': 0.0.1
+      '@visoning/vue-floating-core': workspace:^0.0.13
+      '@visoning/vue-floating-interactions': workspace:^0.0.14
+      '@visoning/vue-utility': ^0.0.1
       sass: ^1.54.8
+      vue-demi: '*'
     dependencies:
       '@floating-ui/core': 1.0.0
       '@floating-ui/dom': 1.0.0
       '@visoning/vue-floating-core': link:../core
       '@visoning/vue-floating-interactions': link:../interactions
+      '@visoning/vue-utility': 0.0.1
+      vue-demi: 0.13.11
     devDependencies:
       sass: 1.54.8
 
@@ -66,15 +72,21 @@ importers:
     specifiers:
       '@floating-ui/core': ^1.0.0
       '@floating-ui/dom': ^1.0.0
+      '@visoning/vue-utility': ^0.0.1
+      vue-demi: '*'
     dependencies:
       '@floating-ui/core': 1.0.0
       '@floating-ui/dom': 1.0.0
+      '@visoning/vue-utility': 0.0.1
+      vue-demi: 0.13.11
 
   packages/interactions:
     specifiers:
-      '@visoning/vue-floating-core': workspace:*
+      '@visoning/vue-floating-core': workspace:^0.0.13
+      vue-demi: '*'
     dependencies:
       '@visoning/vue-floating-core': link:../core
+      vue-demi: 0.13.11
 
 packages:
 
@@ -480,6 +492,16 @@ packages:
   /@types/node/18.0.0:
     resolution: {integrity: sha512-cHlGmko4gWLVI27cGJntjs/Sj8th9aYwplmZFwmmgYQQvL5NUsgVJG7OddLvNfLqYS31KFN0s3qlaD9qCaxACA==}
     dev: true
+
+  /@visoning/vue-utility/0.0.1:
+    resolution: {integrity: sha512-K+NVvCK29It6jakJJHdk7uNUSSdfHHOEfkR66LWxPpjTgKorp3Hvb9MFAzDWxccxdcsw7VyHaoLrs2pdfj7W0Q==}
+    peerDependencies:
+      '@vue/composition-api': ^1.4.0
+      vue: ^2.6.14 || ^3.2.0
+    dependencies:
+      '@vue/shared': 3.2.39
+      vue-demi: 0.13.11
+    dev: false
 
   /@vitejs/plugin-vue-jsx/2.0.1_vite@3.0.2+vue@3.2.39:
     resolution: {integrity: sha512-lmiR1k9+lrF7LMczO0pxtQ8mOn6XeppJDHxnpxkJQpT5SiKz4SKhKdeNstXaTNuR8qZhUo5X0pJlcocn72Y4Jg==}
@@ -2469,6 +2491,19 @@ packages:
       - supports-color
       - terser
     dev: true
+
+  /vue-demi/0.13.11:
+    resolution: {integrity: sha512-IR8HoEEGM65YY3ZJYAjMlKygDQn25D5ajNFNoKh9RSDMQtlzCxtfQjdQgv9jjK+m3377SsJXY8ysq8kLCZL25A==}
+    engines: {node: '>=12'}
+    hasBin: true
+    requiresBuild: true
+    peerDependencies:
+      '@vue/composition-api': ^1.0.0-rc.1
+      vue: ^3.0.0-0 || ^2.6.0
+    peerDependenciesMeta:
+      '@vue/composition-api':
+        optional: true
+    dev: false
 
   /vue-demi/0.13.11_vue@3.2.39:
     resolution: {integrity: sha512-IR8HoEEGM65YY3ZJYAjMlKygDQn25D5ajNFNoKh9RSDMQtlzCxtfQjdQgv9jjK+m3377SsJXY8ysq8kLCZL25A==}

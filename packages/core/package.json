@@ -1,6 +1,6 @@
 {
   "name": "@visoning/vue-floating-core",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "files": [
     "dist"
   ],
@@ -43,8 +43,13 @@
     "directory": "packages/core"
   },
   "dependencies": {
-    "vue-demi": "*",
     "@floating-ui/core": "^1.0.0",
-    "@floating-ui/dom": "^1.0.0"
+    "@floating-ui/dom": "^1.0.0",
+    "@visoning/vue-utility": "^0.0.1",
+    "vue-demi": "*"
+  },
+  "peerDependencies": {
+    "@vue/composition-api": "^1.4.0",
+    "vue": "^2.6.14 || ^3.2.0"
   }
 }

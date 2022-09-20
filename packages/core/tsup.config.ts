@@ -8,5 +8,5 @@ export const tsup: Options = {
   treeshake: true,
   format: ['cjs', 'esm'],
   dts: true,
-  external: ['vue', 'vue-demi']
+  external: ['vue', 'vue-demi', '@visoning/vue-utility']
 }

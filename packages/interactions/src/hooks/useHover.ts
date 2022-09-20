@@ -2,8 +2,13 @@ import { computed, unref, watch } from 'vue-demi'
 import type { Ref } from 'vue-demi'
 import { useManualEffect } from '@visoning/vue-floating-core'
 
-import type { ElementProps, InteractionsContext, MaybeRef, InteractionInfo, Delay } from '../types'
-import { useDelayInteraction } from '../utils/useDelayInteraction'
+import type {
+  ElementProps,
+  InteractionsContext,
+  MaybeRef,
+  InteractionInfo,
+  Delay
+} from '../types'
 import { contains } from '../utils/contains'
 import { getDocument } from '../utils/getDocument'
 
@@ -57,35 +62,42 @@ export function useHover(
 ): Readonly<Ref<ElementProps>> {
   const optionsRef = computed(() => unref(options))
 
-  const interactionInfo = {
-    type: HoverInteractionType
-  } as HoverInteractionInfo
-
-  const setInteractionInfo = (
-    type: HoverInteractionInfo['type'],
-    event: HoverInteractionInfo['event']
-  ) => {
-    interactionInfo.type = type
-    interactionInfo.event = event
-  }
+  const delaySetOpen = context.delay.createDelaySetOpen(
+    computed(() => optionsRef.value.delay),
+    {
+      type: HoverInteractionType
+    }
+  )
 
   const userControl = useManualEffect(() => {
     const doc = getDocument(context.refs.floating.value)
-    doc.addEventListener('pointermove', handlePointerMove)
 
+    doc.addEventListener('pointermove', handleUseControl)
     return () => {
-      doc.removeEventListener('pointermove', handlePointerMove)
+      doc.removeEventListener('pointermove', handleUseControl)
     }
   })
 
-  const { open: openDelay, close: closeDelay } = useDelayInteraction(
-    computed(() => optionsRef.value.delay),
-    (open) => context.setOpen(open, interactionInfo)
-  )
+  watch(context.open, () => userControl.clear())
+
+  const handleUseControl = (event: PointerEvent) => {
+    const handleLeave = optionsRef.value.handleLeave
+
+    if (!context.open.value || !handleLeave) {
+      userControl.clear()
+      return
+    }
+
+    delaySetOpen(false, {
+      event
+    })
+  }
 
   const isAllowPointerEvent = ({ pointerType }: PointerEvent) => {
     const { pointerTypes } = optionsRef.value
-    return !pointerTypes || pointerTypes.includes(pointerType as MousePointerType)
+    return (
+      !pointerTypes || pointerTypes.includes(pointerType as MousePointerType)
+    )
   }
 
   const inContainers = (target: Element) => {
@@ -103,70 +115,52 @@ export function useHover(
       return
     }
 
-    closeDelay.clear()
-
-    if (!context.open.value) {
-      setInteractionInfo(HoverInteractionType, event)
-      openDelay.delay()
-    }
+    delaySetOpen(true, {
+      event
+    })
   }
 
   const handlePointerLeave = (event: PointerEvent) => {
-    if (!isAllowPointerEvent(event) || inContainers(event.relatedTarget as Element)) {
+    if (
+      !isAllowPointerEvent(event) ||
+      inContainers(event.relatedTarget as Element)
+    ) {
       return
     }
 
-    openDelay.clear()
+    context.delay.stop('open')
 
     if (context.open.value) {
       if (optionsRef.value.handleLeave) {
         userControl.reset()
       } else {
-        setInteractionInfo(HoverInteractionType, event)
-        closeDelay.delay()
+        delaySetOpen(false, {
+          event
+        })
       }
-    }
-  }
-
-  const handlePointerMove = (event: PointerEvent) => {
-    const handleLeave = optionsRef.value.handleLeave
-
-    if (!context.open.value || !handleLeave) {
-      userControl.clear()
-      return
-    }
-
-    setInteractionInfo(HoverInteractionType, event)
-
-    if (handleLeave(event)) {
-      closeDelay.delay()
     }
   }
 
   const handleFloatingPointerEnter = (event: PointerEvent) => {
     userControl.clear()
 
-    if (!isAllowPointerEvent(event)) {
-      return
+    if (isAllowPointerEvent(event)) {
+      context.delay.stop('close')
     }
-
-    closeDelay.clear()
   }
 
   const handleFloatingPointerLeave = (event: PointerEvent) => {
-    if (!isAllowPointerEvent(event) || inContainers(event.relatedTarget as Element)) {
+    if (
+      !isAllowPointerEvent(event) ||
+      inContainers(event.relatedTarget as Element)
+    ) {
       return
     }
 
-    setInteractionInfo(HoverInteractionType, event)
-    closeDelay.delay()
+    delaySetOpen(false, {
+      event
+    })
   }
-
-  watch(context.open, () => {
-    openDelay.clear()
-    closeDelay.clear()
-    userControl.clear()
-  })
 
   const elementProps = {
     reference: {

@@ -1,15 +1,18 @@
 import { isRef, unref, watch } from 'vue-demi'
 import type { UnwrapRef, WatchOptions } from 'vue-demi'
+import { noop } from '@visoning/vue-utility'
+import type { MaybeRef } from '@visoning/vue-utility'
 
-import type { MaybeRef } from '../types'
-import { noop } from './noop'
 import { useManualEffect } from './useManualEffect'
 
-export type ConditionHandler<T extends any[]> = (qualifys?: NonNullables<UnwrapRefs<T>>) => void
+export type ConditionHandler<T extends any[]> = (
+  qualifys?: NonNullables<UnwrapRefs<T>>
+) => void
 
-export type Predicate<T = any> = (item: T) => boolean
+export type Qualifier<T = any> = (item: T) => boolean
 
-const defaultPredicate: Predicate = (item) => item !== undefined && item !== null
+const defaultQualifier: Qualifier = (item) =>
+  item !== undefined && item !== null
 
 export interface UseQualifiedRefsReturn {
   detect: () => void
@@ -26,24 +29,24 @@ export function useQualifiedRefs<T extends any[]>(
 export function useQualifiedRefs<T extends any[]>(
   refs: MaybeRef<T>,
   handler: ConditionHandler<T>,
-  predicate?: Predicate<T[number]>,
+  qualifier?: Qualifier<T[number]>,
   options?: WatchOptions
 ): UseQualifiedRefsReturn
 
 export function useQualifiedRefs<T extends any[]>(
   refs: MaybeRef<T>,
   handler: ConditionHandler<T>,
-  predicate?: Predicate<T[number]> | WatchOptions,
+  qualifier?: Qualifier<T[number]> | WatchOptions,
   options?: WatchOptions
 ): UseQualifiedRefsReturn {
-  if (typeof predicate !== 'function') {
-    options = options || predicate
-    predicate = defaultPredicate
+  if (typeof qualifier !== 'function') {
+    options = options || qualifier
+    qualifier = defaultQualifier
   }
 
   const detect = () => {
     const items = unref(refs).map(unref) as NonNullables<UnwrapRefs<T>>
-    if (items.some((item) => !(predicate as Predicate)(item))) {
+    if (items.some((item) => !(qualifier as Qualifier)(item))) {
       handler()
     } else {
       handler(items)

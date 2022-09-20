@@ -1,8 +1,8 @@
-import { inject, provide, Ref, ref } from 'vue-demi'
-import type { InjectionKey } from 'vue-demi'
+import { inject, provide, ref } from 'vue-demi'
+import type { InjectionKey, Ref } from 'vue-demi'
 import type { ReferenceType } from '@visoning/vue-floating-core'
 
-export type ForwardReferenceType = ReferenceType | null
+export type ForwardReferenceType = ReferenceType | undefined
 
 export interface ForwardReferenceContextValue {
   forwardReference: (reference: ForwardReferenceType) => void
@@ -17,7 +17,9 @@ const EMPTY_VALUE = {}
 export const useSafeReferenceForwardContent = () => {
   // prevent Vue from console errors in dev
   const contextValue = inject(injectionKey, EMPTY_VALUE)
-  return contextValue === EMPTY_VALUE ? undefined : (contextValue as ForwardReferenceContextValue)
+  return contextValue === EMPTY_VALUE
+    ? undefined
+    : (contextValue as ForwardReferenceContextValue)
 }
 
 export const useReferenceForwardContext = () => {
@@ -32,12 +34,16 @@ export const useReferenceForwardContext = () => {
   return contextValue
 }
 
-export const providePopupContextValue = (contextValue: ForwardReferenceContextValue) => {
+export const providePopupContextValue = (
+  contextValue: ForwardReferenceContextValue
+) => {
   provide(injectionKey, contextValue)
 }
 
-export const createReferenceForwardContext = (referenceRef?: Ref<ForwardReferenceType>) => {
-  const referenceForwardRef = referenceRef || ref<ReferenceType | null>(null)
+export const createReferenceForwardContext = (
+  referenceRef?: Ref<ForwardReferenceType>
+) => {
+  const referenceForwardRef = referenceRef || ref<ReferenceType>()
 
   providePopupContextValue({
     forwardReference: (reference) => (referenceForwardRef.value = reference)

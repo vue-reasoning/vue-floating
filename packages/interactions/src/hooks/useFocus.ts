@@ -1,8 +1,13 @@
 import { computed, Ref, unref, watch } from 'vue-demi'
 import { useManualEffect } from '@visoning/vue-floating-core'
 
-import type { ElementProps, InteractionsContext, MaybeRef, InteractionInfo, Delay } from '../types'
-import { useDelayInteraction } from '../utils/useDelayInteraction'
+import type {
+  ElementProps,
+  InteractionsContext,
+  MaybeRef,
+  InteractionInfo,
+  Delay
+} from '../types'
 import { contains } from '../utils/contains'
 import { getDocument } from '../utils/getDocument'
 
@@ -34,21 +39,11 @@ export function useFocus(
 ): Readonly<Ref<ElementProps>> {
   const optionsRef = computed(() => unref(options))
 
-  const interactionInfo = {
-    type: FocusInteractionType
-  } as FocusInteractionInfo
-
-  const setInteractionInfo = (
-    type: FocusInteractionInfo['type'],
-    event: FocusInteractionInfo['event']
-  ) => {
-    interactionInfo.type = type
-    interactionInfo.event = event
-  }
-
-  const { open: openDelay, close: closeDelay } = useDelayInteraction(
+  const delaySetOpen = context.delay.createDelaySetOpen(
     computed(() => optionsRef.value.delay),
-    (open) => context.setOpen(open, interactionInfo)
+    {
+      type: FocusInteractionType
+    }
   )
 
   const inContainers = (target: Element) => {
@@ -58,14 +53,13 @@ export function useFocus(
   }
 
   const handleFocus = (event: FocusEvent) => {
-    setInteractionInfo(FocusInteractionType, event)
-
-    closeDelay.clear()
-    !context.open.value && openDelay.delay()
+    delaySetOpen(true, {
+      event
+    })
   }
 
   const handleFloatingFocus = () => {
-    closeDelay.clear()
+    context.delay.stop('close')
   }
 
   const handleBlur = (event: FocusEvent) => {
@@ -73,26 +67,26 @@ export function useFocus(
       return
     }
 
-    setInteractionInfo(FocusInteractionType, event)
-
-    openDelay.clear()
-    context.open.value && closeDelay.delay()
+    delaySetOpen(false, {
+      event
+    })
   }
 
-  const blur = useManualEffect(() => {
+  const blurControl = useManualEffect(() => {
     const doc = getDocument(context.refs.floating.value)
-    doc.addEventListener('blur', handleBlur)
+    const defaultView = doc.defaultView || window
 
-    return () => doc.removeEventListener('blur', handleBlur)
+    defaultView.addEventListener('blur', handleBlur)
+    return () => defaultView.removeEventListener('blur', handleBlur)
   })
 
   watch(
     [context.open, () => optionsRef.value.disabled],
     ([open, disabled]) => {
-      blur.clear()
+      blurControl.clear()
 
       if (open && !disabled) {
-        blur.reset()
+        blurControl.reset()
       }
     },
     {
@@ -100,15 +94,10 @@ export function useFocus(
     }
   )
 
-  watch(context.open, () => {
-    openDelay.clear()
-    closeDelay.clear()
-    blur.clear()
-  })
-
   const elementProps = {
     reference: {
-      onFocus: handleFocus
+      onFocus: handleFocus,
+      onBlur: handleBlur
     },
     floating: {
       onFocus: handleFloatingFocus

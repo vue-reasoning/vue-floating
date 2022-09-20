@@ -1,7 +1,8 @@
 import { isRef, unref, watch } from 'vue-demi'
 import { autoUpdate, AutoUpdateOptions } from '@floating-ui/dom'
+import type { MaybeRef } from '@visoning/vue-floating-interactions'
 
-import type { MaybeReferenceRef, MaybeFloatingRef, MaybeRef } from './types'
+import type { MaybeReferenceRef, MaybeFloatingRef } from './types'
 import { useQualifiedRefs } from './utils/useQualifiedRefs'
 import { useManualEffect } from './utils/useManualEffect'
 

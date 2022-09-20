@@ -1,8 +1,19 @@
-import { defineComponent, computed, watch, toRef, onBeforeUnmount } from 'vue-demi'
+import {
+  defineComponent,
+  computed,
+  watch,
+  toRef,
+  onBeforeUnmount,
+  getCurrentInstance
+} from 'vue-demi'
+import { useListenersEmitter } from '@visoning/vue-utility'
 
 import { useFloating, useAutoUpdate } from '..'
 import type { UseFloatingOptions, UseAutoUpdateOptions } from '..'
-import { FloatingCreatorExposed, FloatingCreatorProps } from './FloatingCreator.types'
+import {
+  FloatingCreatorExposed,
+  FloatingCreatorProps
+} from './FloatingCreator.types'
 
 export const FloatingCreator = defineComponent({
   name: 'FloatingCreator',
@@ -38,8 +49,10 @@ export const FloatingCreator = defineComponent({
       stop: stopFloating
     } = useFloating(referenceRef, floatingRef, useFloatingOptionsRef)
 
-    watch(floatingDataRef, (floatingData) => {
-      emit('update', floatingData)
+    const emitter = useListenersEmitter(getCurrentInstance(), true)
+
+    watch(floatingDataRef, (data) => {
+      emitter.emit('onFloatingDataUpdate', data)
     })
 
     onBeforeUnmount(stopFloating)
@@ -50,14 +63,12 @@ export const FloatingCreator = defineComponent({
 
     const useAutoUpdateOptionsRef = computed<UseAutoUpdateOptions>(() => {
       const options = props.autoUpdate
-
       const disabled = !options || props.disabled
       if (disabled) {
         return {
           disabled: true
         }
       }
-
       return typeof options === 'object' ? options : {}
     })
 
@@ -75,8 +86,8 @@ export const FloatingCreator = defineComponent({
     //
 
     const exposed: FloatingCreatorExposed = {
-      getFloatingData: () => floatingDataRef.value,
-      updatePosition
+      updatePosition,
+      getFloatingData: () => floatingDataRef.value
     }
 
     expose(exposed)

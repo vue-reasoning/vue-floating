@@ -22,7 +22,8 @@ export default defineConfig({
         '@floating-ui/core',
         '@visoning/vue-floating-core',
         '@visoning/vue-floating-core/components',
-        '@visoning/vue-floating-interactions'
+        '@visoning/vue-floating-interactions',
+        '@visoning/vue-utility'
       ]
     }
   },

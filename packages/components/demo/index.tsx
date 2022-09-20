@@ -1,14 +1,15 @@
-import { h, ref } from 'vue-demi'
+import { Vue2, h, ref } from 'vue-demi'
 
 import { Popover } from '../src/popover'
 import { Tooltip } from '../src/tooltip'
-import { createCompatElement, createSimpleCompatVueInstance } from '../src/utils/compat'
+import { createCompatElement } from '../src/utils/compat'
 
 import './index.css'
+import '../src/popover/styles/index.scss'
 
 const appendToBodyRef = ref<string | boolean>('body')
 
-const proxy = createSimpleCompatVueInstance({
+const proxy = new Vue2({
   render() {
     return h('div', [
       h('div', [
@@ -16,7 +17,10 @@ const proxy = createSimpleCompatVueInstance({
           'button',
           {
             data: {
-              onClick: () => (appendToBodyRef.value = !appendToBodyRef.value ? 'body' : false)
+              onClick: () =>
+                (appendToBodyRef.value = !appendToBodyRef.value
+                  ? 'body'
+                  : false)
             }
           },
           [`appendToBody: ${appendToBodyRef.value}`]
@@ -26,7 +30,9 @@ const proxy = createSimpleCompatVueInstance({
         data: {
           title: 'Popover content:',
           content: 'Can be any react node!',
-          interactions: ['click'],
+          interactions: ['click', 'focus'],
+          clickDelay: 100,
+          focusDelay: 1000,
           closeWhenClickOutside: true,
           appendTo: appendToBodyRef.value,
           'onUpdate:open': (open) => console.log('popover on click', open)
@@ -68,4 +74,4 @@ const proxy = createSimpleCompatVueInstance({
   }
 })
 
-proxy.mount('#app')
+proxy.$mount('#app')
