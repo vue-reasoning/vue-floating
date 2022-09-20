@@ -12,7 +12,7 @@ import {
 } from 'vue-demi'
 import type { VNode } from 'vue-demi'
 import * as Vue3 from 'vue'
-import { offset, shift, flip, autoPlacement } from '@floating-ui/core'
+import { offset, shift, flip, autoPlacement } from '@floating-ui/dom'
 import {
   useFirstQualifiedElement,
   isHandlerKey,

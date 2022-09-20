@@ -10,23 +10,11 @@ export type {
   AutoUpdateOptions
 } from '@visoning/vue-floating-core/components'
 
-export {
-  useReferenceForwardContext,
-  useSafeReferenceForwardContent,
-  providePopupContextValue,
-  createReferenceForwardContext
-} from './popup'
-export type {
-  ForwardReferenceType,
-  ForwardReferenceContextValue
-} from './popup'
-
 //
 // Popup
 //
 
-export { PopupPropsType, PopupDefaultProps, PopupProps } from './popup'
-export type { PopupExposed, PopupSlotProps } from './popup'
+export * from './popup'
 
 //
 // Popover

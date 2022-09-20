@@ -7,16 +7,10 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
-  },
+  "style": "./dist/style.css",
   "scripts": {
     "build": "vite build & pnpm build:dts",
-    "build:dts": "tsup src/index.ts --dts-only",
+    "build:dts": "vue-demi-switch 3 vue & tsup src/index.ts --dts-only",
     "demo": "cd ./demo & vite",
     "demo:2": "vue-demi-switch 2.7 vue2 & pnpm demo",
     "demo:3": "vue-demi-switch 3 vue & pnpm demo",

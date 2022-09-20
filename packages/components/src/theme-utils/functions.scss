@@ -20,7 +20,6 @@
       $variable: map.merge($variable, (#{list.nth($keys, $i)}: list.nth($values, $i)));
     }
   } @else {
-    @debug $variable-key-css-var;
     @return (
       #{$variable-key-css-var}: $css-var,
       #{$variable-key-css-prop}: $css-prop,
