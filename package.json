@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": "true",
   "scripts": {
-    "build": "pnpm run -r build"
+    "build": "nr -r build"
   },
   "devDependencies": {
     "@antfu/ni": "^0.18.0",

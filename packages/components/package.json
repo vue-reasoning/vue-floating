@@ -1,6 +1,6 @@
 {
   "name": "@visoning/vue-floating-components",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "files": [
     "dist"
   ],
@@ -9,8 +9,9 @@
   "types": "./dist/index.d.ts",
   "style": "./dist/style.css",
   "scripts": {
-    "build": "vite build & pnpm build:dts",
-    "build:dts": "vue-demi-switch 3 vue & tsup src/index.ts --dts-only",
+    "build": "vite build & nr build:dts",
+    "build:dts": "tsc ./src/index.ts --declaration --emitDeclarationOnly --outDir dist & nr build:integrate-dts",
+    "build:integrate-dts": "api-extractor run --local --verbose",
     "demo": "cd ./demo & vite",
     "demo:2": "vue-demi-switch 2.7 vue2 & pnpm demo",
     "demo:3": "vue-demi-switch 3 vue & pnpm demo",
@@ -39,10 +40,11 @@
     "@floating-ui/dom": "^1.0.0",
     "@visoning/vue-floating-core": "workspace:^0.0.14",
     "@visoning/vue-floating-interactions": "workspace:^0.0.14",
-    "@visoning/vue-utility": "0.0.14-alpha-1",
+    "@visoning/vue-utility": "^0.0.14-alpha-1",
     "vue-demi": "*"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "7.28.6",
     "sass": "^1.54.8"
   },
   "peerDependencies": {

@@ -46,7 +46,7 @@
   "dependencies": {
     "@floating-ui/core": "^1.0.0",
     "@floating-ui/dom": "^1.0.0",
-    "@visoning/vue-utility": "0.0.14-alpha-1",
+    "@visoning/vue-utility": "^0.0.14-alpha-1",
     "vue-demi": "*"
   },
   "peerDependencies": {

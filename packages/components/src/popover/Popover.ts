@@ -9,7 +9,7 @@ import {
   h as createElement
 } from 'vue-demi'
 import * as Vue3 from 'vue'
-import { arrow as coreArrow } from '@floating-ui/core'
+import { arrow as coreArrow } from '@floating-ui/dom'
 import {
   InteractionInfo,
   useClick,
