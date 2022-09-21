@@ -38,7 +38,7 @@
         "logLevel": "none"
       },
 
-      "ae-incompatible-release-tags": {
+      "ae-wrong-input-file-type": {
         "logLevel": "none"
       }
     },
@@ -47,7 +47,24 @@
       "default": {
         "logLevel": "warning"
       },
-      "tsdoc-code-span-missing-delimiter": {
+
+      "tsdoc-undefined-tag": {
+        "logLevel": "none"
+      },
+
+      "tsdoc-escape-greater-than": {
+        "logLevel": "none"
+      },
+
+      "tsdoc-malformed-inline-tag": {
+        "logLevel": "none"
+      },
+
+      "tsdoc-escape-right-brace": {
+        "logLevel": "none"
+      },
+
+      "tsdoc-unnecessary-backslash": {
         "logLevel": "none"
       }
     }

@@ -220,7 +220,10 @@ export const Popover = defineComponent({
         const transitionData =
           typeof transitionProps === 'string'
             ? { name: transitionProps }
-            : { name: PopoverTransitionName, ...transitionProps }
+            : {
+                name: PopoverTransitionName,
+                ...(transitionProps as any) // for ts compile
+              }
 
         if (isVue3) {
           const rawPopup = popup

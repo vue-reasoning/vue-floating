@@ -14,9 +14,6 @@
     "baseUrl": ".",
     "paths": {
       "@visoning/vue-floating-core": ["packages/core/src/index.ts"],
-      "@visoning/vue-floating-core/components": [
-        "packages/core/src/components/index.ts"
-      ],
       "@visoning/vue-floating-interactions": [
         "packages/interactions/src/index.ts"
       ]

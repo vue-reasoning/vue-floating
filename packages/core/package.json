@@ -1,6 +1,6 @@
 {
   "name": "@visoning/vue-floating-core",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "files": [
     "dist"
   ],
@@ -12,11 +12,6 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    },
-    "./components": {
-      "types": "./dist/components/index.d.ts",
-      "import": "./dist/components/index.mjs",
-      "require": "./dist/components/index.js"
     }
   },
   "scripts": {

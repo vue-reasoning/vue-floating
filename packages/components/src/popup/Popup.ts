@@ -24,14 +24,16 @@ import {
   normalizeListenerKeys,
   isDef
 } from '@visoning/vue-utility'
-import { useManualEffect } from '@visoning/vue-floating-core'
-import type { Middleware } from '@visoning/vue-floating-core'
 import {
+  useManualEffect,
   FloatingCreator,
   FloatingCreatorProps,
   FloatingCreatorSlotProps
-} from '@visoning/vue-floating-core/components'
-import type { FloatingCreatorExposed } from '@visoning/vue-floating-core/components'
+} from '@visoning/vue-floating-core'
+import type {
+  Middleware,
+  FloatingCreatorExposed
+} from '@visoning/vue-floating-core'
 
 import {
   FloatingCreatorListenerPropsForwarder,
@@ -307,7 +309,7 @@ export const Popup = defineComponent({
 
       if (isVue3) {
         const child = referenceProps
-          ? cloneVNode(rawChild, referenceProps)
+          ? cloneVNode(rawChild, referenceProps as any) // for ts compile
           : rawChild
         return [child, floatingNode]
       } else {
@@ -315,7 +317,7 @@ export const Popup = defineComponent({
           class: userClass,
           style: userStyle,
           ...otherAttrs
-        } = referenceProps || {}
+        } = referenceProps || ({} as any) // for ts compile
 
         // elementProps will always pass only attrs
         const [userOn, userAttr] = partition(otherAttrs, (_, key) =>

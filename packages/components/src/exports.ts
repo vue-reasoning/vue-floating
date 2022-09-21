@@ -3,12 +3,10 @@ export type {
   MiddlewareData,
   Placement,
   Strategy,
-  VirtualElement
-} from '@visoning/vue-floating-core'
-export type {
+  VirtualElement,
   FloatingData,
   AutoUpdateOptions
-} from '@visoning/vue-floating-core/components'
+} from '@visoning/vue-floating-core'
 
 //
 // Popup

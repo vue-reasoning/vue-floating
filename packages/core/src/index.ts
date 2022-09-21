@@ -20,3 +20,5 @@ export type {
   UseFloatingOptions,
   UseFloatingReturn
 } from './types'
+
+export * from './components'

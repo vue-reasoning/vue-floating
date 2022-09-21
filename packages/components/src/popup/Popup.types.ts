@@ -8,10 +8,10 @@ import type {
 import {
   FloatingCreatorDefaultProps,
   FloatingCreatorProps
-} from '@visoning/vue-floating-core/components'
-import type { FloatingData } from '@visoning/vue-floating-core/components'
+} from '@visoning/vue-floating-core'
 import type {
   FloatingType,
+  FloatingData,
   ReferenceType,
   VirtualElement
 } from '@visoning/vue-floating-core'
