@@ -344,7 +344,7 @@ export const Popup = defineComponent({
         props.disabled || (!props.open && !props.autoUpdateOnClosed)
 
       const floatingCreatorProps = {
-        ...FloatingCreatorListenerPropsForwarder.forwards,
+        ...FloatingCreatorListenerPropsForwarder.forwards(),
         reference: mergedReferenceElRef.value,
         floating: floatingElRef.value,
         disabled,

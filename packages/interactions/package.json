@@ -34,11 +34,17 @@
     "directory": "packages/interactions"
   },
   "dependencies": {
-    "@visoning/vue-floating-core": "workspace:^0.0.13",
+    "@visoning/vue-floating-core": "workspace:^0.0.14",
     "vue-demi": "*"
   },
   "peerDependencies": {
     "@vue/composition-api": "^1.4.0",
+    "typescript": ">=4.4.4",
     "vue": "^2.6.14 || ^3.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@vue/composition-api": {
+      "optional": true
+    }
   }
 }

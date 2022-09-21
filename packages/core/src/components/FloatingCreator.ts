@@ -6,7 +6,7 @@ import {
   onBeforeUnmount,
   getCurrentInstance
 } from 'vue-demi'
-import { useListenersEmitter } from '@visoning/vue-utility'
+import { useListeners } from '@visoning/vue-utility'
 
 import { useFloating, useAutoUpdate } from '..'
 import type { UseFloatingOptions, UseAutoUpdateOptions } from '..'
@@ -22,7 +22,7 @@ export const FloatingCreator = defineComponent({
 
   props: FloatingCreatorProps,
 
-  setup(props, { emit, slots, expose }) {
+  setup(props, { slots, expose }) {
     //
     // Elements ====================================
     //
@@ -49,10 +49,10 @@ export const FloatingCreator = defineComponent({
       stop: stopFloating
     } = useFloating(referenceRef, floatingRef, useFloatingOptionsRef)
 
-    const emitter = useListenersEmitter(getCurrentInstance(), true)
+    const listeners = useListeners(getCurrentInstance())
 
     watch(floatingDataRef, (data) => {
-      emitter.emit('onFloatingDataUpdate', data)
+      listeners.emit('onFloatingDataUpdate', data)
     })
 
     onBeforeUnmount(stopFloating)

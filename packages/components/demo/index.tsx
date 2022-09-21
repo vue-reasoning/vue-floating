@@ -1,4 +1,4 @@
-import { Vue2, h, ref } from 'vue-demi'
+import { Vue2, h, ref, createApp } from 'vue-demi'
 
 import { Popover } from '../src/popover'
 import { Tooltip } from '../src/tooltip'
@@ -9,7 +9,7 @@ import '../src/popover/styles/index.scss'
 
 const appendToBodyRef = ref<string | boolean>('body')
 
-const proxy = new Vue2({
+const proxy = createApp({
   render() {
     return h('div', [
       h('div', [
@@ -74,4 +74,4 @@ const proxy = new Vue2({
   }
 })
 
-proxy.$mount('#app')
+proxy.mount('#app')

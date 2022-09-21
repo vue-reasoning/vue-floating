@@ -10,6 +10,7 @@
     "build": "pnpm run -r build"
   },
   "devDependencies": {
+    "@antfu/ni": "^0.18.0",
     "@types/node": "^18.0.0",
     "@vitejs/plugin-vue": "^3.1.0",
     "@vitejs/plugin-vue-jsx": "^2.0.1",

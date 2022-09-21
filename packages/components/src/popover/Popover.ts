@@ -17,7 +17,7 @@ import {
   useHover,
   useInteractionsContext
 } from '@visoning/vue-floating-interactions'
-import { useListenersEmitter, pick, mergeProps } from '@visoning/vue-utility'
+import { useListeners, pick, mergeProps } from '@visoning/vue-utility'
 
 import { Popup, PopupProps } from '../popup'
 import type { PopupSlotProps, PopupExposed } from '../popup'
@@ -53,7 +53,7 @@ export const Popover = defineComponent({
   setup(props, { attrs, expose, slots }) {
     const currentInstance = getCurrentInstance()
 
-    const emitter = useListenersEmitter(currentInstance)
+    const listeners = useListeners(currentInstance)
 
     //
     // Controlled state ====================================
@@ -67,12 +67,12 @@ export const Popover = defineComponent({
     const setOpen = (open: boolean, info: InteractionInfo) => {
       uncontrolledOpenRef.value = open
       if (open !== props.open) {
-        emitter.emit('update:opepn', open, info)
+        listeners.emit('update:open', open, info)
 
         if (open) {
-          emitter.emit('open', info)
+          listeners.emit('open', info)
         } else {
-          emitter.emit('close', info)
+          listeners.emit('close', info)
         }
       }
     }
@@ -293,7 +293,7 @@ export const Popover = defineComponent({
 
       const popupProps = {
         ...pick(props, ExtendsPopupPropsKeys),
-        ...PopupListenerPropsForwarder.forwards,
+        ...PopupListenerPropsForwarder.forwards(),
         open: mergedOpenRef.value,
         middleware: middlewareRef.value,
         popupWrapper: transitionWrapper,

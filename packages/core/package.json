@@ -1,6 +1,6 @@
 {
   "name": "@visoning/vue-floating-core",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "files": [
     "dist"
   ],
@@ -22,7 +22,8 @@
   "scripts": {
     "build": "tsup",
     "test:2": "vue-demi-switch 2.7 vue2 & vitest",
-    "test:3": "vue-demi-switch 3 vue & vitest"
+    "test:3": "vue-demi-switch 3 vue & vitest",
+    "prepublish": "nr build"
   },
   "keywords": [
     "tooltip",
@@ -45,11 +46,17 @@
   "dependencies": {
     "@floating-ui/core": "^1.0.0",
     "@floating-ui/dom": "^1.0.0",
-    "@visoning/vue-utility": "^0.0.1",
+    "@visoning/vue-utility": "0.0.14-alpha-1",
     "vue-demi": "*"
   },
   "peerDependencies": {
     "@vue/composition-api": "^1.4.0",
+    "typescript": ">=4.4.4",
     "vue": "^2.6.14 || ^3.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@vue/composition-api": {
+      "optional": true
+    }
   }
 }

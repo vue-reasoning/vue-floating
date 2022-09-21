@@ -63,7 +63,7 @@ export const Tooltip = defineComponent({
     return () => {
       const popoverProps = {
         ...pick(props, ExtendsPopoverPropsKeys),
-        ...PopoverListenerPropsForwarder.forwards,
+        ...PopoverListenerPropsForwarder.forwards(),
         theme: 'dark',
         interactions: ['hover'],
         referenceProps: mergeProps(
