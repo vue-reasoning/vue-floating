@@ -10,13 +10,15 @@ $--vpopover-content-padding: 12px 24px;
 // Light
 $--vpopover-font-color: #162d3d;
 $--vpopover-bg-color: #ffffff;
-$--vpopover-box-shadow: 0 6px 6px 0 rgba(22, 45, 61, 0.06), 0 0 18px 0 rgba(22, 45, 61, 0.12);
+$--vpopover-box-shadow: 0 6px 6px 0 rgba(22, 45, 61, 0.06),
+  0 0 18px 0 rgba(22, 45, 61, 0.12);
 $--vpopover-arrow-box-shadow: 3px 3px 6px rgb(0 0 0 / 10%);
 
 // Dark
 $--vpopover-font-color-dark: #ffffff;
 $--vpopover-bg-color-dark: #162d3d;
-$--vpopover-box-shadow-dark: 0 6px 6px 0 rgba(22, 45, 61, 0.06), 0 0 18px 0 rgba(22, 45, 61, 0.12);
+$--vpopover-box-shadow-dark: 0 6px 6px 0 rgba(22, 45, 61, 0.06),
+  0 0 18px 0 rgba(22, 45, 61, 0.12);
 $--vpopover-arrow-box-shadow-dark: 3px 3px 6px rgb(0 0 0 / 10%);
 
 $popover-variables: (

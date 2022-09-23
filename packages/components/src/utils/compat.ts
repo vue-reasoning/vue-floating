@@ -2,7 +2,8 @@ import { isVue3, h as createElement } from 'vue-demi'
 import {
   isHandlerKey,
   normalizeListenerKeys,
-  partition
+  partition,
+  pick
 } from '@visoning/vue-utility'
 
 export interface CompatVNodeData {
@@ -41,14 +42,15 @@ export function createCompatElement(
     ...unkownProps
   } = data.data
 
-  const [on, attrsOrProps] = partition(unkownProps, (_, key) =>
-    isHandlerKey(key as string)
+  const [onKeys, attrsOrPropsKeys] = partition(
+    Object.keys(unkownProps),
+    (key) => isHandlerKey(key)
   )
 
   const { propKeys } = data
-  const [attrs, props] = partition(
-    attrsOrProps,
-    (_, key) => !propKeys?.includes(key)
+  const [attrsKeys, propsKeys] = partition(
+    attrsOrPropsKeys,
+    (key) => !propKeys?.includes(key)
   )
 
   return createElement(
@@ -58,13 +60,13 @@ export function createCompatElement(
       ref,
       class: klass,
       style,
-      props,
-      attrs,
+      props: pick(unkownProps, propsKeys),
+      attrs: pick(unkownProps, attrsKeys),
       scopedSlots: {
         ...scopedSlots,
         ...data.scopedSlots
       },
-      on: normalizeListenerKeys(on)
+      on: normalizeListenerKeys(pick(unkownProps, onKeys))
     },
     children
   )

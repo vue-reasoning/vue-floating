@@ -3,39 +3,32 @@ import {
   defineComponent,
   computed,
   ref,
-  h,
-  getCurrentInstance,
-  watch,
   h as createElement
 } from 'vue-demi'
-import * as Vue3 from 'vue'
 import { arrow as coreArrow } from '@floating-ui/dom'
 import {
-  InteractionInfo,
-  useClick,
-  useFocus,
-  useHover,
-  useInteractionsContext
-} from '@visoning/vue-floating-interactions'
-import { useListeners, pick, mergeProps } from '@visoning/vue-utility'
+  pick,
+  mergeProps,
+  isFunction,
+  isString,
+  normalizeListenerKeys
+} from '@visoning/vue-utility'
 
-import { Popup, PopupProps } from '../popup'
+import { Popup } from '../popup'
 import type { PopupSlotProps, PopupExposed } from '../popup'
 import { createCompatElement } from '../utils/compat'
+import { Transition } from '../utils/vue3.imports'
 import {
-  Interaction,
   ExtendsPopupProps,
-  PopupListenerPropsForwarder,
+  PopupListenersForwarder,
   PopoverProps,
-  PopoverTransitionName,
-  PopoverExposed
+  PopoverTransitionName
 } from './Popover.types'
-import type { PopoverArrowSlotProps } from './Popover.types'
-import { useElementProps } from '../utils/useElementsProps'
+import type { PopoverArrowSlotProps, PopoverExposed } from './Popover.types'
 
 import './styles/index.scss'
 
-const classNames = {
+export const classNames = {
   popover: 'visoning-popover',
   content: 'visoning-popover-content',
   title: 'visoning-popover-title',
@@ -51,111 +44,6 @@ export const Popover = defineComponent({
   props: PopoverProps,
 
   setup(props, { attrs, expose, slots }) {
-    const currentInstance = getCurrentInstance()
-
-    const listeners = useListeners(currentInstance)
-
-    //
-    // Controlled state ====================================
-    //
-
-    const uncontrolledOpenRef = ref(!!props.defaultOpen)
-    const mergedOpenRef = computed(() =>
-      props.open === undefined ? uncontrolledOpenRef.value : props.open
-    )
-
-    const setOpen = (open: boolean, info: InteractionInfo) => {
-      uncontrolledOpenRef.value = open
-      if (open !== props.open) {
-        listeners.emit('update:open', open, info)
-
-        if (open) {
-          listeners.emit('open', info)
-        } else {
-          listeners.emit('close', info)
-        }
-      }
-    }
-
-    //
-    // Interactions ====================================
-    //
-
-    const popupExposedRef = ref<PopupExposed>()
-
-    const elementsRef = computed(() => popupExposedRef.value?.getElements())
-
-    // interactions context
-    const interactionsContext = useInteractionsContext(
-      computed(() => elementsRef.value?.reference),
-      computed(() => elementsRef.value?.floating)
-    )
-
-    watch(interactionsContext.open, (open) => {
-      setOpen(open, interactionsContext.interactionInfo.value)
-    })
-
-    watch(mergedOpenRef, (mergedOpen) => {
-      if (interactionsContext.open.value !== mergedOpen) {
-        interactionsContext.setOpen(mergedOpen, {
-          type: 'component'
-        })
-      }
-    })
-
-    // element props
-    const hasInteraction = (interaction: Interaction) =>
-      props.interactions.includes(interaction)
-
-    const elementPropsRef = useElementProps(
-      useHover(
-        interactionsContext,
-        computed(() => ({
-          disabled: !hasInteraction('hover'),
-          delay: props.hoverDelay ?? props.delay,
-          keepOpenWhenPopupHover: !!props.keepOpenWhenPopupHover
-        }))
-      ),
-      useFocus(
-        interactionsContext,
-        computed(() => ({
-          disabled: !hasInteraction('focus'),
-          delay: props.focusDelay ?? props.delay
-        }))
-      ),
-      useClick(
-        interactionsContext,
-        computed(() => ({
-          disabled: !hasInteraction('click'),
-          delay: props.clickDelay ?? props.delay,
-          closeWhenClickOutside: !!props.closeWhenClickOutside
-        }))
-      ),
-      // user
-      {
-        floating: props.popupProps,
-        reference: props.referenceProps
-      }
-    )
-
-    //
-    // Exposed ====================================
-    //
-
-    const exposed: PopoverExposed = {
-      updatePosition: () => popupExposedRef.value?.updatePosition(),
-      getFloatingData: () => popupExposedRef.value?.getFloatingData(),
-      getElements: () => {
-        const elements = popupExposedRef.value?.getElements()
-        return {
-          reference: elements?.reference,
-          floating: elements?.floating
-        }
-      }
-    }
-
-    expose(exposed)
-
     //
     // Arrow ====================================
     //
@@ -187,7 +75,6 @@ export const Popover = defineComponent({
       if (createor) {
         return createor(slotProps)
       }
-
       return createElement('div', {
         ref: arrowRef,
         class: classNames.arrow,
@@ -213,38 +100,49 @@ export const Popover = defineComponent({
     // Transition wrapper ====================================
     //
 
-    const transitionWrapper = (popup: any) => {
-      const { transitionProps, popoverWrapper } = props
+    const popupWrapper = (popup: any) => {
+      const { transitionProps: userTransitionProps } = props
 
-      if (transitionProps) {
-        const transitionData =
-          typeof transitionProps === 'string'
-            ? { name: transitionProps }
-            : {
-                name: PopoverTransitionName,
-                ...(transitionProps as any) // for ts compile
-              }
+      if (userTransitionProps) {
+        const transitionProps = isString(userTransitionProps)
+          ? { name: userTransitionProps }
+          : {
+              name: PopoverTransitionName,
+              ...(userTransitionProps as any) // for compile
+            }
 
         if (isVue3) {
           const rawPopup = popup
-          popup = createElement(Vue3.Transition, transitionData, {
+          popup = createElement(Transition, transitionProps, {
             default: () => rawPopup
           })
         } else {
           popup = createElement(
             'transition',
             {
-              props: transitionData
+              props: transitionProps
             },
             [popup]
           )
         }
       }
 
-      return typeof popoverWrapper === 'function'
-        ? popoverWrapper(popup)
-        : popup
+      return props.popoverWrapper ? props.popoverWrapper(popup) : popup
     }
+
+    //
+    // Exposed ====================================
+    //
+
+    const popupExposedRef = ref<PopupExposed>()
+
+    const exposed: PopoverExposed = {
+      updatePosition: () => popupExposedRef.value?.updatePosition(),
+      getFloatingData: () => popupExposedRef.value?.getFloatingData(),
+      getElements: () => popupExposedRef.value?.getElements() || {}
+    }
+
+    expose(exposed)
 
     //
     // Render ====================================
@@ -252,11 +150,13 @@ export const Popover = defineComponent({
 
     // render content
     const renderContent = (slotProps: PopupSlotProps) => {
-      const title = props.title ?? slots.title
-      const content = props.content ?? slots.content
+      const titleCreator = props.title ?? slots.title
+      const contentCreator = props.content ?? slots.content ?? slots.default
 
-      const titleNode = typeof title === 'function' ? title() : title
-      const contentNode = typeof content === 'function' ? content() : content
+      const title = isFunction(titleCreator) ? titleCreator() : titleCreator
+      const content = isFunction(contentCreator)
+        ? contentCreator()
+        : contentCreator
 
       return createCompatElement(
         'div',
@@ -279,8 +179,15 @@ export const Popover = defineComponent({
               })
             },
             [
-              titleNode && h('div', { class: classNames.title }, [titleNode]),
-              contentNode ? contentNode : slots.default?.()
+              title &&
+                createElement(
+                  'div',
+                  {
+                    class: classNames.title
+                  },
+                  [title]
+                ),
+              content
             ]
           ),
           props.showArrow && createArrow(slotProps)
@@ -288,38 +195,47 @@ export const Popover = defineComponent({
       )
     }
 
-    const PopupPropsKeys = Object.keys(PopupProps)
-    const ExtendsPopupPropsKeys = Object.keys(ExtendsPopupProps)
-
     return () => {
-      const { value: elementProps } = elementPropsRef
-
-      const popupProps = {
-        ...pick(props, ExtendsPopupPropsKeys),
-        ...PopupListenerPropsForwarder.forwards(),
-        open: mergedOpenRef.value,
-        middleware: middlewareRef.value,
-        popupWrapper: transitionWrapper,
-        popupProps: mergeProps(elementProps.floating),
-        referenceProps: mergeProps(
-          // TODO
-          attrs,
-          props.referenceProps,
-          elementProps.reference
-        )
+      const popupVNodeProps = {
+        ref: popupExposedRef
       }
 
-      return createCompatElement(Popup, {
-        data: {
-          ...popupProps,
-          ref: popupExposedRef
-        },
-        scopedSlots: {
-          reference: slots.reference,
-          default: renderContent
-        },
-        propKeys: PopupPropsKeys
-      })
+      const popupProps = {
+        ...pick(props, Object.keys(ExtendsPopupProps)),
+        middleware: middlewareRef.value,
+        popupWrapper,
+        popupProps: mergeProps(props.popoverProps, {
+          class: classNames.popover
+        })
+      }
+
+      const popupListeners = PopupListenersForwarder.forwards()
+
+      const scopedSlots = {
+        reference: slots.reference,
+        default: renderContent
+      }
+
+      if (isVue3) {
+        return createElement(
+          Popup,
+          {
+            ...attrs,
+            ...popupProps,
+            ...popupListeners,
+            ...popupVNodeProps
+          },
+          scopedSlots
+        )
+      } else {
+        return createElement(Popup, {
+          ...popupVNodeProps,
+          props: popupProps,
+          on: normalizeListenerKeys(popupListeners),
+          attrs,
+          scopedSlots
+        })
+      }
     }
   }
 })

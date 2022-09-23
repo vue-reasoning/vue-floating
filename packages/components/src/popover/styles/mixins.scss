@@ -32,7 +32,11 @@
 }
 
 @function get-popover-css-var-value-dark($prop) {
-  @return get-css-var-value($popover-variables, $prop, $variable-key-theme-dark);
+  @return get-css-var-value(
+    $popover-variables,
+    $prop,
+    $variable-key-theme-dark
+  );
 }
 
 @mixin use-popover-css-var-declare($theme: $default-theme, $props...) {

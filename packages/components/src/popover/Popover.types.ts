@@ -1,28 +1,23 @@
 import type { ExtractPropTypes, PropType, VNode } from 'vue-demi'
-import type {
-  Delay,
-  InteractionInfo
-} from '@visoning/vue-floating-interactions'
 import {
   createListenerPropsForwarder,
   pick,
   withDefaultProps
 } from '@visoning/vue-utility'
+import type { FloatingData } from '@visoning/vue-floating-core'
 
-import { PopupDefaultProps, PopupProps } from '../popup'
-import type { PopupSlotProps, PopupExposed } from '../popup'
+import { PopupProps } from '../popup'
+import type { PopupExposed } from '../popup'
 
 export interface PopoverExposed extends PopupExposed {}
 
-export type PopoverArrowSlotProps = PopupSlotProps
+export type PopoverArrowSlotProps = FloatingData
 
 export type CreateArrow = (props: PopoverArrowSlotProps) => VNode | null
 
-export type Interaction = 'click' | 'hover' | 'focus'
-
-export const PopupListenerPropsForwarder = createListenerPropsForwarder(
+export const PopupListenersForwarder = createListenerPropsForwarder(
   PopupProps,
-  ['onFloatingDataUpdate']
+  ['onFloatingDataUpdate', 'onUpdate:open', 'onOpen', 'onClose']
 )
 
 export const ExtendsPopupProps = pick(PopupProps, [
@@ -30,7 +25,17 @@ export const ExtendsPopupProps = pick(PopupProps, [
   'strategy',
   'middleware',
   'autoUpdate',
+
+  'interactions',
+  'delay',
+  'hoverDelay',
+  'clickDelay',
+  'focusDelay',
+  'allowPointerEnterTarget',
+  'inactiveWhenClickOutside',
+
   'open',
+  'defaultOpen',
   'disabled',
   'virtualElement',
   'appendTo',
@@ -41,68 +46,24 @@ export const ExtendsPopupProps = pick(PopupProps, [
   'autoPlacement',
   'gpuAcceleration',
   'destoryedOnClosed',
-  'referenceProps',
-  'popupProps',
-  'popupWrapper',
+  'floatingProps',
   'floatingWrapper',
   'zIndex'
 ])
 
 export const PopoverPropsType = {
   ...ExtendsPopupProps,
-
-  ...PopupListenerPropsForwarder.props,
-
-  /**
-   * Default open when not manually set.
-   */
-  defaultOpen: Boolean,
-
-  /**
-   * Which actions cause popup shown. enum of 'hover','click','focus'.
-   */
-  interactions: Array as PropType<Interaction[]>,
-
-  /**
-   * Common delay in ms, before popup is open/close.
-   */
-  delay: [Number, Object] as PropType<Delay>,
-
-  /**
-   * Delay in ms, before popup is open/close on pointer click.
-   */
-  clickDelay: [Number, Object] as PropType<Delay>,
-
-  /**
-   * Delay in ms, before popup is open/close on pointer enter/leave.
-   */
-  hoverDelay: [Number, Object] as PropType<Delay>,
-
-  /**
-   * Delay in ms, before popup is open/close on focus/blur.
-   */
-  focusDelay: [Number, Object] as PropType<Delay>,
-
-  /**
-   * Whether to keep the popup open on mouse hover
-   */
-  keepOpenWhenPopupHover: Boolean,
-
-  /**
-   * Whether to close by clicking outside.
-   * @default true
-   */
-  closeWhenClickOutside: Boolean,
-
-  /**
-   * support: string | () => VNode | slot
-   */
-  content: [String, Function] as PropType<string | (() => VNode)>,
+  ...PopupListenersForwarder.props,
 
   /**
    * support: string | () => VNode | slot
    */
   title: [String, Function] as PropType<string | (() => VNode)>,
+
+  /**
+   * support: string | () => VNode | slot
+   */
+  content: [String, Function] as PropType<string | (() => VNode)>,
 
   /**
    * The theme of the popover.
@@ -143,45 +104,22 @@ export const PopoverPropsType = {
   /**
    * HTML attributes of popover node.
    */
-  popoverProps: PopupProps.popupProps,
+  popoverProps: Object as PropType<Record<string, any>>,
 
   /**
    * HTML attributes of popover-content node.
    */
-  contentProps: PopupProps.popupProps,
+  contentProps: Object as PropType<Record<string, any>>,
 
   /**
    * Custom popover node wrapper.
    */
-  popoverWrapper: PopupProps.popupWrapper,
-
-  /**
-   * Callback on open status changes.
-   */
-  'onUpdate:open': Function as PropType<
-    (open: boolean, info: InteractionInfo) => void
-  >,
-
-  /**
-   * Callback on popup open.
-   */
-  onOpen: Function as PropType<(info: InteractionInfo) => void>,
-
-  /**
-   * Callback on popup close.
-   */
-  onClose: Function as PropType<(info: InteractionInfo) => void>
+  popoverWrapper: Function as PropType<(popup: VNode | null) => VNode>
 } as const
 
 export const PopoverTransitionName = 'visoning-popover'
 
 export const PopoverDefaultProps = {
-  ...PopupDefaultProps,
-  // for controlled
-  open: undefined,
-  interactions: () => ['hover'],
-  keepOpenWhenPopupHover: true,
-  closeWhenClickOutside: true,
   theme: 'line',
   size: 'meduim',
   transitionProps: PopoverTransitionName,

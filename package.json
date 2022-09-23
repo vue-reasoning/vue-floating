@@ -7,19 +7,19 @@
   "license": "MIT",
   "private": "true",
   "scripts": {
-    "build": "nr -r build"
+    "build": "nr -r build",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@antfu/ni": "^0.18.0",
     "@types/node": "^18.0.0",
     "@vitejs/plugin-vue": "^3.1.0",
-    "@vitejs/plugin-vue-jsx": "^2.0.1",
     "@vitejs/plugin-vue2": "^1.1.2",
-    "@vitejs/plugin-vue2-jsx": "^1.0.3",
-    "@vue/compiler-sfc": "^3.2.39",
     "@vue/test-utils": "^2.0.2",
     "cross-env": "^7.0.3",
     "jsdom": "^20.0.0",
+    "prettier": "^2.7.1",
+    "pretty-quick": "^3.1.3",
     "rimraf": "^3.0.2",
     "rollup": "^2.75.6",
     "rollup-plugin-dts": "^4.2.1",

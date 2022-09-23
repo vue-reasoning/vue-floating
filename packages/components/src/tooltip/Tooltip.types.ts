@@ -4,17 +4,18 @@ import {
   pick,
   withDefaultProps
 } from '@visoning/vue-utility'
+import type { FloatingData } from '@visoning/vue-floating-core'
 
-import { PopoverDefaultProps, PopoverExposed, PopoverProps } from '../popover'
-import type { PopoverArrowSlotProps } from '../popover'
+import { PopoverProps } from '../popover'
+import type { PopoverExposed } from '../popover'
 
 export interface TooltipExposed extends PopoverExposed {}
 
-export type TooltipArrowSlotProps = PopoverArrowSlotProps
+export type TooltipArrowSlotProps = FloatingData
 
-export const PopoverListenerPropsForwarder = createListenerPropsForwarder(
+export const PopoverListenerForwarder = createListenerPropsForwarder(
   PopoverProps,
-  ['onFloatingDataUpdate', 'onOpen', 'onClose', 'onUpdate:open']
+  ['onFloatingDataUpdate', 'onUpdate:open', 'onOpen', 'onClose']
 )
 
 export const ExtendsPopoverProps = pick(PopoverProps, [
@@ -22,18 +23,20 @@ export const ExtendsPopoverProps = pick(PopoverProps, [
   'strategy',
   'middleware',
   'autoUpdate',
+
+  'interactions',
+  'delay',
+  'hoverDelay',
+  'clickDelay',
+  'focusDelay',
+  'allowPointerEnterTarget',
+  'inactiveWhenClickOutside',
+
   'open',
   'defaultOpen',
   'disabled',
   'virtualElement',
   'appendTo',
-  'interactions',
-  'delay',
-  'clickDelay',
-  'hoverDelay',
-  'focusDelay',
-  'keepOpenWhenPopupHover',
-  'closeWhenClickOutside',
   'autoUpdateOnClosed',
   'offset',
   'shift',
@@ -41,25 +44,17 @@ export const ExtendsPopoverProps = pick(PopoverProps, [
   'autoPlacement',
   'gpuAcceleration',
   'destoryedOnClosed',
-  'size',
-  'transitionProps',
-  'showArrow',
-  'arrow',
-  'arrowProps',
-  'referenceProps',
+  'floatingProps',
   'floatingWrapper',
-  'zIndex'
+  'zIndex',
+
+  'content',
+  'contentProps'
 ])
 
 export const TooltipPropsType = {
   ...ExtendsPopoverProps,
-
-  ...PopoverListenerPropsForwarder.props,
-
-  /**
-   * support: string | VNode | slot
-   */
-  content: [String, Function] as PropType<string | (() => VNode)>,
+  ...PopoverListenerForwarder.props,
 
   /**
    * align tooltip content. enum of CSS text-align.
@@ -72,16 +67,17 @@ export const TooltipPropsType = {
   /**
    * HTML attributes of node.
    */
-  tooltipProps: PopoverProps.popoverProps,
+  tooltipProps: Object as PropType<Record<string, any>>,
 
   /**
    * Custom tooltip node wrapper.
    */
-  tooltipWrapper: PopoverProps.popoverWrapper
+  tooltipWrapper: Function as PropType<(popup: VNode | null) => VNode>
 } as const
 
 export const TooltipDefaultProps = {
-  ...PopoverDefaultProps,
+  interactions: 'hover',
+  theme: 'drak',
   textAlign: 'start'
 } as const
 

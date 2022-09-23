@@ -1,4 +1,4 @@
-export { Popover } from './Popover'
+export { Popover, classNames as PopoverClassNames } from './Popover'
 
 export {
   PopoverPropsType,
@@ -9,6 +9,5 @@ export {
 export type {
   PopoverExposed,
   PopoverArrowSlotProps,
-  CreateArrow,
-  Interaction
+  CreateArrow
 } from './Popover.types'
