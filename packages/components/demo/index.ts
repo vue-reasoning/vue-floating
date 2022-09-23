@@ -31,7 +31,10 @@ const proxy = createApp({
           title: 'Popover content:',
           content: 'Can be any react node!',
           interactions: ['click', 'focus'],
-          clickDelay: 100,
+          clickDelay: {
+            open: 0,
+            close: 500
+          },
           focusDelay: 1000,
           closeWhenClickOutside: true,
           appendTo: appendToBodyRef.value,

@@ -26,11 +26,16 @@ import {
   BaseInteractionInfo,
   createInteractorForwardContext,
   Interactor,
-  InteractorProps,
   useInteractorContext
 } from '@visoning/vue-floating-interactions'
 
-import { FloatingCreatorListenersForwarder, PopupProps } from './Popup.types'
+import {
+  DelayProps,
+  ExtendsInteractiorProps,
+  FloatingCreatorListenersForwarder,
+  PopupProps,
+  transformDelayProps
+} from './Popup.types'
 import type { PopupExposed } from './Popup.types'
 import { createCompatElement } from '../utils/compat'
 import { Teleport, vShow, withDirectives } from '../utils/vue3.imports'
@@ -257,7 +262,8 @@ export const Popup = defineComponent({
     const renderReference = (floatingNode?: VNode) => {
       const children = slots.reference?.()
       const interactorProps = {
-        ...pick(props, Object.keys(InteractorProps)),
+        ...pick(props, Object.keys(ExtendsInteractiorProps) as any),
+        ...transformDelayProps(pick(props, Object.keys(DelayProps) as any)),
         active: mergedOpenRef.value
       }
       const interactorListeners = {
