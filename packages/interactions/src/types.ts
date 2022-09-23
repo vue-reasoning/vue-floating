@@ -1,69 +1,56 @@
-import type { Ref } from 'vue-demi'
-import type { ReferenceType } from '@visoning/vue-floating-core'
-
-export type MaybeRef<T> = T | Ref<T>
-
-export interface ElementRefs<RT extends ReferenceType = ReferenceType> {
-  reference: Readonly<Ref<RT | null | undefined>>
-  floating: Ref<HTMLElement | null | undefined>
-}
-
-export const InitialInteractionType = '__$$it__initial'
-export const UnkownInteractionType = '__$$it__unkown'
-
-/**
- * The info of action that finally sets open.
- */
-export interface InteractionInfo {
-  type: string
-  event?: Event | null
-}
-
-/**
- * The info of action that the last attempt to sets open,
- * but it may not finally set the open state.
- */
-export interface LastInteractionInfo {
-  triggerType: string
-  triggerEvent?: Event | null
-}
+export type InteractorType = HTMLElement | null | undefined
 
 export type Delay = number
-
-export type InteractionDelayType = 'open' | 'close'
+export type InteractionDelayType = 'active' | 'inactive'
 export type InteractionDelay =
   | Delay
-  | Partial<Record<'open' | 'close', Delay>>
+  | Partial<Record<InteractionDelayType, Delay>>
   | undefined
 
-export interface InteractionDelayInfo<T extends string = string> {
-  type?: T
-  delay: number
-  nextOpen: boolean
+export interface BaseInteractionInfo<T extends string = string, U = Event> {
+  type: T
+  event?: U | null
 }
 
-export interface DelayControl<Info extends InteractionInfo> {
-  setOpen: (delay: number, open: boolean, info?: Info) => void
-  info: Readonly<Ref<InteractionDelayInfo<Info['type']> | null>>
-  stop: (type?: InteractionDelayType) => void
-  createDelaySetOpen: (
-    delay?: MaybeRef<InteractionDelay>,
-    overrideInfo?: Partial<Info>
-  ) => (open: boolean, info?: Partial<Info>) => void
+export interface ActiveInfo<T extends string = string, U = Event> {
+  /**
+   * This information is the interaction information that finally sets active.
+   */
+  final?: BaseInteractionInfo<T, U>
+
+  /**
+   * This information is the action information of the last attempt to set active,
+   * but it may not successfully change the state of active.
+   */
+  lastTry?: BaseInteractionInfo<T, U>
+}
+
+export interface BaseDelayInfo<T extends string = string, U = Event>
+  extends BaseInteractionInfo<T, U> {
+  /**
+   * The value to expect to set when the delay ends.
+   */
+  value: boolean
+
+  /**
+   * Delay time.
+   */
+  delay?: Delay
+}
+
+export interface DelayInfo<T extends string = string, U = Event> {
+  /**
+   * This information is the interaction information that finally sets active.
+   */
+  final?: BaseDelayInfo<T, U>
+
+  /**
+   * We prioritize using the least delay, so it may not successfully change the state of active.
+   */
+  lastTry?: BaseDelayInfo<T, U>
 }
 
 export interface ElementProps {
-  reference?: Record<string, any>
-  floating?: Record<string, any>
-}
-
-export interface InteractionsContext<
-  RT extends ReferenceType = ReferenceType,
-  Info extends InteractionInfo = InteractionInfo
-> {
-  open: Readonly<Ref<boolean>>
-  setOpen: (open: boolean, info?: Info) => void
-  interactionInfo: Readonly<Ref<Info & LastInteractionInfo>>
-  delay: DelayControl<Info>
-  refs: ElementRefs<RT>
+  interactor?: Record<string, any>
+  target?: Record<string, any>
 }

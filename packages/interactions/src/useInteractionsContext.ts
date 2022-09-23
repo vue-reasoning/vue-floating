@@ -1,130 +1,158 @@
-import { computed, readonly, ref, unref, watch } from 'vue-demi'
-import type {
-  MaybeFloatingRef,
-  ReferenceType
-} from '@visoning/vue-floating-core'
+import { computed, ref, unref, watch } from 'vue-demi'
+import type { Ref } from 'vue-demi'
+import { isString, isUndef } from '@visoning/vue-utility'
+import type { MaybeRef } from '@visoning/vue-utility'
 
-import type {
-  InteractionsContext,
-  MaybeRef,
-  InteractionInfo,
-  DelayControl,
-  InteractionDelayInfo
-} from './types'
-import { InitialInteractionType, UnkownInteractionType } from './types'
-import { useInteractionDelay } from './utils/useInteractionDelay'
 import { useTimeout } from './utils/useTimeout'
+import type {
+  ActiveInfo,
+  BaseDelayInfo,
+  BaseInteractionInfo,
+  Delay,
+  DelayInfo,
+  InteractionDelay,
+  InteractionDelayType,
+  InteractorType
+} from './types'
 
-export function useInteractionsContext<
-  RT extends ReferenceType = ReferenceType,
-  Info extends InteractionInfo = InteractionInfo
->(
-  referenceRef: MaybeRef<RT | null | undefined>,
-  floatingRef: MaybeFloatingRef
-): InteractionsContext<RT, Info> {
+export interface InteractionsContext<T extends string = string, U = Event> {
+  interactor: Readonly<Ref<InteractorType>>
+  targets: Readonly<Ref<HTMLElement[]>>
+
+  // active control
+  active: Readonly<Ref<boolean>>
+  setActive: (value: boolean, info?: BaseInteractionInfo<T, U>) => void
+  activeInfo: Readonly<Ref<ActiveInfo<T, U>>>
+
+  // delay control
+  delaySetActive: (
+    value: boolean,
+    delay?: Delay,
+    info?: BaseInteractionInfo<T, U>
+  ) => void
+  delayInfo: Readonly<Ref<DelayInfo<T, U>>>
+  stopDelay: (type?: InteractionDelayType) => void
+  delaySetActiveFactory: (
+    delay?: MaybeRef<InteractionDelay>,
+    defaultInfo?: T | Partial<Omit<BaseDelayInfo<T, U>, 'value' | 'delay'>>
+  ) => (value: boolean, info?: Partial<BaseDelayInfo<T, U>>) => void
+}
+
+export interface UseInteractionsContextOptions {
+  targets?: HTMLElement[]
+}
+
+export function useInteractionsContext<T extends string = string, U = Event>(
+  interactor?: MaybeRef<InteractorType>,
+  options?: MaybeRef<UseInteractionsContextOptions>
+): InteractionsContext<T, U> {
+  type R = InteractionsContext<T, U>
+
   //
-  // Open state control ====================================
+  // Active control ====================================
   //
 
-  const openRef = ref(false)
+  const activeRef = ref(false)
+  const activeInfoRef = ref({}) as R['activeInfo']
 
-  const interactionInfoRef = ref({
-    type: InitialInteractionType,
-    event: null,
-    triggerType: InitialInteractionType,
-    triggerEvent: null
-  }) as InteractionsContext<RT, Info>['interactionInfo']
+  const setActive: R['setActive'] = (value, info) => {
+    info = info ? { ...info } : info
 
-  const setOpen: InteractionsContext<RT, Info>['setOpen'] = (open, info) => {
-    const { value: interactionInfo } = interactionInfoRef
+    const { value: activeInfo } = activeInfoRef
 
-    const type = info?.type ?? UnkownInteractionType
-    const event = info?.event
-
-    if (openRef.value !== open) {
-      openRef.value = open
-      interactionInfo.type = type
-      interactionInfo.event = event
+    if (activeRef.value !== value) {
+      activeRef.value = value
+      activeInfo.final = info
     }
 
-    interactionInfo.triggerType = type
-    interactionInfo.triggerEvent = event
+    activeInfo.lastTry = info
   }
 
   //
   // Delay control ====================================
   //
 
-  const timeoutControl = useTimeout()
+  const delayControl = useTimeout()
+
   // clear delay set when the open state change
-  watch(openRef, () => timeoutControl.stop())
+  watch(activeRef, () => delayControl.stop())
 
-  const delayInfoRef = ref<InteractionDelayInfo<Info['type']> | null>(null)
+  const delayInfoRef = ref({}) as R['delayInfo']
 
-  const delaySetOpen: DelayControl<Info>['setOpen'] = (delay, open, info) => {
+  const isLessDelay = (delay = -Infinity) => {
+    const remainingTime = delayControl.getRemainingTime()
+    return remainingTime === null || delay <= remainingTime
+  }
+
+  const delaySetActive: R['delaySetActive'] = (value, delay, info) => {
+    const newDelayInfo = {
+      ...info,
+      value,
+      delay
+    } as BaseDelayInfo<T, U>
+
     const { value: delayInfo } = delayInfoRef
-    if (!delayInfo || open !== delayInfo.nextOpen || delay < delayInfo.delay) {
-      // interrupt slower delay
-      delayInfoRef.value = {
-        type: info?.type as any,
-        delay,
-        nextOpen: open
+    // We reset the delayer When one of the following conditions is met:
+    // 1. no delay
+    // 2. less latency currently
+    // 3. the set value is different
+    if (
+      !delayInfo ||
+      isLessDelay(delay) ||
+      value !== delayInfo.lastTry?.value
+    ) {
+      delayControl.reset(delay, () => setActive(value, info))
+      delayInfo.final = newDelayInfo
+    }
+
+    delayInfo.lastTry = newDelayInfo
+  }
+
+  const stopDelay: R['stopDelay'] = (type) => {
+    if (
+      isUndef(type) ||
+      (type === 'active') === delayInfoRef.value.final?.value
+    ) {
+      delayControl.stop()
+    }
+  }
+
+  const delaySetActiveFactory: R['delaySetActiveFactory'] = (delay, info) => {
+    const defaultInfo = isString(info)
+      ? {
+          type: info
+        }
+      : info
+
+    const getDelay = (value: boolean) => {
+      const unrefDelay = unref(delay)
+
+      if (!unrefDelay || typeof unrefDelay === 'number') {
+        return unrefDelay
       }
 
-      timeoutControl.reset(delay, () => {
-        setOpen(open, info)
-        delayInfoRef.value = null
-      })
+      return value ? unrefDelay.active : unrefDelay.inactive
     }
-  }
 
-  const stopDelay: DelayControl<Info>['stop'] = (type) => {
-    if (
-      type === undefined ||
-      (type === 'close') === !delayInfoRef.value?.nextOpen
-    ) {
-      timeoutControl.stop()
-    }
-  }
-
-  const createDelaySetOpen: DelayControl<Info>['createDelaySetOpen'] = (
-    delay,
-    info
-  ) => {
-    const delayRefs = useInteractionDelay(computed(() => unref(delay)))
-
-    return (open, overrideInfo) => {
-      const finalInfo = {
-        type: UnkownInteractionType,
-        ...info,
+    return (value, overrideInfo) => {
+      delaySetActive(value, getDelay(value), {
+        ...defaultInfo,
         ...overrideInfo
-      } as Info
-
-      delaySetOpen(
-        open ? delayRefs.open.value : delayRefs.close.value,
-        open,
-        finalInfo
-      )
+      } as any)
     }
   }
-
-  //
-  // Return ====================================
-  //
 
   return {
-    open: readonly(openRef),
-    setOpen,
-    interactionInfo: interactionInfoRef,
-    delay: {
-      setOpen: delaySetOpen,
-      info: delayInfoRef,
-      createDelaySetOpen,
-      stop: stopDelay
-    },
-    refs: {
-      reference: computed(() => unref(referenceRef)),
-      floating: computed(() => unref(floatingRef))
-    }
+    interactor: computed(() => unref(interactor)),
+    targets: computed(() => unref(options)?.targets || []),
+
+    active: activeRef,
+    activeInfo: activeInfoRef,
+    setActive,
+
+    delayInfo: delayInfoRef,
+    delaySetActive,
+    stopDelay,
+    delaySetActiveFactory
   }
 }

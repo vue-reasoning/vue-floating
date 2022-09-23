@@ -1,15 +1,15 @@
 import { computed, Ref, unref, watch } from 'vue-demi'
-import { useManualEffect } from '@visoning/vue-floating-core'
+import type { MaybeRef } from '@visoning/vue-utility'
 
 import type {
   ElementProps,
-  InteractionsContext,
-  MaybeRef,
-  InteractionInfo,
-  Delay
+  BaseInteractionInfo,
+  InteractionDelay
 } from '../types'
+import type { InteractionsContext } from '../useInteractionsContext'
 import { contains } from '../utils/contains'
 import { getDocument } from '../utils/getDocument'
+import { useManualEffect } from '../utils/useManualEffect'
 
 export interface UseFocusOptions {
   /**
@@ -21,35 +21,35 @@ export interface UseFocusOptions {
 
   /**
    * Delay in millisecond.
-   * Waits for the specified time when the event listener runs before changing the open state.
    */
-  delay?: Delay
+  delay?: InteractionDelay
 }
 
 export const FocusInteractionType = 'focus'
 
-export interface FocusInteractionInfo extends InteractionInfo {
-  type: typeof FocusInteractionType
-  event: FocusEvent
-}
+export type FocusInteractionInfo = BaseInteractionInfo<
+  typeof FocusInteractionType,
+  FocusEvent
+>
 
 export function useFocus(
   context: InteractionsContext,
-  options: MaybeRef<UseFocusOptions> = {}
+  options?: MaybeRef<UseFocusOptions>
 ): Readonly<Ref<ElementProps>> {
-  const optionsRef = computed(() => unref(options))
+  const optionsRef = computed(() => unref(options) || {})
 
-  const delaySetOpen = context.delay.createDelaySetOpen(
+  const delaySetOpen = context.delaySetActiveFactory(
     computed(() => optionsRef.value.delay),
-    {
-      type: FocusInteractionType
-    }
+    FocusInteractionType
   )
 
-  const inContainers = (target: Element) => {
-    const { floating, reference } = context.refs
-    const containers = [floating.value, reference.value]
-    return contains(target, containers)
+  const inContainers = (event: FocusEvent) => {
+    const { value: interactor } = context.interactor
+    const { value: targets } = context.targets
+    return contains(
+      event.relatedTarget as HTMLElement,
+      [interactor, event.target as HTMLElement].concat(targets)
+    )
   }
 
   const handleFocus = (event: FocusEvent) => {
@@ -58,22 +58,20 @@ export function useFocus(
     })
   }
 
-  const handleFloatingFocus = () => {
-    context.delay.stop('close')
+  const handleTargetFocus = () => {
+    context.stopDelay('inactive')
   }
 
   const handleBlur = (event: FocusEvent) => {
-    if (inContainers(event.relatedTarget as Element)) {
-      return
+    if (!inContainers(event)) {
+      delaySetOpen(false, {
+        event
+      })
     }
-
-    delaySetOpen(false, {
-      event
-    })
   }
 
   const blurControl = useManualEffect(() => {
-    const doc = getDocument(context.refs.floating.value)
+    const doc = getDocument(context.interactor.value)
     const defaultView = doc.defaultView || window
 
     defaultView.addEventListener('blur', handleBlur)
@@ -81,11 +79,11 @@ export function useFocus(
   })
 
   watch(
-    [context.open, () => optionsRef.value.disabled],
-    ([open, disabled]) => {
+    [context.active, () => optionsRef.value.disabled],
+    ([active, disabled]) => {
       blurControl.clear()
 
-      if (open && !disabled) {
+      if (active && !disabled) {
         blurControl.reset()
       }
     },
@@ -94,13 +92,13 @@ export function useFocus(
     }
   )
 
-  const elementProps = {
-    reference: {
+  const elementProps: ElementProps = {
+    interactor: {
       onFocus: handleFocus,
       onBlur: handleBlur
     },
-    floating: {
-      onFocus: handleFloatingFocus
+    target: {
+      onFocus: handleTargetFocus
     }
   }
 

@@ -1,24 +1,26 @@
 import { computed, ref, unref, watch } from 'vue-demi'
 import type { Ref } from 'vue-demi'
-import { useManualEffect } from '@visoning/vue-floating-core'
+import type { MaybeRef } from '@visoning/vue-utility'
 
 import type {
   ElementProps,
-  InteractionsContext,
-  MaybeRef,
-  InteractionInfo,
-  Delay
+  BaseInteractionInfo,
+  InteractionDelay
 } from '../types'
-import { getDocument } from '../utils/getDocument'
+import type { InteractionsContext } from '../useInteractionsContext'
 import { contains } from '../utils/contains'
+import { getDocument } from '../utils/getDocument'
+import { useManualEffect } from '../utils/useManualEffect'
 
 export const ClickInteractionType = 'click'
 export const ClickOutsideInteractionType = 'clickOutsideControl'
 
-export interface ClickInteractionInfo extends InteractionInfo {
-  type: typeof ClickInteractionType | typeof ClickOutsideInteractionType
-  event: KeyboardEvent | MouseEvent
-}
+type ClickEvent = KeyboardEvent | MouseEvent
+
+export type ClickInteractionInfo = BaseInteractionInfo<
+  typeof ClickInteractionType | typeof ClickOutsideInteractionType,
+  ClickEvent
+>
 
 export type ClickPointerType = 'mouse' | 'touch' | 'pen'
 
@@ -39,24 +41,20 @@ export interface UseClickOptions {
 
   /**
    * Delay in millisecond.
-   * Waits for the specified time when the event listener runs before changing the open state.
    */
-  delay?: Delay
+  delay?: InteractionDelay
 
   /**
    * Whether to close by clicking outside.
    */
-  closeWhenClickOutside?: boolean
+  inactiveWhenClickOutside?: boolean
 
   /**
    * Callback before reference click, This handler runs on click.
    *
    * We will use the return value of the callback to confirm whether the click should be allowed or not.
    */
-  handleToggle?: (
-    event: ClickInteractionInfo['event'],
-    currentOpen: boolean
-  ) => boolean
+  handleToggle?: (event: ClickEvent, active: boolean) => boolean
 }
 
 export function useClick(
@@ -65,44 +63,9 @@ export function useClick(
 ): Readonly<Ref<ElementProps>> {
   const optionsRef = computed(() => unref(options))
 
-  const delaySetOpen = context.delay.createDelaySetOpen(
+  const delaySetOpen = context.delaySetActiveFactory(
     computed(() => optionsRef.value.delay)
   )
-
-  const inContainers = (target: Element) => {
-    const { floating, reference } = context.refs
-    const containers = [floating.value, reference.value]
-    return contains(target, containers)
-  }
-
-  const handleClickOutside = (event: PointerEvent) => {
-    if (isAllowPointerEvent(event) && !inContainers(event.target as Element)) {
-      delaySetOpen(false, {
-        type: ClickOutsideInteractionType,
-        event
-      })
-    }
-  }
-
-  const clickOutsideControl = useManualEffect(() => {
-    const doc = getDocument(context.refs.floating.value)
-
-    doc.addEventListener('pointerdown', handleClickOutside)
-    return () => doc.removeEventListener('pointerdown', handleClickOutside)
-  })
-
-  const toggle = (event: ClickInteractionInfo['event']) => {
-    const userControl = optionsRef.value.handleToggle
-    const currentOpen = context.open.value
-    if (!userControl || userControl(event, currentOpen)) {
-      delaySetOpen(!currentOpen, {
-        type: ClickInteractionType,
-        event
-      })
-    }
-  }
-
-  const blockClickRef = ref(false)
 
   const isAllowPointerEvent = ({ pointerType }: PointerEvent) => {
     const { pointerTypes } = optionsRef.value
@@ -111,6 +74,40 @@ export function useClick(
     )
   }
 
+  const inContainers = (target: Element) => {
+    const { value: interactor } = context.interactor
+    const { value: targets } = context.targets
+    return contains(target, [interactor].concat(targets))
+  }
+
+  const handleClickOutside = (event: PointerEvent) => {
+    if (!inContainers(event.target as Element)) {
+      delaySetOpen(false, {
+        type: ClickOutsideInteractionType,
+        event
+      })
+    }
+  }
+
+  const clickOutsideControl = useManualEffect(() => {
+    const doc = getDocument(context.interactor.value)
+    doc.addEventListener('pointerdown', handleClickOutside)
+    return () => doc.removeEventListener('pointerdown', handleClickOutside)
+  })
+
+  const toggle = (event: ClickEvent) => {
+    const userControl = optionsRef.value.handleToggle
+    const currentActive = context.active.value
+    if (!userControl || userControl(event, currentActive)) {
+      delaySetOpen(!currentActive, {
+        type: ClickInteractionType,
+        event
+      })
+    }
+  }
+
+  const blockClickRef = ref(false)
+
   const handlePointerDown = (event: PointerEvent) => {
     blockClickRef.value = !isAllowPointerEvent(event)
   }
@@ -118,15 +115,15 @@ export function useClick(
   const handleClick = (event: MouseEvent) => {
     if (!blockClickRef.value) {
       toggle(event)
+      blockClickRef.value = true
     }
   }
 
-  const isReferenceButton = () => {
-    return (context.refs.reference.value as Element)?.tagName === 'Button'
-  }
+  const isButton = () =>
+    (context.interactor.value as Element)?.tagName === 'Button'
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (isReferenceButton()) {
+    if (isButton()) {
       return
     }
 
@@ -141,7 +138,7 @@ export function useClick(
   }
 
   const handleKeyUp = (event: KeyboardEvent) => {
-    if (isReferenceButton()) {
+    if (isButton()) {
       return
     }
 
@@ -150,19 +147,25 @@ export function useClick(
     }
   }
 
-  watch(context.open, (open) => {
+  watch(context.active, (active) => {
     clickOutsideControl.clear()
-    if (open && optionsRef.value.closeWhenClickOutside) {
+
+    const { value: options } = optionsRef
+
+    if (!options.disabled && options.inactiveWhenClickOutside && active) {
       clickOutsideControl.reset()
     }
   })
 
-  const elementProps = {
-    reference: {
+  const elementProps: ElementProps = {
+    interactor: {
       onPointerdown: handlePointerDown,
       onClick: handleClick,
       onKeydown: handleKeyDown,
       onKeyup: handleKeyUp
+    },
+    target: {
+      onClick: handleClickOutside
     }
   }
 
