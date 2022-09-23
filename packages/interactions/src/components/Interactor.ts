@@ -11,11 +11,13 @@ import {
 import {
   cloneVNode,
   findFirstQualifiedChild,
+  isArray,
   isComment,
   isFragment,
   isHandlerKey,
   isString,
   isText,
+  MaybeArray,
   toListenerKey,
   useFirstQualifiedElement,
   useListeners
@@ -208,10 +210,14 @@ function usePropsEffect(target: Element, key: string, value: any) {
 function useListenersEffect(
   target: Element,
   event: string,
-  listener: (...args: any[]) => void
+  listener: MaybeArray<(...args: any[]) => void>
 ) {
-  target.addEventListener(event, listener)
-  return () => target.removeEventListener(event, listener)
+  const listeners = isArray(listener) ? listener : [listener]
+  const cleans = listeners.map((listener) => {
+    target.addEventListener(event, listener)
+    return () => target.removeEventListener(event, listener)
+  })
+  return () => cleans.forEach((clean) => clean())
 }
 
 function useAttrsEffect(target: Element, attr: string, value: any) {
