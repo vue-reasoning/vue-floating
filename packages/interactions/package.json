@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@visoning/vue-utility": "^0.0.15",
-    "@vueuse/core": "^9.2.0",
     "vue-demi": "*"
   },
   "peerDependencies": {

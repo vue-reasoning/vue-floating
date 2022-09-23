@@ -85,11 +85,9 @@ importers:
   packages/interactions:
     specifiers:
       '@visoning/vue-utility': ^0.0.15
-      '@vueuse/core': ^9.2.0
       vue-demi: '*'
     dependencies:
       '@visoning/vue-utility': 0.0.15
-      '@vueuse/core': 9.2.0
       vue-demi: 0.13.11
 
 packages:
@@ -293,10 +291,6 @@ packages:
     resolution: {integrity: sha512-cHlGmko4gWLVI27cGJntjs/Sj8th9aYwplmZFwmmgYQQvL5NUsgVJG7OddLvNfLqYS31KFN0s3qlaD9qCaxACA==}
     dev: true
 
-  /@types/web-bluetooth/0.0.15:
-    resolution: {integrity: sha512-w7hEHXnPMEZ+4nGKl/KDRVpxkwYxYExuHOYXyzIzCDzEZ9ZCGMAewulr9IqJu2LR4N37fcnb1XVeuZ09qgOxhA==}
-    dev: false
-
   /@visoning/vue-utility/0.0.15:
     resolution: {integrity: sha512-AVxLTh0iam3Yg+KrIkDGXXukdfoO4MvcmxRbdRL+v48qM6qfxvUsKEhxcfBu3jJNHW5y0C67Kb2AZJIx1Qwa8w==}
     peerDependencies:
@@ -423,31 +417,6 @@ packages:
     dependencies:
       vue: 3.2.39
     dev: true
-
-  /@vueuse/core/9.2.0:
-    resolution: {integrity: sha512-/MZ6qpz6uSyaXrtoeBWQzAKRG3N7CvfVWvQxiM3ei3Xe5ydOjjtVbo7lGl9p8dECV93j7W8s63A8H0kFLpLyxg==}
-    dependencies:
-      '@types/web-bluetooth': 0.0.15
-      '@vueuse/metadata': 9.2.0
-      '@vueuse/shared': 9.2.0
-      vue-demi: 0.13.11
-    transitivePeerDependencies:
-      - '@vue/composition-api'
-      - vue
-    dev: false
-
-  /@vueuse/metadata/9.2.0:
-    resolution: {integrity: sha512-exN4KE6iquxDCdt72BgEhb3tlOpECtD61AUdXnUqBTIUCl70x1Ar/QXo3bYcvxmdMS2/peQyfeTzBjRTpvL5xw==}
-    dev: false
-
-  /@vueuse/shared/9.2.0:
-    resolution: {integrity: sha512-NnRp/noSWuXW0dKhZK5D0YLrDi0nmZ18UeEgwXQq7Ul5TTP93lcNnKjrHtd68j2xFB/l59yPGFlCryL692bnrA==}
-    dependencies:
-      vue-demi: 0.13.11
-    transitivePeerDependencies:
-      - '@vue/composition-api'
-      - vue
-    dev: false
 
   /abab/2.0.6:
     resolution: {integrity: sha512-j2afSsaIENvHZN2B8GOpF566vZ5WVk5opAiMTvWgaQT8DkbOqsTfvNAvHoRGU2zzP8cPoqys+xHTRDWW8L+/BA==}
