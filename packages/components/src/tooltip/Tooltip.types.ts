@@ -49,6 +49,12 @@ export const ExtendsPopoverProps = pick(PopoverProps, [
   'zIndex',
 
   'content',
+  'theme',
+  'size',
+  'transitionProps',
+  'showArrow',
+  'arrow',
+  'arrowProps',
   'contentProps'
 ])
 
@@ -79,7 +85,7 @@ export const TooltipDefaultProps = {
   interactions: 'hover',
   theme: 'drak',
   textAlign: 'start',
-  // allowPointerEnterTarget: false
+  allowPointerEnterTarget: false
 } as const
 
 export const TooltipProps = withDefaultProps(

@@ -1,6 +1,6 @@
 {
   "name": "@visoning/vue-floating-components",
-  "version": "0.0.24",
+  "version": "0.0.3",
   "files": [
     "dist"
   ],
@@ -38,7 +38,7 @@
     "@floating-ui/core": "^1.0.0",
     "@floating-ui/dom": "^1.0.0",
     "@visoning/vue-floating-core": "workspace:^0.0.17",
-    "@visoning/vue-floating-interactions": "workspace:^0.0.18",
+    "@visoning/vue-floating-interactions": "workspace:^0.0.2",
     "@visoning/vue-utility": "^0.0.17",
     "vue-demi": "*"
   },
