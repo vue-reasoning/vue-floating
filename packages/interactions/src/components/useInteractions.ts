@@ -1,6 +1,5 @@
 import { computed, unref } from 'vue-demi'
 import { isString, mergeProps } from '@visoning/vue-utility'
-import type { MaybeRef } from '@visoning/vue-utility'
 
 import type { InteractionsContext } from '../useInteractionsContext'
 import type { InteractorProps } from './Interactor.types'
@@ -30,13 +29,11 @@ export interface UseInteractionsProps
 
 export function useInteractionElementProps(
   context: InteractionsContext,
-  props?: MaybeRef<UseInteractionsProps>
+  props: UseInteractionsProps
 ) {
-  const propsRef = computed<UseInteractionsProps>(() => unref(props) || {})
-
   const hasInteraction = (interaction: Interaction) => {
-    const { interactions } = propsRef.value
-    if (!interactions || typeof interactions === 'bigint') {
+    const { interactions } = props
+    if (!interactions || typeof interactions === 'boolean') {
       return false
     }
     return isString(interactions)
@@ -47,7 +44,6 @@ export function useInteractionElementProps(
   const hoverElementProps = useHover(
     context,
     computed(() => {
-      const { value: props } = propsRef
       return {
         disabled: props.disabled || !hasInteraction('hover'),
         delay: props.hoverDelay ?? props.delay,
@@ -59,10 +55,9 @@ export function useInteractionElementProps(
   const clickElementProps = useClick(
     context,
     computed(() => {
-      const { value: props } = propsRef
       return {
         disabled: props.disabled || !hasInteraction('click'),
-        delay: props.clickDelay ?? props.delay,
+        delay: props.delay,
         inactiveWhenClickOutside: !!props.inactiveWhenClickOutside
       }
     })
@@ -71,7 +66,6 @@ export function useInteractionElementProps(
   const focusElementProps = useFocus(
     context,
     computed(() => {
-      const { value: props } = propsRef
       return {
         disabled: props.disabled || !hasInteraction('focus'),
         delay: props.focusDelay ?? props.delay
@@ -87,7 +81,7 @@ export function useInteractionElementProps(
 
   const customElementPropsRef = computed(
     () =>
-      propsRef.value.customInteractions?.map((interaction) =>
+      props.customInteractions?.map((interaction) =>
         unref(interaction(context))
       ) || []
   )

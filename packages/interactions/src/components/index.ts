@@ -12,12 +12,11 @@ export {
 export type {
   Interaction,
   InteractionDelay,
-  InteractionExposed
+  InteractorExposed
 } from './Interactor.types'
 
 export {
-  useInteractorContext,
-  contributeInteractor,
+  useInteractorForwardContext,
   createInteractorForwardContext
 } from './InteractorForwardContext'
 export type { InteractorForwardContextValue } from './InteractorForwardContext'

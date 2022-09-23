@@ -73,7 +73,7 @@ export const transformDelayProps = <
   props: T
 ): Record<keyof T, InteractionDelay> => {
   return Object.keys(props).reduce<any>((ret, prop) => {
-    const delay = props[prop as keyof T]
+    const delay = props[prop as keyof T] as any
     ret[prop] = isObject(delay)
       ? { active: delay.open, inactive: delay.close }
       : delay

@@ -1,33 +1,35 @@
 import { provide, ref } from 'vue-demi'
-import type { InjectionKey, Ref } from 'vue-demi'
+import type { InjectionKey } from 'vue-demi'
 import { safeInject } from '@visoning/vue-utility'
+
+import type { ElementProps } from '../types'
 
 export type InteractorType = HTMLElement | undefined | null
 
 export interface InteractorForwardContextValue {
   setInteractor: (element?: InteractorType) => void
+  setElementProps: (props?: ElementProps) => void
 }
 
 const injectionKey = Symbol(
-  'InteractorContextKey'
+  'InteractorForwardContextKey'
 ) as InjectionKey<InteractorForwardContextValue>
 
-export function useInteractorContext() {
+export function useInteractorForwardContext() {
   return safeInject(injectionKey)
 }
 
-export function contributeInteractor(element: InteractorType) {
-  useInteractorContext()?.setInteractor(element)
-}
-
-export function createInteractorForwardContext(
-  interactor?: Ref<InteractorType>
-) {
-  const interactorRef: Ref<InteractorType> = interactor || ref()
+export function createInteractorForwardContext() {
+  const interactorRef = ref<InteractorType>()
+  const elementPropsRef = ref<ElementProps>()
 
   provide(injectionKey, {
-    setInteractor: (element) => (interactorRef!.value = element)
+    setInteractor: (element) => (interactorRef!.value = element),
+    setElementProps: (props) => (elementPropsRef.value = props)
   })
 
-  return interactorRef
+  return {
+    interactor: interactorRef,
+    elementProps: elementPropsRef
+  }
 }

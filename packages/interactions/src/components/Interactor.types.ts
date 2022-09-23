@@ -12,7 +12,8 @@ export type Interaction = 'hover' | 'click' | 'focus'
 
 export type { InteractionDelay }
 
-export interface InteractionExposed {
+export interface InteractorExposed {
+  getInteractor: () => HTMLElement | null | undefined
   getElementProps: () => ElementProps
 }
 
@@ -33,6 +34,9 @@ export const InteractorPropTypes = {
     Interaction | Interaction[] | false
   >,
 
+  /**
+   * Custom interactions.
+   */
   customInteractions: Array as PropType<
     Array<(context: InteractionsContext) => MaybeRef<ElementProps>>
   >,

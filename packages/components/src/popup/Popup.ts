@@ -15,7 +15,8 @@ import {
   pick,
   useListeners,
   isString,
-  normalizeListenerKeys
+  normalizeListenerKeys,
+  isDef
 } from '@visoning/vue-utility'
 import { useManualEffect, FloatingCreator } from '@visoning/vue-floating-core'
 import type {
@@ -23,11 +24,11 @@ import type {
   FloatingCreatorSlotProps
 } from '@visoning/vue-floating-core'
 import {
-  BaseInteractionInfo,
-  createInteractorForwardContext,
   Interactor,
-  useInteractorContext
+  createInteractorForwardContext,
+  useInteractorForwardContext
 } from '@visoning/vue-floating-interactions'
+import type { BaseInteractionInfo } from '@visoning/vue-floating-interactions'
 
 import {
   DelayProps,
@@ -77,16 +78,16 @@ export const Popup = defineComponent({
     // Element refs ====================================
     //
 
-    const referenceElRef = createInteractorForwardContext()
+    const interactorForwards = createInteractorForwardContext()
+    const interactiorContext = useInteractorForwardContext()
 
-    const interactiorContext = useInteractorContext()
+    const referenceElRef = computed(() => interactorForwards.interactor.value)
     // continue forward ref
     watch(referenceElRef, (el) => interactiorContext?.setInteractor(el))
 
     const mergedReferenceElRef = computed(
       () => props.virtualElement || referenceElRef.value
     )
-
     const floatingElRef = ref<HTMLElement>()
 
     //
@@ -165,6 +166,7 @@ export const Popup = defineComponent({
     // Render ====================================
     //
 
+    // render floating
     const getFloatingStyle = (data: FloatingCreatorSlotProps) => {
       if (props.gpuAcceleration) {
         return {
@@ -183,7 +185,6 @@ export const Popup = defineComponent({
       }
     }
 
-    // render floating
     const renderFloating = (
       slotProps: FloatingCreatorSlotProps,
       popupNode?: VNode
@@ -260,15 +261,16 @@ export const Popup = defineComponent({
 
     // render reference
     const renderReference = (floatingNode?: VNode) => {
-      const children = slots.reference?.()
       const interactorProps = {
         ...pick(props, Object.keys(ExtendsInteractiorProps) as any),
         ...transformDelayProps(pick(props, Object.keys(DelayProps) as any)),
-        active: mergedOpenRef.value
+        active: mergedOpenRef.value,
+        targets: [floatingElRef.value].filter(isDef)
       }
       const interactorListeners = {
         'onUpdate:active': setOpen
       }
+      const children = slots.reference?.()
       if (isVue3) {
         return createElement(
           Interactor,

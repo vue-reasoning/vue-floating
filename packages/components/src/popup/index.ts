@@ -9,7 +9,7 @@ export type {
 } from './Popup.types'
 
 export {
-  useInteractorContext,
+  useInteractorForwardContext,
   createInteractorForwardContext
 } from '@visoning/vue-floating-interactions'
 export type { InteractorForwardContextValue } from '@visoning/vue-floating-interactions'

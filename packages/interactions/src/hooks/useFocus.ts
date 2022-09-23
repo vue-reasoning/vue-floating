@@ -63,14 +63,10 @@ export function useFocus(
     }
   }
 
-  const handleTargetBlur = (event: FocusEvent) => {
-    handleBlur(event)
-  }
-
   const blurControl = useManualEffect(() => {
-    const defaultView = getWindow(context.interactor.value)
-    defaultView.addEventListener('blur', handleTargetBlur)
-    return () => defaultView.removeEventListener('blur', handleTargetBlur)
+    const win = getWindow(context.interactor.value)
+    win.addEventListener('blur', handleBlur)
+    return () => win.removeEventListener('blur', handleBlur)
   })
 
   watch(
@@ -93,7 +89,7 @@ export function useFocus(
       onBlur: handleBlur
     },
     target: {
-      onBlur: handleTargetBlur
+      tabIndex: -1
     }
   }
 

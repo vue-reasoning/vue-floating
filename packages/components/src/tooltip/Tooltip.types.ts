@@ -78,7 +78,8 @@ export const TooltipPropsType = {
 export const TooltipDefaultProps = {
   interactions: 'hover',
   theme: 'drak',
-  textAlign: 'start'
+  textAlign: 'start',
+  // allowPointerEnterTarget: false
 } as const
 
 export const TooltipProps = withDefaultProps(

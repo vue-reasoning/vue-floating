@@ -1,5 +1,5 @@
-import { computed, unref } from 'vue-demi'
-import { isObject, MaybeRef } from '@visoning/vue-utility'
+import { computed } from 'vue-demi'
+import { isObject } from '@visoning/vue-utility'
 import type { Middleware } from '@visoning/vue-floating-core'
 import { offset, shift, flip, autoPlacement } from '@floating-ui/dom'
 
@@ -10,9 +10,8 @@ export type UseMiddlewaresProps = Pick<
   'offset' | 'shift' | 'flip' | 'autoPlacement' | 'middleware'
 >
 
-export function useMiddlewares(propsRef: MaybeRef<UseMiddlewaresProps>) {
+export function useMiddlewares(props: UseMiddlewaresProps) {
   return computed(() => {
-    const props = unref(propsRef)
     const middleware: Middleware[] = []
 
     if (props.offset) {
@@ -38,6 +37,6 @@ function normalizeMiddlewareOptions(
   options: boolean | Record<string, any>,
   candidate: Record<string, any> = {}
 ) {
-  // determine whether it enables the middleware in hooks
+  // determine whether it disabled the middleware in hooks
   return isObject(options) ? options : candidate
 }

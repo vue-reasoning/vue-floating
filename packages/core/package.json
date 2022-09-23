@@ -1,6 +1,6 @@
 {
   "name": "@visoning/vue-floating-core",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "files": [
     "dist"
   ],
@@ -41,7 +41,7 @@
   "dependencies": {
     "@floating-ui/core": "^1.0.0",
     "@floating-ui/dom": "^1.0.0",
-    "@visoning/vue-utility": "^0.0.15",
+    "@visoning/vue-utility": "^0.0.17",
     "vue-demi": "*"
   },
   "peerDependencies": {

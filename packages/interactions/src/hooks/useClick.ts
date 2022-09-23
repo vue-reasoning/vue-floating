@@ -92,6 +92,11 @@ export function useClick(
   })
 
   const toggle = (event: ClickEvent) => {
+    if (contains(event.target as Element, context.targets.value)) {
+      // Can't be inactive by clicking on targets
+      return
+    }
+    // use control
     const userControl = optionsRef.value.handleToggle
     const currentActive = context.active.value
     if (!userControl || userControl(event, currentActive)) {
