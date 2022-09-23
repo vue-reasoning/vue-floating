@@ -107,6 +107,9 @@ export const Popup = defineComponent({
     if (!isVue3) {
       const createTeleport = () => {
         const { value: container } = containerRef
+        if (!container) {
+          return
+        }
 
         const teleportInstance = new Vue2({
           render() {
@@ -115,8 +118,7 @@ export const Popup = defineComponent({
         })
         teleportInstance.$mount()
 
-        // allow throw error
-        container!.appendChild(teleportInstance.$el)
+        container.appendChild(teleportInstance.$el)
 
         return () => {
           teleportInstance.$destroy()

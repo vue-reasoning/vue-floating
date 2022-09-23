@@ -207,7 +207,7 @@ export const PopupDefaultProps = {
   open: undefined,
   defaultOpen: false,
   shift: true,
-  appendTo: 'viewport'
+  appendTo: 'body'
 } as const
 
 export const PopupProps = withDefaultProps(PopupPropsType, PopupDefaultProps)
