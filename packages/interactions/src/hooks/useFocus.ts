@@ -8,8 +8,8 @@ import type {
 } from '../types'
 import type { InteractionsContext } from '../useInteractionsContext'
 import { contains } from '../utils/contains'
-import { getDocument } from '../utils/getDocument'
 import { useManualEffect } from '../utils/useManualEffect'
+import { getWindow } from '../utils/getWindow'
 
 export interface UseFocusOptions {
   /**
@@ -43,13 +43,10 @@ export function useFocus(
     FocusInteractionType
   )
 
-  const inContainers = (event: FocusEvent) => {
+  const inContainers = (target: Element) => {
     const { value: interactor } = context.interactor
     const { value: targets } = context.targets
-    return contains(
-      event.relatedTarget as HTMLElement,
-      [interactor, event.target as HTMLElement].concat(targets)
-    )
+    return contains(target, [interactor].concat(targets))
   }
 
   const handleFocus = (event: FocusEvent) => {
@@ -58,24 +55,22 @@ export function useFocus(
     })
   }
 
-  const handleTargetFocus = () => {
-    context.stopDelay('inactive')
-  }
-
   const handleBlur = (event: FocusEvent) => {
-    if (!inContainers(event)) {
+    if (!inContainers(event.relatedTarget as Element)) {
       delaySetOpen(false, {
         event
       })
     }
   }
 
-  const blurControl = useManualEffect(() => {
-    const doc = getDocument(context.interactor.value)
-    const defaultView = doc.defaultView || window
+  const handleTargetBlur = (event: FocusEvent) => {
+    handleBlur(event)
+  }
 
-    defaultView.addEventListener('blur', handleBlur)
-    return () => defaultView.removeEventListener('blur', handleBlur)
+  const blurControl = useManualEffect(() => {
+    const defaultView = getWindow(context.interactor.value)
+    defaultView.addEventListener('blur', handleTargetBlur)
+    return () => defaultView.removeEventListener('blur', handleTargetBlur)
   })
 
   watch(
@@ -98,7 +93,7 @@ export function useFocus(
       onBlur: handleBlur
     },
     target: {
-      onFocus: handleTargetFocus
+      onBlur: handleTargetBlur
     }
   }
 

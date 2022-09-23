@@ -74,14 +74,10 @@ export function useClick(
     )
   }
 
-  const inContainers = (target: Element) => {
+  const handleClickOutside = (event: PointerEvent) => {
     const { value: interactor } = context.interactor
     const { value: targets } = context.targets
-    return contains(target, [interactor].concat(targets))
-  }
-
-  const handleClickOutside = (event: PointerEvent) => {
-    if (!inContainers(event.target as Element)) {
+    if (!contains(event.target as Element, [interactor].concat(targets))) {
       delaySetOpen(false, {
         type: ClickOutsideInteractionType,
         event
@@ -147,15 +143,20 @@ export function useClick(
     }
   }
 
-  watch(context.active, (active) => {
-    clickOutsideControl.clear()
+  watch(
+    [
+      context.active,
+      () =>
+        optionsRef.value.disabled || !optionsRef.value.inactiveWhenClickOutside
+    ],
+    ([active, disabled]) => {
+      clickOutsideControl.clear()
 
-    const { value: options } = optionsRef
-
-    if (!options.disabled && options.inactiveWhenClickOutside && active) {
-      clickOutsideControl.reset()
+      if (active && !disabled) {
+        clickOutsideControl.reset()
+      }
     }
-  })
+  )
 
   const elementProps: ElementProps = {
     interactor: {
@@ -163,9 +164,6 @@ export function useClick(
       onClick: handleClick,
       onKeydown: handleKeyDown,
       onKeyup: handleKeyUp
-    },
-    target: {
-      onClick: handleClickOutside
     }
   }
 

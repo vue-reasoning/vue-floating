@@ -1,3 +1,3 @@
-export function getDocument(element?: HTMLElement | null) {
+export function getDocument(element?: Element | null) {
   return element?.ownerDocument || document
 }

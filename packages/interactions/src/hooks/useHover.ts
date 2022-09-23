@@ -102,15 +102,15 @@ export function useHover(
     }
   }
 
-  const inContainers = (event: PointerEvent) => {
+  const inContainers = (target: Element) => {
     const { value: interactor } = context.interactor
     const targets = [interactor]
 
     if (optionsRef.value.allowPointerEnterTarget) {
-      targets.push(...context.targets.value, event.target as HTMLElement)
+      targets.push(...context.targets.value)
     }
 
-    return contains(event.relatedTarget as HTMLElement, targets)
+    return contains(target, targets)
   }
 
   const handlePointerEnter = (event: PointerEvent) => {
@@ -124,11 +124,11 @@ export function useHover(
   }
 
   const handlePointerLeave = (event: PointerEvent) => {
-    if (inContainers(event)) {
+    if (inContainers(event.relatedTarget as Element)) {
       return
     }
 
-    context.stopDelay('inactive')
+    context.stopDelay('active')
 
     if (context.active.value) {
       if (optionsRef.value.handleMoveExternal) {
@@ -150,7 +150,7 @@ export function useHover(
   }
 
   const handleTargetPointerLeave = (event: PointerEvent) => {
-    if (!inContainers(event)) {
+    if (!inContainers(event.relatedTarget as Element)) {
       delaySetOpen(false, {
         event
       })

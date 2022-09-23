@@ -90,14 +90,16 @@ export function useInteractionsContext<T extends string = string, U = Event>(
       value,
       delay
     } as BaseDelayInfo<T, U>
-
+    if (value === activeInfoRef.value) {
+      return
+    }
     const { value: delayInfo } = delayInfoRef
     // We reset the delayer When one of the following conditions is met:
     // 1. no delay
     // 2. less latency currently
     // 3. the set value is different
     if (
-      !delayInfo ||
+      !delayInfo.lastTry ||
       isLessDelay(delay) ||
       value !== delayInfo.lastTry?.value
     ) {
