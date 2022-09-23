@@ -43,39 +43,37 @@ export const FloatingCreator = defineComponent({
       }
     })
 
-    const {
-      data: floatingDataRef,
-      update: updatePosition,
-      stop: stopFloating
-    } = useFloating(referenceRef, floatingRef, useFloatingOptionsRef)
+    const floatingControl = useFloating(
+      referenceRef,
+      floatingRef,
+      useFloatingOptionsRef
+    )
 
     const listeners = useListeners(getCurrentInstance())
 
-    watch(floatingDataRef, (data) => {
+    watch(floatingControl.data, (data) => {
       listeners.emit('onFloatingDataUpdate', data)
     })
 
-    onBeforeUnmount(stopFloating)
+    onBeforeUnmount(floatingControl.stop)
 
     //
     // AutoUpdate ====================================
     //
 
     const useAutoUpdateOptionsRef = computed<UseAutoUpdateOptions>(() => {
-      const options = props.autoUpdate
-      const disabled = !options || props.disabled
-      if (disabled) {
+      if (props.disabled || props.autoUpdate === false) {
         return {
           disabled: true
         }
       }
-      return typeof options === 'object' ? options : {}
+      return typeof props.autoUpdate === 'object' ? props.autoUpdate : {}
     })
 
     const stopAutoUpdate = useAutoUpdate(
       referenceRef,
       floatingRef,
-      updatePosition,
+      floatingControl.update,
       useAutoUpdateOptionsRef
     )
 
@@ -86,8 +84,8 @@ export const FloatingCreator = defineComponent({
     //
 
     const exposed: FloatingCreatorExposed = {
-      updatePosition,
-      getFloatingData: () => floatingDataRef.value
+      updatePosition: floatingControl.update,
+      getFloatingData: () => floatingControl.data.value
     }
 
     expose(exposed)
@@ -96,6 +94,6 @@ export const FloatingCreator = defineComponent({
     // Render ====================================
     //
 
-    return () => slots.default?.(floatingDataRef.value)
+    return () => slots.default?.(floatingControl.data.value)
   }
 })

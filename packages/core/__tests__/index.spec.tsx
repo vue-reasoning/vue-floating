@@ -65,7 +65,12 @@ describe('virtual element', () => {
     height: number
   }
 
-  const createVirtualElement = ({ x, y, width, height }: BaseRect): ClientRectObject => {
+  const createVirtualElement = ({
+    x,
+    y,
+    width,
+    height
+  }: BaseRect): ClientRectObject => {
     return {
       x,
       y,
@@ -122,7 +127,10 @@ describe('options update', () => {
     }
   )
 
-  const diviner = (props: UseFloatingOptions, data: Partial<UseFloatingData>) => {
+  const diviner = (
+    props: UseFloatingOptions,
+    data: Partial<UseFloatingData>
+  ) => {
     const { promise, resolve } = (() => {
       let resolve: () => void
       const promise = new Promise<void>((_resolve) => {

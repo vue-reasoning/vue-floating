@@ -1,6 +1,6 @@
 import { computed, ref, unref } from 'vue-demi'
 import { computePosition } from '@floating-ui/dom'
-import type { MaybeRef } from '@visoning/vue-floating-interactions'
+import type { MaybeRef } from '@visoning/vue-utility'
 
 import type {
   MaybeReferenceRef,

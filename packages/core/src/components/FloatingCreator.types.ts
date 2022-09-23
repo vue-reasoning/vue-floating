@@ -18,8 +18,8 @@ export type AutoUpdateOptions = UseAutoUpdateOptions
 export type FloatingCreatorSlotProps = FloatingData
 
 export interface FloatingCreatorExposed {
-  getFloatingData: () => FloatingData
   updatePosition: () => void
+  getFloatingData: () => FloatingData
 }
 
 export const FloatingCreatorPropsType = {
