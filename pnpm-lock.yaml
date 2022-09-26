@@ -48,9 +48,9 @@ importers:
     specifiers:
       '@floating-ui/core': ^1.0.0
       '@floating-ui/dom': ^1.0.0
-      '@visoning/vue-floating-core': workspace:^0.0.17
-      '@visoning/vue-floating-interactions': workspace:^0.0.17
-      '@visoning/vue-utility': ^0.0.17
+      '@visoning/vue-floating-core': workspace:^0.0.18
+      '@visoning/vue-floating-interactions': workspace:^0.0.21
+      '@visoning/vue-utility': ^0.0.18
       sass: ^1.54.8
       vue-demi: '*'
     dependencies:
@@ -58,7 +58,7 @@ importers:
       '@floating-ui/dom': 1.0.0
       '@visoning/vue-floating-core': link:../core
       '@visoning/vue-floating-interactions': link:../interactions
-      '@visoning/vue-utility': 0.0.17
+      '@visoning/vue-utility': 0.0.18
       vue-demi: 0.13.11
     devDependencies:
       sass: 1.54.8
@@ -67,20 +67,20 @@ importers:
     specifiers:
       '@floating-ui/core': ^1.0.0
       '@floating-ui/dom': ^1.0.0
-      '@visoning/vue-utility': ^0.0.17
+      '@visoning/vue-utility': ^0.0.18
       vue-demi: '*'
     dependencies:
       '@floating-ui/core': 1.0.0
       '@floating-ui/dom': 1.0.0
-      '@visoning/vue-utility': 0.0.17
+      '@visoning/vue-utility': 0.0.18
       vue-demi: 0.13.11
 
   packages/interactions:
     specifiers:
-      '@visoning/vue-utility': ^0.0.17
+      '@visoning/vue-utility': ^0.0.18
       vue-demi: '*'
     dependencies:
-      '@visoning/vue-utility': 0.0.17
+      '@visoning/vue-utility': 0.0.18
       vue-demi: 0.13.11
 
 packages:
@@ -188,8 +188,8 @@ packages:
     resolution: {integrity: sha512-cHlGmko4gWLVI27cGJntjs/Sj8th9aYwplmZFwmmgYQQvL5NUsgVJG7OddLvNfLqYS31KFN0s3qlaD9qCaxACA==}
     dev: true
 
-  /@visoning/vue-utility/0.0.17:
-    resolution: {integrity: sha512-Wt9Dfe/bHYEoX7UXiDGF8WLh3QGwcFQZ7ieQAgBugmBzSg5VNAVquo+NgyUXjhBo7ovOrdi6ULJzilNAaK6lPw==}
+  /@visoning/vue-utility/0.0.18:
+    resolution: {integrity: sha512-8MzHlWjPn/UdeJWOCFjgmi1+KH6xRDWOInwFhg/dc1lldgPJP23Kv7kBskqywwnKpsbs30lUjz526jSdm/Ot5Q==}
     peerDependencies:
       typescript: '>=4.4.4'
       vue: '>=2.7.0 || ^3.2.0'

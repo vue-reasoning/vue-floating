@@ -8,6 +8,7 @@ import './index.css'
 import '../src/popover/styles/index.scss'
 
 const appendToBodyRef = ref<string | boolean>('body')
+const iRef = ref(['click', 'focus'])
 
 const proxy = createApp({
   render() {
@@ -24,13 +25,23 @@ const proxy = createApp({
             }
           },
           [`appendToBody: ${appendToBodyRef.value}`]
+        ),
+        createCompatElement(
+          'button',
+          {
+            data: {
+              onClick: () => (iRef.value = ['click'])
+            }
+          },
+          [iRef.value]
         )
       ]),
       createCompatElement(Popover, {
         data: {
           title: 'Popover content:',
           content: 'Can be any react node!',
-          interactions: ['click', 'focus'],
+          interactions: iRef.value,
+          defaultOpen: true,
           clickDelay: {
             open: 0,
             close: 500

@@ -14,14 +14,12 @@ import type {
 } from '@visoning/vue-floating-core'
 import {
   createListenerPropsForwarder,
-  isObject,
   pick,
   withDefaultProps
 } from '@visoning/vue-utility'
 import { InteractorProps } from '@visoning/vue-floating-interactions'
 import type {
   Delay,
-  InteractionDelay,
   BaseInteractionInfo
 } from '@visoning/vue-floating-interactions'
 
@@ -66,20 +64,6 @@ export const DelayProps = {
   clickDelay: [Number, Object] as PropType<PopupDelay>,
   focusDelay: [Number, Object] as PropType<PopupDelay>
 } as const
-
-export const transformDelayProps = <
-  T extends ExtractPropTypes<typeof DelayProps>
->(
-  props: T
-): Record<keyof T, InteractionDelay> => {
-  return Object.keys(props).reduce<any>((ret, prop) => {
-    const delay = props[prop as keyof T] as any
-    ret[prop] = isObject(delay)
-      ? { active: delay.open, inactive: delay.close }
-      : delay
-    return ret
-  }, {})
-}
 
 export const PopupPropsType = {
   ...ExtendsFloatingCreatorProps,
