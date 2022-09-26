@@ -1,6 +1,6 @@
 {
   "name": "@visoning/vue-floating-interactions",
-  "version": "0.0.2",
+  "version": "0.0.21",
   "files": [
     "dist"
   ],
@@ -9,7 +9,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "vue-demi-switch 3 vue & tsup",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublish": "nr build"
   },
   "keywords": [
     "trigger",
@@ -29,7 +30,7 @@
     "directory": "packages/interactions"
   },
   "dependencies": {
-    "@visoning/vue-utility": "^0.0.17",
+    "@visoning/vue-utility": "^0.0.18",
     "vue-demi": "*"
   },
   "peerDependencies": {

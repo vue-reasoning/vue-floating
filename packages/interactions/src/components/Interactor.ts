@@ -79,12 +79,8 @@ export const Interactor = defineComponent({
       }))
     )
 
-    watch(
-      interactionsContext.active,
-      (active) => setActive(active, interactionsContext.activeInfo.value.final),
-      {
-        immediate: true
-      }
+    watch(interactionsContext.active, (active) =>
+      setActive(active, interactionsContext.activeInfo.value.final)
     )
 
     watch(
@@ -116,7 +112,7 @@ export const Interactor = defineComponent({
       }
     )
 
-    watchEffect(() => {
+    watchEffect((cleanup) => {
       const { value: interactor } = interactorRef
       if (!interactor) {
         return
@@ -148,7 +144,7 @@ export const Interactor = defineComponent({
         })
       })
 
-      return () => cleans.forEach((clean) => clean())
+      cleanup(() => cleans.forEach((clean) => clean()))
     })
 
     //

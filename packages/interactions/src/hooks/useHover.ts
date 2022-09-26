@@ -1,16 +1,16 @@
 import { computed, unref, watch } from 'vue-demi'
-import type { Ref } from 'vue-demi'
 import type { MaybeRef } from '@visoning/vue-utility'
+import { useManualEffect } from '@visoning/vue-utility'
 
 import type {
   ElementProps,
   BaseInteractionInfo,
-  InteractionDelay
+  InteractionDelay,
+  InteractionHookReturn
 } from '../types'
 import type { InteractionsContext } from '../useInteractionsContext'
 import { contains } from '../utils/contains'
 import { getDocument } from '../utils/getDocument'
-import { useManualEffect } from '../utils/useManualEffect'
 
 export const HoverInteractionType = 'hover'
 
@@ -58,7 +58,7 @@ export interface UseHoverOptions {
 export function useHover(
   context: InteractionsContext,
   options?: MaybeRef<UseHoverOptions>
-): Readonly<Ref<ElementProps>> {
+): InteractionHookReturn {
   const optionsRef = computed(() => unref(options) || {})
 
   const delaySetOpen = context.delaySetActiveFactory(
@@ -73,29 +73,20 @@ export function useHover(
     )
   }
 
-  const externalControl = useManualEffect(() => {
+  const moveExternalControl = useManualEffect(() => {
     const doc = getDocument(context.interactor.value)
-    doc.addEventListener('pointermove', handlePointerMoveExternal)
-    return () =>
-      doc.removeEventListener('pointermove', handlePointerMoveExternal)
+    doc.addEventListener('pointermove', handleMoveExternal)
+    return () => doc.removeEventListener('pointermove', handleMoveExternal)
   })
 
-  // when the state changes, we clear the control effects
-  watch(context.active, () => externalControl.clear())
-
-  const handlePointerMoveExternal = (event: PointerEvent) => {
+  const handleMoveExternal = (event: PointerEvent) => {
     if (!isAllowPointerEvent(event)) {
       return
     }
 
     const { handleMoveExternal } = optionsRef.value
-
-    if (!context.active.value || !handleMoveExternal) {
-      externalControl.clear()
-      return
-    }
-
-    if (!handleMoveExternal(event)) {
+    if (!handleMoveExternal?.(event)) {
+      moveExternalControl.clear()
       delaySetOpen(false, {
         event
       })
@@ -104,17 +95,17 @@ export function useHover(
 
   const inContainers = (target: Element) => {
     const { value: interactor } = context.interactor
-    const targets = [interactor]
+    const containers = [interactor]
 
     if (optionsRef.value.allowPointerEnterTarget) {
-      targets.push(...context.targets.value)
+      containers.push(...context.targets.value)
     }
 
-    return contains(target, targets)
+    return contains(target, containers)
   }
 
   const handlePointerEnter = (event: PointerEvent) => {
-    externalControl.clear()
+    moveExternalControl.clear()
 
     if (isAllowPointerEvent(event)) {
       delaySetOpen(true, {
@@ -132,7 +123,7 @@ export function useHover(
 
     if (context.active.value) {
       if (optionsRef.value.handleMoveExternal) {
-        externalControl.reset()
+        moveExternalControl.mesure()
       } else {
         delaySetOpen(false, {
           event
@@ -142,7 +133,7 @@ export function useHover(
   }
 
   const handleTargetPointerEnter = (event: PointerEvent) => {
-    externalControl.clear()
+    moveExternalControl.clear()
 
     if (isAllowPointerEvent(event)) {
       context.stopDelay('inactive')
@@ -150,12 +141,16 @@ export function useHover(
   }
 
   const handleTargetPointerLeave = (event: PointerEvent) => {
-    if (!inContainers(event.relatedTarget as Element)) {
-      delaySetOpen(false, {
-        event
-      })
+    if (inContainers(event.relatedTarget as Element)) {
+      return
     }
+    delaySetOpen(false, {
+      event
+    })
   }
+
+  // when the state changes, we clear the control effects
+  const cleanupEffect = watch(context.active, () => moveExternalControl.clear())
 
   const elementProps: ElementProps = {
     interactor: {
@@ -168,18 +163,21 @@ export function useHover(
     }
   }
 
-  return computed(() => {
-    const { value: options } = optionsRef
-    if (options.disabled) {
-      return {}
-    }
-
-    if (!options.allowPointerEnterTarget) {
-      return {
-        interactor: elementProps.interactor
+  return {
+    cleanupEffect,
+    elementProps: computed(() => {
+      const { value: options } = optionsRef
+      if (options.disabled) {
+        return {}
       }
-    }
 
-    return elementProps
-  })
+      if (!options.allowPointerEnterTarget) {
+        return {
+          interactor: elementProps.interactor
+        }
+      }
+
+      return elementProps
+    })
+  }
 }

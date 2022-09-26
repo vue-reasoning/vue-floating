@@ -1,3 +1,5 @@
+import type { MaybeRef } from '@visoning/vue-utility'
+
 export type InteractorType = HTMLElement | null | undefined
 
 export type Delay = number
@@ -30,7 +32,7 @@ export interface BaseDelayInfo<T extends string = string, U = Event>
   /**
    * The value to expect to set when the delay ends.
    */
-  value: boolean
+  active: boolean
 
   /**
    * Delay time.
@@ -53,4 +55,9 @@ export interface DelayInfo<T extends string = string, U = Event> {
 export interface ElementProps {
   interactor?: Record<string, any>
   target?: Record<string, any>
+}
+
+export interface InteractionHookReturn<T extends ElementProps = ElementProps> {
+  elementProps?: Readonly<MaybeRef<T>>
+  cleanupEffect?: () => void
 }

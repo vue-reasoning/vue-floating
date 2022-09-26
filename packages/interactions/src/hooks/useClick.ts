@@ -1,16 +1,16 @@
 import { computed, ref, unref, watch } from 'vue-demi'
-import type { Ref } from 'vue-demi'
 import type { MaybeRef } from '@visoning/vue-utility'
+import { useManualEffect } from '@visoning/vue-utility'
 
 import type {
   ElementProps,
   BaseInteractionInfo,
-  InteractionDelay
+  InteractionDelay,
+  InteractionHookReturn
 } from '../types'
 import type { InteractionsContext } from '../useInteractionsContext'
 import { contains } from '../utils/contains'
 import { getDocument } from '../utils/getDocument'
-import { useManualEffect } from '../utils/useManualEffect'
 
 export const ClickInteractionType = 'click'
 export const ClickOutsideInteractionType = 'clickOutsideControl'
@@ -60,11 +60,12 @@ export interface UseClickOptions {
 export function useClick(
   context: InteractionsContext,
   options: MaybeRef<UseClickOptions> = {}
-): Readonly<Ref<ElementProps>> {
+): InteractionHookReturn {
   const optionsRef = computed(() => unref(options))
 
   const delaySetOpen = context.delaySetActiveFactory(
-    computed(() => optionsRef.value.delay)
+    computed(() => optionsRef.value.delay),
+    ClickInteractionType
   )
 
   const isAllowPointerEvent = ({ pointerType }: PointerEvent) => {
@@ -97,11 +98,10 @@ export function useClick(
       return
     }
     // use control
-    const userControl = optionsRef.value.handleToggle
     const currentActive = context.active.value
+    const userControl = optionsRef.value.handleToggle
     if (!userControl || userControl(event, currentActive)) {
       delaySetOpen(!currentActive, {
-        type: ClickInteractionType,
         event
       })
     }
@@ -121,7 +121,7 @@ export function useClick(
   }
 
   const isButton = () =>
-    (context.interactor.value as Element)?.tagName === 'Button'
+    (context.interactor.value as Element)?.tagName === 'BUTTON'
 
   const handleKeyDown = (event: KeyboardEvent) => {
     if (isButton()) {
@@ -148,7 +148,7 @@ export function useClick(
     }
   }
 
-  watch(
+  const cleanupEffect = watch(
     [
       context.active,
       () =>
@@ -160,6 +160,9 @@ export function useClick(
       if (active && !disabled) {
         clickOutsideControl.reset()
       }
+    },
+    {
+      immediate: true
     }
   )
 
@@ -172,5 +175,10 @@ export function useClick(
     }
   }
 
-  return computed(() => (optionsRef.value.disabled ? {} : elementProps))
+  return {
+    cleanupEffect,
+    elementProps: computed(() =>
+      optionsRef.value.disabled ? {} : elementProps
+    )
+  }
 }

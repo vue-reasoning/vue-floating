@@ -1,14 +1,15 @@
-import { computed, Ref, unref, watch } from 'vue-demi'
+import { computed, unref, watch } from 'vue-demi'
 import type { MaybeRef } from '@visoning/vue-utility'
+import { useManualEffect } from '@visoning/vue-utility'
 
 import type {
   ElementProps,
   BaseInteractionInfo,
-  InteractionDelay
+  InteractionDelay,
+  InteractionHookReturn
 } from '../types'
 import type { InteractionsContext } from '../useInteractionsContext'
 import { contains } from '../utils/contains'
-import { useManualEffect } from '../utils/useManualEffect'
 import { getWindow } from '../utils/getWindow'
 
 export interface UseFocusOptions {
@@ -35,7 +36,7 @@ export type FocusInteractionInfo = BaseInteractionInfo<
 export function useFocus(
   context: InteractionsContext,
   options?: MaybeRef<UseFocusOptions>
-): Readonly<Ref<ElementProps>> {
+): InteractionHookReturn {
   const optionsRef = computed(() => unref(options) || {})
 
   const delaySetOpen = context.delaySetActiveFactory(
@@ -56,11 +57,12 @@ export function useFocus(
   }
 
   const handleBlur = (event: FocusEvent) => {
-    if (!inContainers(event.relatedTarget as Element)) {
-      delaySetOpen(false, {
-        event
-      })
+    if (inContainers(event.relatedTarget as Element)) {
+      return
     }
+    delaySetOpen(false, {
+      event
+    })
   }
 
   const blurControl = useManualEffect(() => {
@@ -69,13 +71,13 @@ export function useFocus(
     return () => win.removeEventListener('blur', handleBlur)
   })
 
-  watch(
+  const cleanupEffect = watch(
     [context.active, () => optionsRef.value.disabled],
     ([active, disabled]) => {
       blurControl.clear()
 
       if (active && !disabled) {
-        blurControl.reset()
+        blurControl.mesure()
       }
     },
     {
@@ -93,5 +95,10 @@ export function useFocus(
     }
   }
 
-  return computed(() => (optionsRef.value.disabled ? {} : elementProps))
+  return {
+    cleanupEffect,
+    elementProps: computed(() =>
+      optionsRef.value.disabled ? {} : elementProps
+    )
+  }
 }

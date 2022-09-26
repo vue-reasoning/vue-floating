@@ -41,7 +41,7 @@ export function useInteractionElementProps(
       : interactions.includes(interaction)
   }
 
-  const hoverElementProps = useHover(
+  const hoverInteraction = useHover(
     context,
     computed(() => {
       return {
@@ -52,7 +52,7 @@ export function useInteractionElementProps(
     })
   )
 
-  const clickElementProps = useClick(
+  const clickInteraction = useClick(
     context,
     computed(() => {
       return {
@@ -63,7 +63,7 @@ export function useInteractionElementProps(
     })
   )
 
-  const focusElementProps = useFocus(
+  const focusInteraction = useFocus(
     context,
     computed(() => {
       return {
@@ -74,9 +74,9 @@ export function useInteractionElementProps(
   )
 
   const builtInElementProps = [
-    hoverElementProps,
-    clickElementProps,
-    focusElementProps
+    hoverInteraction.elementProps,
+    clickInteraction.elementProps,
+    focusInteraction.elementProps
   ]
 
   const customElementPropsRef = computed(
@@ -94,9 +94,9 @@ export function useInteractionElementProps(
 
     return {
       interactor: mergeProps(
-        ...elementProps.map((ref) => unref(ref).interactor)
+        ...elementProps.map((ref) => unref(ref)?.interactor)
       ),
-      target: mergeProps(...elementProps.map((ref) => unref(ref).target))
+      target: mergeProps(...elementProps.map((ref) => unref(ref)?.target))
     }
   })
 }
