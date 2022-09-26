@@ -1,31 +1,34 @@
 import { describe, test, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { ref, watch } from 'vue-demi'
+import { ref, watch, h } from 'vue-demi'
 import { offset } from '@floating-ui/core'
 import type { ClientRectObject } from '@floating-ui/dom'
 
 import { useFloating } from '../src'
-import type { UseFloatingData, UseFloatingOptions, ReferenceType } from '../src'
+import type { FloatingData, UseFloatingOptions, ReferenceType } from '../src'
 
 const mountBasicComponent = () => {
   const referenceRef = ref<HTMLElement | null>(null)
   const floatingRef = ref<HTMLElement | null>(null)
 
   const wrapper = mount({
-    setup() {
-      // For Vue2
-      return {
-        referenceRef,
-        floatingRef
-      }
-    },
     render() {
-      return (
-        <div>
-          <div ref="referenceRef">reference</div>
-          <div ref="floatingRef">floating</div>
-        </div>
-      )
+      return h('div', null, [
+        h(
+          'div',
+          {
+            ref: referenceRef
+          },
+          'reference'
+        ),
+        h(
+          'div',
+          {
+            ref: floatingRef
+          },
+          'floating'
+        )
+      ])
     }
   })
 
@@ -118,19 +121,16 @@ describe('options update', () => {
 
   const { data } = useFloating(referenceRef, floatingRef, propsRef)
 
-  let onUpdate: ((data: UseFloatingData) => void) | void
+  let onUpdate: ((data: FloatingData) => void) | void
 
   watch(
-    () => data.value as UseFloatingData,
+    () => data.value as FloatingData,
     (data) => {
       onUpdate?.(data)
     }
   )
 
-  const diviner = (
-    props: UseFloatingOptions,
-    data: Partial<UseFloatingData>
-  ) => {
+  const diviner = (props: UseFloatingOptions, data: Partial<FloatingData>) => {
     const { promise, resolve } = (() => {
       let resolve: () => void
       const promise = new Promise<void>((_resolve) => {
@@ -166,7 +166,7 @@ describe('options update', () => {
 
   const cases: Array<{
     message: string
-    queue: Array<[UseFloatingOptions, Partial<UseFloatingData>]>
+    queue: Array<[UseFloatingOptions, Partial<FloatingData>]>
   }> = [
     {
       message: 'should update position after options update',

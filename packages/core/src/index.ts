@@ -1,10 +1,7 @@
 export { useAutoUpdate } from './useAutoUpdate'
 export type { UseAutoUpdateOptions } from './useAutoUpdate'
 export { useFloating } from './useFloating'
-
-export * from './utils/useFloatingOptionsChange'
-export * from './utils/useManualEffect'
-export * from './utils/useQualifiedRefs'
+export type { UseFloatingOptions, FloatingControl } from './useFloating'
 
 export type {
   Middleware,
@@ -16,9 +13,7 @@ export type {
   FloatingType,
   MaybeReferenceRef,
   MaybeFloatingRef,
-  UseFloatingData,
-  UseFloatingOptions,
-  UseFloatingReturn
+  FloatingData
 } from './types'
 
 export * from './components'

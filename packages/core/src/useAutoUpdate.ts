@@ -1,10 +1,11 @@
-import { isRef, unref, watch } from 'vue-demi'
-import { autoUpdate, AutoUpdateOptions } from '@floating-ui/dom'
+import { unref, watch } from 'vue-demi'
+import { autoUpdate } from '@floating-ui/dom'
+import type { AutoUpdateOptions } from '@floating-ui/dom'
 import type { MaybeRef } from '@visoning/vue-utility'
+import { useManualEffect } from '@visoning/vue-utility'
 
 import type { MaybeReferenceRef, MaybeFloatingRef } from './types'
-import { useQualifiedRefs } from './utils/useQualifiedRefs'
-import { useManualEffect } from './utils/useManualEffect'
+import { useQualifiedItems } from './utils/useQualifiedItems'
 
 export type UseAutoUpdateOptions = Partial<AutoUpdateOptions> & {
   /**
@@ -25,10 +26,12 @@ export function useAutoUpdate(
 ) {
   const { reset: resetAutoUpdate, clear: clearAutoUpdate } = useManualEffect()
 
-  const { mesure: watchElements, stop: stopWatchElements } = useQualifiedRefs<
+  const { mesure: watchElements, stop: stopWatchElements } = useQualifiedItems<
     [MaybeReferenceRef, MaybeFloatingRef]
   >([reference, floating], (qualifys) => {
-    resetAutoUpdate(qualifys && autoUpdate(...qualifys, update, unref(options)))
+    resetAutoUpdate(
+      () => qualifys && autoUpdate(...qualifys, update, unref(options))
+    )
   })
 
   const handleOptionsChange = (options: UseAutoUpdateOptions) => {
@@ -39,17 +42,14 @@ export function useAutoUpdate(
     }
   }
 
-  const { mesure: watchProps, clear: stopWatchProps } = useManualEffect(
-    () => watch(() => unref(options!), handleOptionsChange),
+  const { clear: stopWatchOptions } = useManualEffect(
+    () =>
+      watch(() => unref(options!), handleOptionsChange, { immediate: true }),
     true
   )
 
-  if (isRef(options)) {
-    watchProps()
-  }
-
   return () => {
-    stopWatchProps()
+    stopWatchOptions()
     stopWatchElements()
     clearAutoUpdate()
   }

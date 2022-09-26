@@ -1,6 +1,4 @@
-import type { Ref } from 'vue-demi'
 import type {
-  ComputePositionConfig,
   Middleware,
   MiddlewareData,
   Placement,
@@ -21,23 +19,10 @@ export type MaybeReferenceRef = MaybeRefType<ReferenceType>
 
 export type MaybeFloatingRef = MaybeRefType<FloatingType>
 
-export interface UseFloatingData {
+export interface FloatingData {
   x: number | null
   y: number | null
   strategy: Strategy
   placement: Placement
   middlewareData: MiddlewareData
-}
-
-export type UseFloatingOptions = Omit<ComputePositionConfig, 'platform'> & {
-  disabled?: boolean
-}
-
-export interface UseFloatingReturn {
-  /**
-   * @see https://floating-ui.com/docs/computePosition#return-value
-   */
-  data: Readonly<Ref<UseFloatingData>>
-  update: () => void
-  stop: () => void
 }

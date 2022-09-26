@@ -1,25 +1,27 @@
 import { watch } from 'vue-demi'
-import type { Ref, WatchOptions } from 'vue-demi'
-import type { Middleware } from '@floating-ui/core'
+import type { Ref } from 'vue-demi'
+import type { ComputePositionConfig, Middleware } from '@floating-ui/core'
+import { useManualEffect } from '@visoning/vue-utility'
 
-import type { UseFloatingOptions } from '../types'
-import { useManualEffect } from './useManualEffect'
+export type FloatingOptions = Omit<ComputePositionConfig, 'platform'> & {
+  disabled?: boolean
+}
 
 export function useFloatingOptionsChange(
-  options: Ref<UseFloatingOptions>,
-  onChange: (options: UseFloatingOptions) => void,
-  watchOptions?: WatchOptions
+  options: Ref<FloatingOptions>,
+  onChange: (options: FloatingOptions) => void,
+  immediate?: boolean
 ) {
-  let lastOptions: UseFloatingOptions | null = null
+  let lastOptions: FloatingOptions | null = null
 
-  const updateLastProps = (options: UseFloatingOptions) => {
+  const updateLastProps = (options: FloatingOptions) => {
     lastOptions = {
       ...options,
       middleware: options.middleware ? [...options.middleware] : []
     }
   }
 
-  const handlePropsChange = (options: UseFloatingOptions) => {
+  const handlePropsChange = (options: FloatingOptions) => {
     if (!lastOptions || !equalFloatingProps(lastOptions, options)) {
       updateLastProps(options)
       onChange(options)
@@ -27,8 +29,11 @@ export function useFloatingOptionsChange(
   }
 
   const { clear: stop, mesure } = useManualEffect(
-    () => watch(options, handlePropsChange, watchOptions),
-    true
+    () =>
+      watch(options, handlePropsChange, {
+        immediate: true
+      }),
+    immediate
   )
 
   return {
@@ -37,7 +42,7 @@ export function useFloatingOptionsChange(
   }
 }
 
-function equalFloatingProps(a: UseFloatingOptions, b: UseFloatingOptions) {
+function equalFloatingProps(a: FloatingOptions, b: FloatingOptions) {
   return (
     a.strategy === b.strategy &&
     a.placement === b.placement &&

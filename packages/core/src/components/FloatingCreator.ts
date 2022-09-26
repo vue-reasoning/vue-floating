@@ -6,7 +6,7 @@ import {
   onBeforeUnmount,
   getCurrentInstance
 } from 'vue-demi'
-import { useListeners } from '@visoning/vue-utility'
+import { isObject, useListeners } from '@visoning/vue-utility'
 
 import { useFloating, useAutoUpdate } from '..'
 import type { UseFloatingOptions, UseAutoUpdateOptions } from '..'
@@ -62,12 +62,14 @@ export const FloatingCreator = defineComponent({
     //
 
     const useAutoUpdateOptionsRef = computed<UseAutoUpdateOptions>(() => {
-      if (props.disabled || props.autoUpdate === false) {
+      const disabled = props.disabled || props.autoUpdate === false
+      if (disabled) {
         return {
-          disabled: true
+          disabled
         }
       }
-      return typeof props.autoUpdate === 'object' ? props.autoUpdate : {}
+      const { autoUpdate } = props
+      return isObject(autoUpdate) ? autoUpdate : {}
     })
 
     const stopAutoUpdate = useAutoUpdate(

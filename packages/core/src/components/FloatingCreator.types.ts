@@ -1,5 +1,5 @@
 import type { ExtractPropTypes, PropType, UnwrapRef } from 'vue-demi'
-import { withDefaultProps } from '@visoning/vue-utility'
+import { definePropType, withDefaultProps } from '@visoning/vue-utility'
 
 import type {
   ReferenceType,
@@ -8,10 +8,8 @@ import type {
   Placement,
   Strategy,
   UseAutoUpdateOptions,
-  UseFloatingData
+  FloatingData
 } from '..'
-
-export type FloatingData = UseFloatingData
 
 export type AutoUpdateOptions = UseAutoUpdateOptions
 
@@ -30,12 +28,12 @@ export const FloatingCreatorPropsType = {
    * This enables things like positioning context menus or following the cursor.
    * @see https://floating-ui.com/docs/virtual-elements
    */
-  reference: {} as { type: PropType<ReferenceType | null> },
+  reference: definePropType<ReferenceType | null>(),
 
   /**
    * Floating element.
    */
-  floating: {} as { type: PropType<FloatingType | null> },
+  floating: definePropType<FloatingType | null>(),
 
   /**
    * Whether to disable the floating.

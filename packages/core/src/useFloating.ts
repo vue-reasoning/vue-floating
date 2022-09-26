@@ -1,16 +1,22 @@
-import { computed, ref, unref } from 'vue-demi'
+import { computed, Ref, ref, unref } from 'vue-demi'
 import { computePosition } from '@floating-ui/dom'
 import type { MaybeRef } from '@visoning/vue-utility'
 
-import type {
-  MaybeReferenceRef,
-  MaybeFloatingRef,
-  UseFloatingOptions,
-  UseFloatingReturn,
-  UseFloatingData
-} from './types'
-import { useQualifiedRefs } from './utils/useQualifiedRefs'
+import type { MaybeReferenceRef, MaybeFloatingRef, FloatingData } from './types'
+import { useQualifiedItems } from './utils/useQualifiedItems'
 import { useFloatingOptionsChange } from './utils/useFloatingOptionsChange'
+import type { FloatingOptions } from './utils/useFloatingOptionsChange'
+
+export type UseFloatingOptions = FloatingOptions
+
+export interface FloatingControl {
+  /**
+   * @see https://floating-ui.com/docs/computePosition#return-value
+   */
+  data: Readonly<Ref<FloatingData>>
+  update: () => void
+  stop: () => void
+}
 
 /**
  * Uue hooks based on `computePosition`.
@@ -20,7 +26,7 @@ export function useFloating(
   referenceRef: MaybeReferenceRef,
   floatingRef: MaybeFloatingRef,
   options?: MaybeRef<UseFloatingOptions>
-): UseFloatingReturn {
+): FloatingControl {
   const optionsRef = computed(() => {
     const userOptions = unref(options) || {}
     return {
@@ -31,7 +37,7 @@ export function useFloating(
     }
   })
 
-  const dataRef = ref<UseFloatingData>({
+  const dataRef = ref<FloatingData>({
     // Setting these to `null` will allow the consumer to determine if
     // `computePosition()` has run yet
     x: null,
@@ -56,7 +62,7 @@ export function useFloating(
     detect: detectElements,
     mesure: watchElements,
     stop: stopWatchElements
-  } = useQualifiedRefs(
+  } = useQualifiedItems(
     [referenceRef, floatingRef],
     (qualifys) => qualifys && updatePosotion()
   )
@@ -83,9 +89,7 @@ export function useFloating(
   const { stop: stopWatchProps } = useFloatingOptionsChange(
     optionsRef,
     handleOptionsChange,
-    {
-      immediate: true
-    }
+    true
   )
 
   return {
