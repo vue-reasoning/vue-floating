@@ -1,6 +1,6 @@
 import { computed, ref, unref, watch } from 'vue-demi'
 import type { Ref } from 'vue-demi'
-import { isString, isUndef, useTimeout } from '@visoning/vue-utility'
+import { isString, isUndef, noop, useTimeout } from '@visoning/vue-utility'
 import type { MaybeRef } from '@visoning/vue-utility'
 
 import type {
@@ -67,7 +67,7 @@ export function useInteractionsContext<T extends string = string, U = Event>(
   // Delay control ====================================
   //
 
-  const delayControl = useTimeout()
+  const delayControl = useTimeout(noop)
   const delayInfoRef = ref({}) as InteractionsContext<T, U>['delayInfo']
 
   let delayStartTime: number | null = null
