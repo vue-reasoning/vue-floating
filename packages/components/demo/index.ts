@@ -9,6 +9,7 @@ import '../src/popover/styles/index.scss'
 
 const appendToBodyRef = ref<string | boolean>('body')
 const iRef = ref(['click', 'focus'])
+const disabledRef = ref(false)
 
 const proxy = createApp({
   render() {
@@ -34,6 +35,15 @@ const proxy = createApp({
             }
           },
           [iRef.value]
+        ),
+        createCompatElement(
+          'button',
+          {
+            data: {
+              onClick: () => (disabledRef.value = !disabledRef.value)
+            }
+          },
+          ['disabled:' + disabledRef.value]
         )
       ]),
       createCompatElement(Popover, {
@@ -42,6 +52,7 @@ const proxy = createApp({
           content: 'Can be any react node!',
           interactions: iRef.value,
           defaultOpen: true,
+          disabled: disabledRef.value,
           clickDelay: {
             open: 0,
             close: 500
@@ -59,6 +70,7 @@ const proxy = createApp({
                 title: 'Popover content:',
                 content: 'Can be any node!',
                 theme: 'dark',
+                disabled: disabledRef.value,
                 // appendTo: appendToBodyRef.value,
                 appendTo: false,
                 keepOpenWhenPopupHover: false,
@@ -76,6 +88,7 @@ const proxy = createApp({
           content: 'Can be any node!',
           theme: 'dark',
           size: 'small',
+          disabled: disabledRef.value,
           appendTo: appendToBodyRef.value,
           'onUpdate:open': (open) => console.log('tooltip', open)
         },

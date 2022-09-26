@@ -9,7 +9,6 @@ import {
   onMounted,
   h as createElement,
   toRef,
-  ExtractPropTypes,
   nextTick
 } from 'vue-demi'
 import type { VNode } from 'vue-demi'
@@ -21,8 +20,7 @@ import {
   normalizeListenerKeys,
   isDef,
   useManualEffect,
-  useControlledState,
-  isObject
+  useControlledState
 } from '@visoning/vue-utility'
 import { FloatingCreator } from '@visoning/vue-floating-core'
 import type {
@@ -32,8 +30,7 @@ import type {
 import {
   Interactor,
   createInteractorForwardContext,
-  useInteractorForwardContext,
-  InteractionDelay
+  useInteractorForwardContext
 } from '@visoning/vue-floating-interactions'
 import type { BaseInteractionInfo } from '@visoning/vue-floating-interactions'
 
@@ -47,18 +44,7 @@ import type { PopupExposed } from './Popup.types'
 import { createCompatElement } from '../utils/compat'
 import { Teleport, vShow, withDirectives } from '../utils/vue3.imports'
 import { useMiddlewares } from './useMiddlewares'
-
-function transformDelayProps<T extends ExtractPropTypes<typeof DelayProps>>(
-  props: T
-): Record<keyof T, InteractionDelay> {
-  return Object.keys(props).reduce<any>((ret, prop) => {
-    const delay = props[prop as keyof T] as any
-    ret[prop] = isObject(delay)
-      ? { active: delay.open, inactive: delay.close }
-      : delay
-    return ret
-  }, {})
-}
+import { useInteractorProps } from './useInteractorProps'
 
 const classNames = {
   floating: 'visoning-floating',
@@ -292,12 +278,14 @@ export const Popup = defineComponent({
     }
 
     // render reference
+    const interactorPropsRef = useInteractorProps(props)
+
     const renderReference = (floatingNode?: VNode) => {
+      const { value: floatingEl } = floatingElRef
       const interactorProps = {
-        ...pick(props, Object.keys(ExtendsInteractiorProps) as any),
-        ...transformDelayProps(pick(props, Object.keys(DelayProps) as any)),
+        ...interactorPropsRef.value,
         active: mergedOpenRef.value,
-        targets: [floatingElRef.value].filter(isDef)
+        targets: floatingEl && [floatingEl]
       }
       const interactorListeners = {
         'onUpdate:active': setOpen

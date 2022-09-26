@@ -85,6 +85,8 @@ export const PopupPropsType = {
 
   /**
    * Whether to disable the floating.
+   *
+   * @default false
    */
   disabled: Boolean,
 
