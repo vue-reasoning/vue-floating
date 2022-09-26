@@ -68,11 +68,9 @@ export function useClick(
     ClickInteractionType
   )
 
-  const isAllowPointerEvent = ({ pointerType }: PointerEvent) => {
+  const isAllowPointerType = (type: string) => {
     const { pointerTypes } = optionsRef.value
-    return (
-      !pointerTypes || pointerTypes.includes(pointerType as ClickPointerType)
-    )
+    return !pointerTypes || pointerTypes.includes(type as ClickPointerType)
   }
 
   const handleClickOutside = (event: PointerEvent) => {
@@ -107,16 +105,19 @@ export function useClick(
     }
   }
 
-  const blockClickRef = ref(false)
+  let pointerDownType: string | null = null
 
   const handlePointerDown = (event: PointerEvent) => {
-    blockClickRef.value = !isAllowPointerEvent(event)
+    pointerDownType = event.pointerType
   }
 
   const handleClick = (event: MouseEvent) => {
-    if (!blockClickRef.value) {
+    if (event.button !== 0) {
+      return
+    }
+    if (!pointerDownType || isAllowPointerType(pointerDownType)) {
       toggle(event)
-      blockClickRef.value = true
+      pointerDownType = null
     }
   }
 
@@ -139,6 +140,10 @@ export function useClick(
   }
 
   const handleKeyUp = (event: KeyboardEvent) => {
+    if (pointerDownType) {
+      pointerDownType = null
+    }
+
     if (isButton()) {
       return
     }

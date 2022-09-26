@@ -12,6 +12,13 @@ import type { InteractionsContext } from '../useInteractionsContext'
 import { contains } from '../utils/contains'
 import { getWindow } from '../utils/getWindow'
 
+export const FocusInteractionType = 'focus'
+
+export type FocusInteractionInfo = BaseInteractionInfo<
+  typeof FocusInteractionType,
+  FocusEvent
+>
+
 export interface UseFocusOptions {
   /**
    * Conditionally enable/disable the hook.
@@ -25,13 +32,6 @@ export interface UseFocusOptions {
    */
   delay?: InteractionDelay
 }
-
-export const FocusInteractionType = 'focus'
-
-export type FocusInteractionInfo = BaseInteractionInfo<
-  typeof FocusInteractionType,
-  FocusEvent
->
 
 export function useFocus(
   context: InteractionsContext,

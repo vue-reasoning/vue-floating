@@ -26,6 +26,13 @@ export const InteractorPropTypes = {
   active: Boolean,
 
   /**
+   * Whether to disable the interaction.
+   *
+   * @default false
+   */
+  disabled: Boolean,
+
+  /**
    * Which interaction cause state actived, enum of 'hover','click','focus'.
    *
    * @default 'hover'

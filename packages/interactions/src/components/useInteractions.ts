@@ -14,6 +14,7 @@ export interface UseInteractionsProps
   extends Partial<
     Pick<
       InteractorProps,
+      | 'disabled'
       | 'interactions'
       | 'customInteractions'
       | 'delay'
@@ -23,9 +24,7 @@ export interface UseInteractionsProps
       | 'allowPointerEnterTarget'
       | 'inactiveWhenClickOutside'
     >
-  > {
-  disabled?: boolean
-}
+  > {}
 
 export function useInteractionElementProps(
   context: InteractionsContext,
